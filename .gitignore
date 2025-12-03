@@ -1,36 +1,80 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Expo
+.expo/
+.expo-shared/
+.expo-packager/
+.expo/web-build/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Expo EAS
+dist/
+build/
+*.tar.gz
+eas-cache/
+.easl/
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# React Native / Metro
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
+pnpm-lock.yaml
+.expo-bundle
+.metro/
+.metro-cache/
+tmp/
+temp/
 
-# local env files
-.env*.local
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
 .env
+.env.*.local
+*.key
+*.pem
+*.p12
 
-# vercel
-.vercel
+# VSCode and IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Android
+android/app/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/.cxx/
+*.iml
+
+# iOS
+ios/Pods/
+ios/build/
+ios/DerivedData/
+*.xcworkspace
+*.xcuserstate
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+
+# Web builds (Expo Web)
+web-build/
+
+# Cache
+.cache/
+coverage/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Misc
+*.jks
+*.keystore
