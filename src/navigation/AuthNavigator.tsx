@@ -1,21 +1,23 @@
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 import { LoginScreen } from '../screens/auth/LoginScreen';
 import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
 import { RegisterScreen } from '../screens/auth/RegisterScreen';
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 export const AuthNavigator = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: false,
-            }}
-        >
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-        </Stack.Navigator>
-    );
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,        // Now works perfectly
+        animation: 'slide_from_right',
+      }}
+    >
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
+    </Stack.Navigator>
+  );
 };
