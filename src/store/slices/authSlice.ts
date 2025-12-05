@@ -7,6 +7,7 @@ interface AuthState {
     user: User | null;
     token: string | null;
     isAuthenticated: boolean;
+    isAdminPortal: boolean;
     isLoading: boolean;
     error: string | null;
 }
@@ -15,6 +16,7 @@ const initialState: AuthState = {
     user: null,
     token: null,
     isAuthenticated: false,
+    isAdminPortal: false,
     isLoading: false,
     error: null,
 };
@@ -73,6 +75,9 @@ const authSlice = createSlice({
         clearError: (state) => {
             state.error = null;
         },
+        togglePortalMode: (state) => {
+            state.isAdminPortal = !state.isAdminPortal;
+        },
     },
     extraReducers: (builder) => {
         // Login
@@ -86,6 +91,8 @@ const authSlice = createSlice({
                 state.isAuthenticated = true;
                 state.token = action.payload.token;
                 state.user = action.payload.data.user;
+                // Default to User portal, can switch if admin
+                state.isAdminPortal = false; 
                 state.error = null;
             })
             .addCase(login.rejected, (state, action) => {
@@ -109,10 +116,11 @@ const authSlice = createSlice({
                 state.user = null;
                 state.token = null;
                 state.isAuthenticated = false;
+                state.isAdminPortal = false;
                 state.error = null;
             });
     },
 });
 
-export const { clearError } = authSlice.actions;
+export const { clearError, togglePortalMode } = authSlice.actions;
 export default authSlice.reducer;
