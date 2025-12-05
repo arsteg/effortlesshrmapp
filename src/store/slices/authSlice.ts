@@ -92,7 +92,7 @@ const authSlice = createSlice({
                 state.token = action.payload.token;
                 state.user = action.payload.data.user;
                 // Default to User portal, can switch if admin
-                state.isAdminPortal = false; 
+                state.isAdminPortal = (action.payload.data.user.isAdmin || action.payload.data.user.role?.toLowerCase() === 'admin') ? true : false; 
                 state.error = null;
             })
             .addCase(login.rejected, (state, action) => {
