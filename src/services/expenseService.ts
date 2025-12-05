@@ -34,6 +34,13 @@ export const expenseService = {
         return apiService.get<ExpenseReportExpense[]>('/expense/expenses'); // Assuming endpoint
     },
     getAllExpenseCategories: async () => {
-        return apiService.get<ExpenseCategory[]>('/expense/categories'); // Assuming endpoint
+        return apiService.get<ExpenseCategory[]>('/expense/categories');
+    },
+    addExpenseReport: async (data: FormData) => {
+        return apiService.post('/expense/create', data, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     },
 };

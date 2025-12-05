@@ -16,6 +16,9 @@ import { fetchDashboardData, fetchPaymentInfo } from '../../store/slices/dashboa
 import { Card } from '../../components/common/Card';
 import { Loading } from '../../components/common/Loading';
 import { theme } from '../../theme';
+import { attendanceService } from '../../services/attendanceService';
+import { Alert, ActivityIndicator } from 'react-native';
+import * as Location from 'expo-location';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -35,17 +38,21 @@ export const DashboardScreen = ({ navigation }: any) => {
     } = useAppSelector((state) => state.dashboard);
 
     const [refreshing, setRefreshing] = useState(false);
+    const [attendanceStatus, setAttendanceStatus] = useState<'In' | 'Out' | null>(null);
+    const [punchLoading, setPunchLoading] = useState(false);
+    const [punchTime, setPunchTime] = useState<string | null>(null);
+
     const isAdmin = user?.isAdmin || false;
 
     useEffect(() => {
         if (user?.id) {
             loadDashboardData();
+            fetchAttendanceStatus();
             if (isAdmin) {
                 dispatch(fetchPaymentInfo());
             }
         }
     }, [user?.id, selectedDate]);
-
     const loadDashboardData = () => {
         if (user?.id) {
             const date = new Date(selectedDate).toDateString();
@@ -56,7 +63,55 @@ export const DashboardScreen = ({ navigation }: any) => {
     const onRefresh = async () => {
         setRefreshing(true);
         await loadDashboardData();
+        await fetchAttendanceStatus();
         setRefreshing(false);
+    };
+
+    const fetchAttendanceStatus = async () => {
+        if (!user?.id) return;
+        try {
+            const status = await attendanceService.getTodayStatus(user.id);
+            if (status.status) {
+                setAttendanceStatus(status.status);
+                setPunchTime(status.status === 'In' ? status.inTime : status.outTime);
+            }
+        } catch (error) {
+            console.error('Failed to fetch attendance status', error);
+        }
+    };
+
+    const handlePunch = async () => {
+        setPunchLoading(true);
+        try {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission to access location was denied');
+                setPunchLoading(false);
+                return;
+            }
+
+            const location = await Location.getCurrentPositionAsync({});
+            const locationData = {
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+            };
+
+            if (attendanceStatus === 'In') {
+                await attendanceService.clockOut(locationData);
+                Alert.alert('Success', 'Clocked Out Successfully');
+                setAttendanceStatus('Out');
+            } else {
+                await attendanceService.clockIn(locationData);
+                Alert.alert('Success', 'Clocked In Successfully');
+                setAttendanceStatus('In');
+            }
+            await fetchAttendanceStatus();
+        } catch (error) {
+            console.error('Punch failed', error);
+            Alert.alert('Error', 'Failed to update attendance');
+        } finally {
+            setPunchLoading(false);
+        }
     };
 
     const formatTime = (milliseconds?: number) => {
@@ -140,6 +195,37 @@ export const DashboardScreen = ({ navigation }: any) => {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.colors.primary]} />
                 }
             >
+                {/* Clock In/Out Card */}
+                <Card style={[styles.timeCard, { borderLeftWidth: 5, borderLeftColor: attendanceStatus === 'In' ? theme.colors.success : theme.colors.primary }]}>
+                    <View style={[styles.timeCardContent, { paddingVertical: 10 }]}>
+                        <View>
+                            <Text style={styles.timeCardTitle}>Attendance</Text>
+                            <Text style={[styles.timeCardValue, { color: attendanceStatus === 'In' ? theme.colors.success : theme.colors.textPrimary }]}>
+                                {attendanceStatus === 'In' ? 'Checked In' : 'Checked Out'}
+                            </Text>
+                            {punchTime && (
+                                <Text style={styles.paymentLabel}>Last Punch: {new Date(punchTime).toLocaleTimeString()}</Text>
+                            )}
+                        </View>
+                        <TouchableOpacity
+                            style={[
+                                styles.punchButton,
+                                { backgroundColor: attendanceStatus === 'In' ? theme.colors.danger : theme.colors.success }
+                            ]}
+                            onPress={handlePunch}
+                            disabled={punchLoading}
+                        >
+                            {punchLoading ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <Text style={styles.punchButtonText}>
+                                    {attendanceStatus === 'In' ? 'Punch Out' : 'Punch In'}
+                                </Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </Card>
+
                 {/* Admin Profile Card */}
                 {isAdmin && (
                     <View style={styles.adminSection}>
@@ -446,5 +532,21 @@ const styles = StyleSheet.create({
         fontSize: theme.typography.fontSize.sm,
         color: theme.colors.primary,
         fontWeight: theme.typography.fontWeight.bold,
-    },
-});
+        timeText: {
+            fontSize: theme.typography.fontSize.sm,
+            color: theme.colors.primary,
+            fontWeight: theme.typography.fontWeight.bold,
+        },
+        punchButton: {
+            paddingHorizontal: theme.spacing.lg,
+            paddingVertical: theme.spacing.sm,
+            borderRadius: theme.borderRadius.md,
+            minWidth: 100,
+            alignItems: 'center',
+        },
+        punchButtonText: {
+            color: theme.colors.white,
+            fontWeight: 'bold',
+            fontSize: theme.typography.fontSize.md,
+        },
+    });

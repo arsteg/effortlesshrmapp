@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { leaveService, LeaveData } from '../../services/leaveService';
 import { theme } from '../../theme';
 import { Ionicons } from '@expo/vector-icons';
 
-export const LeaveReportScreen = () => {
+export const LeaveReportScreen = ({ navigation }: any) => {
     const [leaves, setLeaves] = useState<LeaveData[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -56,7 +56,15 @@ export const LeaveReportScreen = () => {
                     ListEmptyComponent={<Text style={styles.emptyText}>No leave records found.</Text>}
                 />
             )}
-        </View>
+
+
+            <TouchableOpacity
+                style={styles.fab}
+                onPress={() => navigation.navigate('ApplyLeave')}
+            >
+                <Ionicons name="add" size={30} color={theme.colors.white} />
+            </TouchableOpacity>
+        </View >
     );
 };
 
@@ -110,5 +118,19 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: theme.spacing.xl,
         color: theme.colors.textSecondary,
+    },
+
+    fab: {
+        position: 'absolute',
+        bottom: theme.spacing.xl,
+        right: theme.spacing.xl,
+        backgroundColor: theme.colors.primary,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...theme.shadows.medium,
+        elevation: 5,
     },
 });

@@ -4,7 +4,7 @@ import { expenseService, ExpenseReport } from '../../services/expenseService';
 import { theme } from '../../theme';
 import { Ionicons } from '@expo/vector-icons';
 
-export const ExpenseScreen = () => {
+export const ExpenseScreen = ({ navigation }: any) => {
     const [expenses, setExpenses] = useState<ExpenseReport[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -62,7 +62,14 @@ export const ExpenseScreen = () => {
                     contentContainerStyle={styles.list}
                     ListEmptyComponent={<Text style={styles.emptyText}>No expense reports found.</Text>}
                 />
+
             )}
+            <TouchableOpacity
+                style={styles.fab}
+                onPress={() => navigation.navigate('AddExpense')}
+            >
+                <Ionicons name="add" size={30} color={theme.colors.white} />
+            </TouchableOpacity>
         </View>
     );
 };
@@ -123,5 +130,18 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: theme.spacing.xl,
         color: theme.colors.textSecondary,
+    },
+    fab: {
+        position: 'absolute',
+        bottom: theme.spacing.xl,
+        right: theme.spacing.xl,
+        backgroundColor: theme.colors.primary,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...theme.shadows.medium,
+        elevation: 5,
     },
 });

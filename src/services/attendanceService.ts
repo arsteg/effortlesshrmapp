@@ -20,6 +20,15 @@ export interface AttendanceRequest {
 
 export const attendanceService = {
     getAttendance: async (req: AttendanceRequest) => {
-        return apiService.post<AttendanceData[]>('/attendance/get', req); // Assuming endpoint based on method name, will verify if needed
+        return apiService.post<AttendanceData[]>('/attendance/get', req);
+    },
+    clockIn: async (data: { latitude?: number; longitude?: number; address?: string }) => {
+        return apiService.post('/attendance/clock-in', data);
+    },
+    clockOut: async (data: { latitude?: number; longitude?: number; address?: string }) => {
+        return apiService.post('/attendance/clock-out', data);
+    },
+    getTodayStatus: async (userId: string) => {
+        return apiService.get<{ inTime: string | null; outTime: string | null; status: 'In' | 'Out' }>(`/attendance/status/${userId}`);
     },
 };
