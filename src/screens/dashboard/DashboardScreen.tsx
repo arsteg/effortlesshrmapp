@@ -196,7 +196,7 @@ export const DashboardScreen = ({ navigation }: any) => {
                 }
             >
                 {/* Clock In/Out Card */}
-                <Card style={[styles.timeCard, { borderLeftWidth: 5, borderLeftColor: attendanceStatus === 'In' ? theme.colors.success : theme.colors.primary }]}>
+                <Card style={styles.timeCard}>
                     <View style={[styles.timeCardContent, { paddingVertical: 10 }]}>
                         <View>
                             <Text style={styles.timeCardTitle}>Attendance</Text>
@@ -210,7 +210,7 @@ export const DashboardScreen = ({ navigation }: any) => {
                         <TouchableOpacity
                             style={[
                                 styles.punchButton,
-                                { backgroundColor: attendanceStatus === 'In' ? theme.colors.danger : theme.colors.success }
+                                { backgroundColor: attendanceStatus === 'In' ? theme.colors.error : theme.colors.success }
                             ]}
                             onPress={handlePunch}
                             disabled={punchLoading}
@@ -531,11 +531,7 @@ const styles = StyleSheet.create({
     timeText: {
         fontSize: theme.typography.fontSize.sm,
         color: theme.colors.primary,
-        fontWeight: theme.typography.fontWeight.bold,
-        timeText: {
-            fontSize: theme.typography.fontSize.sm,
-            color: theme.colors.primary,
-            fontWeight: theme.typography.fontWeight.bold,
+        fontWeight: theme.typography.fontWeight.bold       
         },
         punchButton: {
             paddingHorizontal: theme.spacing.lg,

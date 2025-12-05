@@ -3,8 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { checkAuthStatus } from '../store/slices/authSlice';
 import { AuthNavigator } from './AuthNavigator';
-import { MainNavigator } from './MainNavigator';
 import { Loading } from '../components/common/Loading';
+import MainNavigator from './MainNavigator';
 
 export const AppNavigator = () => {
     const dispatch = useAppDispatch();
