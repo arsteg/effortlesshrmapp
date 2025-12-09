@@ -23,7 +23,14 @@ export const CustomDrawerContent = (props: any) => {
         return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
     };
 
-    const isUserAdmin = user?.isAdmin || user?.role === 'Admin';
+    const isUserAdmin = React.useMemo(() => {
+        if (!user) return false;
+        if (user.isAdmin) return true;
+        if (!user.role) return false;
+
+        const roleName = typeof user.role === 'string' ? user.role : user.role.name;
+        return roleName?.toLowerCase() === 'admin';
+    }, [user]);
 
     return (
         <View style={{ flex: 1 }}>

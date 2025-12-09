@@ -5,7 +5,7 @@ export interface User {
     firstName?: string;
     lastName?: string;
     FullName: string;
-    role?: string;
+    role?: string | { id: string; name: string;[key: string]: any };
     isAdmin?: boolean;
 }
 
