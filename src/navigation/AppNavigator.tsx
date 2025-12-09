@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { checkAuthStatus } from '../store/slices/authSlice';
+import { checkAuthStatus, logout } from '../store/slices/authSlice';
 import { AuthNavigator } from './AuthNavigator';
 import { Loading } from '../components/common/Loading';
 import MainNavigator from './MainNavigator';
+import { apiService } from '../services/api';
 
 export const AppNavigator = () => {
     const dispatch = useAppDispatch();
@@ -13,6 +14,11 @@ export const AppNavigator = () => {
 
     useEffect(() => {
         checkAuth();
+
+        // Set up logout callback for API 401 errors
+        apiService.setLogoutCallback(() => {
+            dispatch(logout());
+        });
     }, []);
 
     const checkAuth = async () => {

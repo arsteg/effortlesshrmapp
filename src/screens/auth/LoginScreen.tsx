@@ -27,9 +27,7 @@ export const LoginScreen = ({ navigation }: any) => {
     const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
     const dispatch = useAppDispatch();
-    //const { isLoading, error } = useAppSelector((state) => state.auth);
-    const isLoading= false;
-    const error= null;
+    const { isLoading, error } = useAppSelector((state) => state.auth);
     useEffect(() => {
         loadRememberMeData();
     }, []);
@@ -102,7 +100,7 @@ export const LoginScreen = ({ navigation }: any) => {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-           <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
+            <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}

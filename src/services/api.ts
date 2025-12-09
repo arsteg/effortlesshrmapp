@@ -4,6 +4,7 @@ import { getToken } from '../utils/storage';
 
 class ApiService {
     private axiosInstance: AxiosInstance;
+    private onLogout: (() => void) | null = null;
 
     constructor() {
         this.axiosInstance = axios.create({
@@ -34,11 +35,17 @@ class ApiService {
             async (error) => {
                 if (error.response?.status === 401) {
                     // Handle unauthorized access
-                    // You might want to dispatch a logout action here
+                    if (this.onLogout) {
+                        this.onLogout();
+                    }
                 }
                 return Promise.reject(error);
             }
         );
+    }
+
+    setLogoutCallback(callback: () => void) {
+        this.onLogout = callback;
     }
 
     async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
