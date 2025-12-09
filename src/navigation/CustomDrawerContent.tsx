@@ -16,6 +16,7 @@ export const CustomDrawerContent = (props: any) => {
 
     const handleSwitchPortal = () => {
         dispatch(togglePortalMode());
+        props.navigation.closeDrawer();
     };
 
     // Helper to get initials
