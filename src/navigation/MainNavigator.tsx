@@ -4,7 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { CustomDrawerContent } from './CustomDrawerContent';
 import { useAppSelector } from '../store/hooks';
 import { theme } from '../theme';
-import { DashboardScreen } from '../screens/dashboard/DashboardScreen';
+import { UserDashboardScreen } from '../screens/dashboard/UserDashboardScreen';
+import { AdminDashboardScreen } from '../screens/dashboard/AdminDashboardScreen';
 import { TaskScreen } from '../screens/tasks/TaskScreen';
 import { AttendanceScreen } from '../screens/attendance/AttendanceScreen';
 import TimesheetScreen from '../screens/projects/TimesheetScreen';
@@ -18,13 +19,20 @@ import ScreenshotScreen from '../screens/reports/ScreenshotScreen';
 import { ApplyLeaveScreen } from '../screens/leaves/ApplyLeaveScreen';
 import { AddExpenseScreen } from '../screens/expenses/AddExpenseScreen';
 import { PayslipScreen } from '../screens/payroll/PayslipScreen';
+import { ProfileScreen } from '../screens/profile/ProfileScreen';
+import { ChangePasswordScreen } from '../screens/profile/ChangePasswordScreen';
+import { SettingsScreen } from '../screens/settings/SettingsScreen';
+import { HelpScreen } from '../screens/support/HelpScreen';
 
 // Import all screens
 
 const Drawer = createDrawerNavigator();
 
 const MainNavigator = () => {
-    const isAdminPortal = useAppSelector((state) => state.auth.user?.isAdmin);
+    const isAdminPortal = useAppSelector((state) => state.auth.isAdminPortal);
+
+    // Select dashboard component based on role
+    const DashboardComponent = isAdminPortal ? AdminDashboardScreen : UserDashboardScreen;
 
     return (
         <Drawer.Navigator
@@ -39,7 +47,7 @@ const MainNavigator = () => {
         >
             <Drawer.Screen
                 name="Dashboard"
-                component={DashboardScreen}
+                component={DashboardComponent}
                 options={{
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="grid-outline" size={size} color={color} />
@@ -213,6 +221,51 @@ const MainNavigator = () => {
                     />
                 </>
             )}
+
+            {/* Common screens for both portals */}
+            <Drawer.Screen
+                name="Settings"
+                component={SettingsScreen}
+                options={{
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="settings-outline" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Drawer.Screen
+                name="Help"
+                component={HelpScreen}
+                options={{
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="help-circle-outline" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            {/* Hidden screens (not in drawer menu) */}
+            <Drawer.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={{
+                    drawerItemStyle: { display: 'none' },
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="person-outline" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Drawer.Screen
+                name="ChangePassword"
+                component={ChangePasswordScreen}
+                options={{
+                    drawerItemStyle: { display: 'none' },
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="lock-closed-outline" size={size} color={color} />
+                    ),
+                    title: 'Change Password',
+                }}
+            />
 
             <Drawer.Screen
                 name="Screenshots"

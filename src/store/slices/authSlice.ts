@@ -84,6 +84,11 @@ const authSlice = createSlice({
         togglePortalMode: (state) => {
             state.isAdminPortal = !state.isAdminPortal;
         },
+        updateUser: (state, action: PayloadAction<Partial<User>>) => {
+            if (state.user) {
+                state.user = { ...state.user, ...action.payload };
+            }
+        },
     },
     extraReducers: (builder) => {
         // Login
@@ -142,5 +147,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { clearError, togglePortalMode } = authSlice.actions;
+export const { clearError, togglePortalMode, updateUser } = authSlice.actions;
 export default authSlice.reducer;

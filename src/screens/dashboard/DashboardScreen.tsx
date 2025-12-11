@@ -7,18 +7,30 @@ import {
     RefreshControl,
     TouchableOpacity,
     Dimensions,
+    Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { PieChart } from 'react-native-chart-kit';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { fetchDashboardData, fetchPaymentInfo } from '../../store/slices/dashboardSlice';
+import {
+    fetchDashboardData,
+    fetchPaymentInfo,
+    fetchTeamMembers,
+    setSelectedDate,
+    setSelectedProductivityUserId,
+    setSelectedTaskUserId,
+    setSelectedProjectUserId,
+} from '../../store/slices/dashboardSlice';
 import { Card } from '../../components/common/Card';
 import { Loading } from '../../components/common/Loading';
 import { theme } from '../../theme';
 import { attendanceService } from '../../services/attendanceService';
 import { Alert, ActivityIndicator } from 'react-native';
 import * as Location from 'expo-location';
+import { dashboardService } from '../../services/dashboardService';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -33,6 +45,10 @@ export const DashboardScreen = ({ navigation }: any) => {
         taskStatusCounts,
         projectWiseTasks,
         paymentInfo,
+        teamMembers,
+        selectedProductivityUserId,
+        selectedTaskUserId,
+        selectedProjectUserId,
         selectedDate,
         isLoading,
     } = useAppSelector((state) => state.dashboard);
@@ -41,18 +57,45 @@ export const DashboardScreen = ({ navigation }: any) => {
     const [attendanceStatus, setAttendanceStatus] = useState<'In' | 'Out' | null>(null);
     const [punchLoading, setPunchLoading] = useState(false);
     const [punchTime, setPunchTime] = useState<string | null>(null);
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     const isAdmin = user?.isAdmin || false;
 
     useEffect(() => {
         if (user?.id) {
             loadDashboardData();
-            fetchAttendanceStatus();
             if (isAdmin) {
                 dispatch(fetchPaymentInfo());
+                dispatch(fetchTeamMembers(user.id));
             }
         }
-    }, [user?.id, selectedDate]);
+    }, [user?.id]);
+
+    useEffect(() => {
+        if (user?.id) {
+            loadDashboardData();
+        }
+    }, [selectedDate]);
+
+    // Load data when user selection changes
+    useEffect(() => {
+        if (selectedProductivityUserId && user?.id) {
+            loadProductivityData();
+        }
+    }, [selectedProductivityUserId]);
+
+    useEffect(() => {
+        if (selectedTaskUserId && user?.id) {
+            loadTaskStatusData();
+        }
+    }, [selectedTaskUserId]);
+
+    useEffect(() => {
+        if (selectedProjectUserId && user?.id) {
+            loadProjectWiseData();
+        }
+    }, [selectedProjectUserId]);
+
     const loadDashboardData = () => {
         if (user?.id) {
             const date = new Date(selectedDate).toDateString();
@@ -60,10 +103,42 @@ export const DashboardScreen = ({ navigation }: any) => {
         }
     };
 
+    const loadProductivityData = async () => {
+        if (!selectedProductivityUserId) return;
+        try {
+            const date = new Date(selectedDate).toDateString();
+            const data = await dashboardService.getApplicationTimeSummary(selectedProductivityUserId, date);
+            // Update would need to be handled via dispatch - for now just reload all
+            loadDashboardData();
+        } catch (error) {
+            console.error('Failed to load productivity data', error);
+        }
+    };
+
+    const loadTaskStatusData = async () => {
+        if (!selectedTaskUserId) return;
+        try {
+            const data = await dashboardService.getTaskStatusCounts(selectedTaskUserId);
+            loadDashboardData();
+        } catch (error) {
+            console.error('Failed to load task status data', error);
+        }
+    };
+
+    const loadProjectWiseData = async () => {
+        if (!selectedProjectUserId) return;
+        try {
+            const data = await dashboardService.getTaskWiseHours(selectedProjectUserId);
+            loadDashboardData();
+        } catch (error) {
+            console.error('Failed to load project-wise data', error);
+        }
+    };
+
     const onRefresh = async () => {
         setRefreshing(true);
         await loadDashboardData();
-        await fetchAttendanceStatus();
+        //await fetchAttendanceStatus();
         setRefreshing(false);
     };
 
@@ -105,12 +180,19 @@ export const DashboardScreen = ({ navigation }: any) => {
                 Alert.alert('Success', 'Clocked In Successfully');
                 setAttendanceStatus('In');
             }
-            await fetchAttendanceStatus();
+            //await fetchAttendanceStatus();
         } catch (error) {
             console.error('Punch failed', error);
             Alert.alert('Error', 'Failed to update attendance');
         } finally {
             setPunchLoading(false);
+        }
+    };
+
+    const handleDateChange = (event: any, selectedDateValue?: Date) => {
+        setShowDatePicker(Platform.OS === 'ios');
+        if (selectedDateValue) {
+            dispatch(setSelectedDate(selectedDateValue.toISOString()));
         }
     };
 
@@ -195,6 +277,23 @@ export const DashboardScreen = ({ navigation }: any) => {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.colors.primary]} />
                 }
             >
+                {/* Date Picker Card */}
+                <Card style={styles.dateCard}>
+                    <Text style={styles.dateLabel}>Selected Date</Text>
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
+                        <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
+                        <Text style={styles.dateText}>{new Date(selectedDate).toLocaleDateString()}</Text>
+                    </TouchableOpacity>
+                    {showDatePicker && (
+                        <DateTimePicker
+                            value={new Date(selectedDate)}
+                            mode="date"
+                            display="default"
+                            onChange={handleDateChange}
+                        />
+                    )}
+                </Card>
+
                 {/* Clock In/Out Card */}
                 <Card style={styles.timeCard}>
                     <View style={[styles.timeCardContent, { paddingVertical: 10 }]}>
@@ -237,7 +336,7 @@ export const DashboardScreen = ({ navigation }: any) => {
                             </View>
                             <Text style={styles.profileName}>{user?.FullName}</Text>
                             <Text style={styles.profileRole}>Admin</Text>
-                            <Text style={styles.membersText}>Members: 0</Text>
+                            <Text style={styles.membersText}>Members: {teamMembers.length - 1}</Text>
                         </Card>
 
                         {paymentInfo && (
@@ -298,9 +397,28 @@ export const DashboardScreen = ({ navigation }: any) => {
                 )}
 
                 {/* Productivity Chart */}
-                {productivityChartData.length > 0 && (
-                    <Card style={styles.chartCard}>
+                <Card style={styles.chartCard}>
+                    <View style={styles.chartHeader}>
                         <Text style={styles.chartTitle}>Productivity</Text>
+                        {isAdmin && teamMembers.length > 0 && (
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={selectedProductivityUserId || user?.id}
+                                    onValueChange={(value) => dispatch(setSelectedProductivityUserId(value))}
+                                    style={styles.picker}
+                                >
+                                    {teamMembers.map((member) => (
+                                        <Picker.Item
+                                            key={member.id}
+                                            label={member.firstName || member.FullName}
+                                            value={member.id}
+                                        />
+                                    ))}
+                                </Picker>
+                            </View>
+                        )}
+                    </View>
+                    {productivityChartData.length > 0 ? (
                         <PieChart
                             data={productivityChartData}
                             width={screenWidth - 60}
@@ -313,13 +431,37 @@ export const DashboardScreen = ({ navigation }: any) => {
                             paddingLeft="15"
                             absolute
                         />
-                    </Card>
-                )}
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Ionicons name="pie-chart-outline" size={48} color={theme.colors.gray400} />
+                            <Text style={styles.emptyStateText}>No productivity data available</Text>
+                        </View>
+                    )}
+                </Card>
 
                 {/* Task Summary Chart */}
-                {taskChartData.length > 0 && (
-                    <Card style={styles.chartCard}>
+                <Card style={styles.chartCard}>
+                    <View style={styles.chartHeader}>
                         <Text style={styles.chartTitle}>Tasks Summary</Text>
+                        {isAdmin && teamMembers.length > 0 && (
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={selectedTaskUserId || user?.id}
+                                    onValueChange={(value) => dispatch(setSelectedTaskUserId(value))}
+                                    style={styles.picker}
+                                >
+                                    {teamMembers.map((member) => (
+                                        <Picker.Item
+                                            key={member.id}
+                                            label={member.firstName || member.FullName}
+                                            value={member.id}
+                                        />
+                                    ))}
+                                </Picker>
+                            </View>
+                        )}
+                    </View>
+                    {taskChartData.length > 0 ? (
                         <PieChart
                             data={taskChartData}
                             width={screenWidth - 60}
@@ -332,29 +474,60 @@ export const DashboardScreen = ({ navigation }: any) => {
                             paddingLeft="15"
                             absolute
                         />
-                    </Card>
-                )}
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Ionicons name="checkbox-outline" size={48} color={theme.colors.gray400} />
+                            <Text style={styles.emptyStateText}>No task data available</Text>
+                        </View>
+                    )}
+                </Card>
 
                 {/* Project-wise Tasks */}
-                {projectWiseTasks.length > 0 && (
-                    <Card style={styles.tableCard}>
+                <Card style={styles.tableCard}>
+                    <View style={styles.chartHeader}>
                         <Text style={styles.chartTitle}>Project-wise Time Spent</Text>
-                        <View style={styles.tableHeader}>
-                            <Text style={[styles.tableHeaderText, styles.projectColumn]}>Project</Text>
-                            <Text style={[styles.tableHeaderText, styles.taskColumn]}>Task</Text>
-                            <Text style={[styles.tableHeaderText, styles.timeColumn]}>Time</Text>
-                        </View>
-                        {projectWiseTasks.slice(0, 10).map((item, index) => (
-                            <View key={index} style={styles.tableRow}>
-                                <Text style={[styles.tableCell, styles.projectColumn]} numberOfLines={1}>{item.name}</Text>
-                                <Text style={[styles.tableCell, styles.taskColumn]} numberOfLines={1}>{item.taskName}</Text>
-                                <View style={styles.timeBadge}>
-                                    <Text style={styles.timeText}>{item.timeTaken}</Text>
-                                </View>
+                        {isAdmin && teamMembers.length > 0 && (
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={selectedProjectUserId || user?.id}
+                                    onValueChange={(value) => dispatch(setSelectedProjectUserId(value))}
+                                    style={styles.picker}
+                                >
+                                    {teamMembers.map((member) => (
+                                        <Picker.Item
+                                            key={member.id}
+                                            label={member.firstName || member.FullName}
+                                            value={member.id}
+                                        />
+                                    ))}
+                                </Picker>
                             </View>
-                        ))}
-                    </Card>
-                )}
+                        )}
+                    </View>
+                    {projectWiseTasks.length > 0 ? (
+                        <>
+                            <View style={styles.tableHeader}>
+                                <Text style={[styles.tableHeaderText, styles.projectColumn]}>Project</Text>
+                                <Text style={[styles.tableHeaderText, styles.taskColumn]}>Task</Text>
+                                <Text style={[styles.tableHeaderText, styles.timeColumn]}>Time</Text>
+                            </View>
+                            {projectWiseTasks.slice(0, 10).map((item, index) => (
+                                <View key={index} style={styles.tableRow}>
+                                    <Text style={[styles.tableCell, styles.projectColumn]} numberOfLines={1}>{item.name}</Text>
+                                    <Text style={[styles.tableCell, styles.taskColumn]} numberOfLines={1}>{item.taskName}</Text>
+                                    <View style={styles.timeBadge}>
+                                        <Text style={styles.timeText}>{item.timeTaken}</Text>
+                                    </View>
+                                </View>
+                            ))}
+                        </>
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Ionicons name="folder-open-outline" size={48} color={theme.colors.gray400} />
+                            <Text style={styles.emptyStateText}>No project data available</Text>
+                        </View>
+                    )}
+                </Card>
             </ScrollView>
         </View>
     );
@@ -367,6 +540,27 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: theme.spacing.md,
+    },
+    dateCard: {
+        marginBottom: theme.spacing.md,
+    },
+    dateLabel: {
+        fontSize: theme.typography.fontSize.sm,
+        color: theme.colors.textSecondary,
+        marginBottom: theme.spacing.xs,
+    },
+    dateButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: theme.spacing.sm,
+        backgroundColor: theme.colors.backgroundSecondary,
+        borderRadius: theme.borderRadius.md,
+    },
+    dateText: {
+        fontSize: theme.typography.fontSize.md,
+        fontWeight: theme.typography.fontWeight.medium,
+        color: theme.colors.textPrimary,
+        marginLeft: theme.spacing.sm,
     },
     adminSection: {
         marginBottom: theme.spacing.md,
@@ -477,13 +671,38 @@ const styles = StyleSheet.create({
     },
     chartCard: {
         marginBottom: theme.spacing.md,
+    },
+    chartHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
+        marginBottom: theme.spacing.md,
+        width: '100%',
     },
     chartTitle: {
         fontSize: theme.typography.fontSize.lg,
         fontWeight: theme.typography.fontWeight.bold,
-        marginBottom: theme.spacing.md,
-        alignSelf: 'flex-start',
+    },
+    pickerContainer: {
+        flex: 1,
+        marginLeft: theme.spacing.md,
+        borderWidth: 1,
+        borderColor: theme.colors.gray300,
+        borderRadius: theme.borderRadius.sm,
+        backgroundColor: theme.colors.white,
+    },
+    picker: {
+        height: 40,
+    },
+    emptyState: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: theme.spacing.xl,
+    },
+    emptyStateText: {
+        fontSize: theme.typography.fontSize.md,
+        color: theme.colors.textSecondary,
+        marginTop: theme.spacing.sm,
     },
     tableCard: {
         marginBottom: theme.spacing.md,
@@ -531,18 +750,18 @@ const styles = StyleSheet.create({
     timeText: {
         fontSize: theme.typography.fontSize.sm,
         color: theme.colors.primary,
-        fontWeight: theme.typography.fontWeight.bold       
-        },
-        punchButton: {
-            paddingHorizontal: theme.spacing.lg,
-            paddingVertical: theme.spacing.sm,
-            borderRadius: theme.borderRadius.md,
-            minWidth: 100,
-            alignItems: 'center',
-        },
-        punchButtonText: {
-            color: theme.colors.white,
-            fontWeight: 'bold',
-            fontSize: theme.typography.fontSize.md,
-        },
-    });
+        fontWeight: theme.typography.fontWeight.bold,
+    },
+    punchButton: {
+        paddingHorizontal: theme.spacing.lg,
+        paddingVertical: theme.spacing.sm,
+        borderRadius: theme.borderRadius.md,
+        minWidth: 100,
+        alignItems: 'center',
+    },
+    punchButtonText: {
+        color: theme.colors.white,
+        fontWeight: 'bold',
+        fontSize: theme.typography.fontSize.md,
+    },
+});

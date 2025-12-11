@@ -7,6 +7,9 @@ export interface User {
     FullName: string;
     role?: string | { id: string; name: string;[key: string]: any };
     isAdmin?: boolean;
+    phone?: string;
+    profilePicture?: string;
+    createdAt?: string;
 }
 
 // Authentication types
@@ -94,6 +97,43 @@ export interface PaymentInfo {
     new_users_amount: number;
     amount: number;
     payment_method?: string;
+}
+
+export interface DayWorkStatusTask {
+    taskName: string;
+    count: number;
+}
+
+export interface DayWorkStatusProject {
+    projectName: string;
+    tasks: DayWorkStatusTask[];
+}
+
+export type TimeSpentPeriod = 'Daily' | 'Weekly' | 'Monthly';
+
+export interface ChartDataPoint {
+    name: string;
+    value: number;
+}
+
+export interface ChartColor {
+    name: string;
+    value: string;
+}
+
+export interface TimeSpentData {
+    today?: number;
+    previousDay?: number;
+    currentWeek?: number;
+    previousWeek?: number;
+    currentMonth?: number;
+    previousMonth?: number;
+    increased?: boolean;
+    change?: number;
+    changeDisplay?: string;
+    changeColor?: string;
+    chartData?: ChartDataPoint[];
+    chartColors?: ChartColor[];
 }
 
 // Task types

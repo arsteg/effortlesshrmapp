@@ -30,6 +30,7 @@ export const GET_APPLICATION_TIME_SUMMARY = 'dashboard/getApplicationTimeSummary
 export const GET_TASK_STATUS_COUNTS = 'dashboard/getTaskStatusCounts';
 export const GET_LAST_INVOICE = 'pricing/last-invoice';
 export const GET_UPCOMING_PAYMENT = 'pricing/upcoming-payment';
+export const DAY_WORK_STATUS_BY_USER = 'dashboard/getDayWorkStatusByUser';
 
 // Screenshots API's
 export const GET_LOGS_WITH_IMAGES = 'timeLogs/getLogsWithImages';

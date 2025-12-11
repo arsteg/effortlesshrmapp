@@ -9,6 +9,7 @@ import {
     ProjectWiseTask,
     TaskWiseHoursData,
     PaymentInfo,
+    User,
 } from '../../types';
 
 interface DashboardState {
@@ -19,6 +20,10 @@ interface DashboardState {
     taskStatusCounts: TaskStatusCount[];
     projectWiseTasks: ProjectWiseTask[];
     paymentInfo: PaymentInfo | null;
+    teamMembers: User[];
+    selectedProductivityUserId: string | null;
+    selectedTaskUserId: string | null;
+    selectedProjectUserId: string | null;
     selectedDate: string;
     isLoading: boolean;
     error: string | null;
@@ -32,6 +37,10 @@ const initialState: DashboardState = {
     taskStatusCounts: [],
     projectWiseTasks: [],
     paymentInfo: null,
+    teamMembers: [],
+    selectedProductivityUserId: null,
+    selectedTaskUserId: null,
+    selectedProjectUserId: null,
     selectedDate: new Date().toISOString(),
     isLoading: false,
     error: null,
@@ -102,6 +111,17 @@ export const fetchPaymentInfo = createAsyncThunk(
     }
 );
 
+export const fetchTeamMembers = createAsyncThunk(
+    'dashboard/fetchTeamMembers',
+    async (userId: string, { rejectWithValue }) => {
+        try {
+            return await dashboardService.getTeamMembers(userId);
+        } catch (error: any) {
+            return rejectWithValue(error.message || 'Failed to fetch team members');
+        }
+    }
+);
+
 const formatTime = (milliseconds: number): string => {
     const hours = Math.floor(milliseconds / 3600000);
     const minutes = Math.floor((milliseconds % 3600000) / 60000);
@@ -114,6 +134,15 @@ const dashboardSlice = createSlice({
     reducers: {
         setSelectedDate: (state, action: PayloadAction<string>) => {
             state.selectedDate = action.payload;
+        },
+        setSelectedProductivityUserId: (state, action: PayloadAction<string>) => {
+            state.selectedProductivityUserId = action.payload;
+        },
+        setSelectedTaskUserId: (state, action: PayloadAction<string>) => {
+            state.selectedTaskUserId = action.payload;
+        },
+        setSelectedProjectUserId: (state, action: PayloadAction<string>) => {
+            state.selectedProjectUserId = action.payload;
         },
         clearDashboardData: (state) => {
             state.hoursWorked = null;
@@ -145,9 +174,18 @@ const dashboardSlice = createSlice({
             })
             .addCase(fetchPaymentInfo.fulfilled, (state, action) => {
                 state.paymentInfo = action.payload;
+            })
+            .addCase(fetchTeamMembers.fulfilled, (state, action) => {
+                state.teamMembers = action.payload;
             });
     },
 });
 
-export const { setSelectedDate, clearDashboardData } = dashboardSlice.actions;
+export const {
+    setSelectedDate,
+    setSelectedProductivityUserId,
+    setSelectedTaskUserId,
+    setSelectedProjectUserId,
+    clearDashboardData
+} = dashboardSlice.actions;
 export default dashboardSlice.reducer;
