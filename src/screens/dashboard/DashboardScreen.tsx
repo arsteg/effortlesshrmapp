@@ -376,24 +376,24 @@ export const DashboardScreen = ({ navigation }: any) => {
                     'Today',
                     hoursWorked.today,
                     hoursWorked.previousDay,
-                    hoursWorked.PercentageDifference,
-                    hoursWorked.IsLessThanPrevious
+                    hoursWorked.percentageDifference,
+                    hoursWorked.isLessThanPrevious
                 )}
 
                 {weeklySummary && renderTimeCard(
                     'This Week',
                     weeklySummary.currentWeek,
                     weeklySummary.previousWeek,
-                    weeklySummary.PercentageDifference,
-                    weeklySummary.IsLessThanPrevious
+                    weeklySummary.percentageDifference,
+                    weeklySummary.isLessThanPrevious
                 )}
 
                 {monthlySummary && renderTimeCard(
                     'This Month',
                     monthlySummary.currentMonth,
                     monthlySummary.previousMonth,
-                    monthlySummary.PercentageDifference,
-                    monthlySummary.IsLessThanPrevious
+                    monthlySummary.percentageDifference,
+                    monthlySummary.isLessThanPrevious
                 )}
 
                 {/* Productivity Chart */}

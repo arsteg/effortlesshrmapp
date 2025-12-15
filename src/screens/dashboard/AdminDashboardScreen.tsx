@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { Dropdown } from 'react-native-element-dropdown';
+
 import {
     View,
     Text,
@@ -49,6 +51,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
     const [productivityData, setProductivityData] = useState<any[]>([]);
     const [taskSummary, setTaskSummary] = useState<any[]>([]);
     const [dayWorkStatus, setDayWorkStatus] = useState<any[]>([]);
+    const [isFocus, setIsFocus] = useState(false);
 
     useEffect(() => {
         if (user?.id) {
@@ -70,11 +73,11 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
 
     const loadDashboardData = async () => {
         if (!selectedMember?.id) return;
-
+        console.log('Loading dashboard data for member:', selectedMember.firstName || selectedMember.FullName);
         setLoading(true);
         try {
-            const date = selectedDate.toDateString();
-
+            const date = selectedDate.toISOString().split('T')[0];
+            console.log('Selected date:', date);
             const [
                 hoursData,
                 weeklyData,
@@ -121,10 +124,12 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
     };
 
     const formatTime = (milliseconds?: number) => {
+        console.log('Formatting time for milliseconds:', milliseconds);
         if (!milliseconds) return '0h 0m';
         const totalSeconds = Math.floor(milliseconds / 1000);
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
+        console.log(`Formatting time: ${milliseconds} ms = ${hours}h ${minutes}m`);
         return `${hours}h ${minutes}m`;
     };
 
@@ -146,13 +151,13 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
         switch (selectedTimeSpent) {
             case 'Daily':
                 return {
-                    current: hoursWorked?.today || 0,
+                    current: hoursWorked?.today || 10,
                     previous: hoursWorked?.previousDay || 0,
                     currentLabel: 'Today',
                     previousLabel: 'Yesterday',
                     formatter: formatTime,
-                    percentage: hoursWorked?.PercentageDifference || 0,
-                    isLess: hoursWorked?.IsLessThanPrevious || false,
+                    percentage: hoursWorked?.percentageDifference || 0,
+                    isLess: hoursWorked?.isLessThanPrevious || false,
                 };
             case 'Weekly':
                 return {
@@ -161,8 +166,8 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                     currentLabel: 'This Week',
                     previousLabel: 'Last Week',
                     formatter: formatHoursAndMinutes,
-                    percentage: weeklySummary?.PercentageDifference || 0,
-                    isLess: weeklySummary?.IsLessThanPrevious || false,
+                    percentage: weeklySummary?.percentageDifference || 0,
+                    isLess: weeklySummary?.isLessThanPrevious || false,
                 };
             case 'Monthly':
                 return {
@@ -171,8 +176,8 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                     currentLabel: 'This Month',
                     previousLabel: 'Last Month',
                     formatter: formatMinutesToHoursAndMinutes,
-                    percentage: monthlySummary?.PercentageDifference || 0,
-                    isLess: monthlySummary?.IsLessThanPrevious || false,
+                    percentage: monthlySummary?.percentageDifference || 0,
+                    isLess: monthlySummary?.isLessThanPrevious || false,
                 };
         }
     };
@@ -201,62 +206,65 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                 </View>
 
                 {/* Member Selector & Date Picker */}
-                <View style={styles.controlsRow}>
-                    {teamMembers.length > 0 && (
-                        <Card style={styles.memberCard}>
-                            <Text style={styles.controlLabel}>
-                                Viewing Data For: <Text style={styles.selectedMemberText}>
-                                    {selectedMember?.firstName
-                                        ? `${selectedMember.firstName} ${selectedMember.lastName || ''}`.trim()
-                                        : selectedMember?.FullName || 'Loading...'}
-                                </Text>
-                            </Text>
-                            <View style={styles.fullWidthPickerContainer}>
-                                <Picker
-                                    selectedValue={selectedMember?.id}
-                                    onValueChange={(value) => {
-                                        const member = teamMembers.find(m => m.id === value);
-                                        if (member) {
-                                            console.log('Selected member:', member.firstName || member.FullName);
-                                            setSelectedMember(member);
-                                        }
-                                    }}
-                                    style={styles.fullWidthPicker}
-                                >
-                                    {teamMembers.map((member) => {
-                                        const label = member.firstName
-                                            ? `${member.firstName} ${member.lastName || ''}`.trim()
-                                            : member.FullName || member.email || 'Unknown';
-                                        return (
-                                            <Picker.Item
-                                                key={member.id}
-                                                label={label}
-                                                value={member.id}
-                                            />
-                                        );
-                                    })}
-                                </Picker>
-                            </View>
-                        </Card>
-                    )}
 
-                    {/* Date Picker */}
-                    <Card style={styles.dateCard}>
-                        <Text style={styles.controlLabel}>Select Date</Text>
-                        <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
-                            <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
-                            <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
-                        </TouchableOpacity>
-                        {showDatePicker && (
-                            <DateTimePicker
-                                value={selectedDate}
-                                mode="date"
-                                display="default"
-                                onChange={handleDateChange}
-                            />
-                        )}
+                {teamMembers.length > 0 && (
+                    <Card style={styles.memberCard}>
+                        <Text style={styles.controlLabel}>
+                            Viewing Data For:{' '}
+                            <Text style={styles.selectedMemberText}>
+                                {selectedMember?.firstName
+                                    ? `${selectedMember.firstName} ${selectedMember.lastName || ''}`.trim()
+                                    : selectedMember?.FullName || 'Select a member'}
+                            </Text>
+                        </Text>
+
+                        <Dropdown
+                            style={[styles.dropdown, isFocus && { borderColor: theme.colors.primary }]}
+                            placeholderStyle={styles.placeholderStyle}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            inputSearchStyle={styles.inputSearchStyle}
+                            iconStyle={styles.iconStyle}
+                            data={teamMembers.map(member => ({
+                                label: member.firstName
+                                    ? `${member.firstName} ${member.lastName || ''}`.trim()
+                                    : member.FullName || member.email || 'Unknown',
+                                value: member.id,
+                            }))}
+                            search
+                            maxHeight={300}
+                            labelField="label"
+                            valueField="value"
+                            placeholder={!isFocus ? 'Select member' : '...'}
+                            searchPlaceholder="Search..."
+                            value={selectedMember?.id}
+                            onFocus={() => setIsFocus(true)}
+                            onBlur={() => setIsFocus(false)}
+                            onChange={item => {
+                                const member = teamMembers.find(m => m.id === item.value);
+                                if (member) setSelectedMember(member);
+                                setIsFocus(false);
+                            }}
+                        />
                     </Card>
-                </View>
+                )}
+
+                {/* Date Picker */}
+                <Card style={styles.dateCard}>
+                    <Text style={styles.controlLabel}>Select Date</Text>
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
+                        <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
+                        <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
+                    </TouchableOpacity>
+                    {showDatePicker && (
+                        <DateTimePicker
+                            value={selectedDate}
+                            mode="date"
+                            display="default"
+                            onChange={handleDateChange}
+                        />
+                    )}
+                </Card>
+
 
                 {/* Subscription Info - Placeholder */}
                 {paymentInfo && (
@@ -738,5 +746,30 @@ const styles = StyleSheet.create({
         fontSize: theme.typography.fontSize.md,
         color: theme.colors.textSecondary,
         textAlign: 'center',
+    },
+
+    dropdown: {
+        height: 50,
+        borderColor: theme.colors.gray300,
+        borderWidth: 1,
+        borderRadius: theme.borderRadius.sm,
+        paddingHorizontal: 10,
+        backgroundColor: theme.colors.white,
+    },
+    placeholderStyle: {
+        fontSize: theme.typography.fontSize.sm,
+        color: theme.colors.textSecondary,
+    },
+    selectedTextStyle: {
+        fontSize: theme.typography.fontSize.sm,
+        color: theme.colors.textPrimary,
+    },
+    iconStyle: {
+        width: 20,
+        height: 20,
+    },
+    inputSearchStyle: {
+        height: 40,
+        fontSize: theme.typography.fontSize.sm,
     },
 });

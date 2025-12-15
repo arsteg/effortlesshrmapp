@@ -48,22 +48,22 @@ export interface BaseResponse {
 export interface HoursWorkedData {
     today: number;
     previousDay: number;
-    PercentageDifference: number;
-    IsLessThanPrevious: boolean;
+    percentageDifference: number;
+    isLessThanPrevious: boolean;
 }
 
 export interface WeeklySummaryData {
     currentWeek: number;
     previousWeek: number;
-    PercentageDifference: number;
-    IsLessThanPrevious: boolean;
+    percentageDifference: number;
+    isLessThanPrevious: boolean;
 }
 
 export interface MonthlySummaryData {
     currentMonth: number;
     previousMonth: number;
-    PercentageDifference: number;
-    IsLessThanPrevious: boolean;
+    percentageDifference: number;
+    isLessThanPrevious: boolean;
 }
 
 export interface ApplicationTimeSummary {

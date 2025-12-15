@@ -135,8 +135,8 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                     currentLabel: 'Today',
                     previousLabel: 'Yesterday',
                     formatter: formatTime,
-                    percentage: hoursWorked?.PercentageDifference || 0,
-                    isLess: hoursWorked?.IsLessThanPrevious || false,
+                    percentage: hoursWorked?.percentageDifference || 0,
+                    isLess: hoursWorked?.isLessThanPrevious || false,
                 };
             case 'Weekly':
                 return {
@@ -145,8 +145,8 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                     currentLabel: 'This Week',
                     previousLabel: 'Last Week',
                     formatter: formatHoursAndMinutes,
-                    percentage: weeklySummary?.PercentageDifference || 0,
-                    isLess: weeklySummary?.IsLessThanPrevious || false,
+                    percentage: weeklySummary?.percentageDifference || 0,
+                    isLess: weeklySummary?.isLessThanPrevious || false,
                 };
             case 'Monthly':
                 return {
@@ -155,8 +155,8 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                     currentLabel: 'This Month',
                     previousLabel: 'Last Month',
                     formatter: formatMinutesToHoursAndMinutes,
-                    percentage: monthlySummary?.PercentageDifference || 0,
-                    isLess: monthlySummary?.IsLessThanPrevious || false,
+                    percentage: monthlySummary?.percentageDifference || 0,
+                    isLess: monthlySummary?.isLessThanPrevious || false,
                 };
         }
     };

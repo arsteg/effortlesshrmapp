@@ -22,54 +22,64 @@ import {
     PaymentInfo,
     User,
     DayWorkStatusProject,
+    ApiResponse,
 } from '../types';
 
 export const dashboardService = {
     async getHoursWorked(userId: string, date: string): Promise<HoursWorkedData> {
-        return await apiService.get<HoursWorkedData>(
+        const response = await apiService.get<ApiResponse<HoursWorkedData>>(
             `${HOURS_WORKED}?userId=${userId}&date=${date}`
         );
+        console.log('getHoursWorked API Response Data:', JSON.stringify(response.data, null, 2));
+        return response.data;
     },
 
     async getWeeklySummary(userId: string, date: string): Promise<WeeklySummaryData> {
-        return await apiService.get<WeeklySummaryData>(
+        const response = await apiService.get<ApiResponse<WeeklySummaryData>>(
             `${WEEKLY_SUMMARY}?userId=${userId}&date=${date}`
         );
+        return response.data;
     },
 
     async getMonthlySummary(userId: string, date: string): Promise<MonthlySummaryData> {
-        return await apiService.get<MonthlySummaryData>(
+        const response = await apiService.get<ApiResponse<MonthlySummaryData>>(
             `${MONTHLY_SUMMARY}?userId=${userId}&date=${date}`
         );
+        return response.data;
     },
 
     async getTaskWiseHours(userId: string): Promise<TaskWiseHoursData[]> {
-        return await apiService.get<TaskWiseHoursData[]>(
+        const response = await apiService.get<ApiResponse<TaskWiseHoursData[]>>(
             `${TASK_WISE_HOURS}?userId=${userId}`
         );
+        return response.data;
     },
 
     async getApplicationTimeSummary(
         userId: string,
         date: string
     ): Promise<ApplicationTimeSummary[]> {
-        return await apiService.get<ApplicationTimeSummary[]>(
+        const response = await apiService.get<ApiResponse<ApplicationTimeSummary[]>>(
             `${GET_APPLICATION_TIME_SUMMARY}?userId=${userId}&date=${date}`
         );
+        return response.data;
     },
 
     async getTaskStatusCounts(userId: string): Promise<TaskStatusCount[]> {
-        return await apiService.get<TaskStatusCount[]>(
+        const response = await apiService.get<ApiResponse<TaskStatusCount[]>>(
             `${GET_TASK_STATUS_COUNTS}?userId=${userId}`
         );
+        return response.data;
     },
 
     async getLastInvoice(): Promise<PaymentInfo> {
-        return await apiService.get<PaymentInfo>(GET_LAST_INVOICE);
+        const response = await apiService.get<ApiResponse<PaymentInfo>>(GET_LAST_INVOICE);
+        return response.data;
     },
 
     async getUpcomingPayment(): Promise<PaymentInfo> {
-        return await apiService.get<PaymentInfo>(GET_UPCOMING_PAYMENT);
+        const response = await apiService.get<ApiResponse<PaymentInfo>>(GET_UPCOMING_PAYMENT);
+        return response.data;
     },
 
     async getTeamMembers(userId: string): Promise<User[]> {
@@ -77,18 +87,19 @@ export const dashboardService = {
             console.log('getTeamMembers: Starting for userId:', userId);
 
             // Get subordinates IDs
-            const subordinateIds = await apiService.get<string[]>(
-                `${GET_SUBORDINATES}?userId=${userId}`
+            const response = await apiService.get<any>(
+                `${GET_SUBORDINATES}/${userId}`
             );
 
-            console.log('getTeamMembers: Subordinate IDs:', subordinateIds);
+            console.log('getTeamMembers: Subordinate IDs:', response);
 
-            if (subordinateIds && subordinateIds.length > 0) {
+            if (response && response.data && response.data.length > 0) {
                 // Get user details for subordinates
-                const users = await apiService.post<User[]>(GET_USERS, {
-                    userId: subordinateIds
-                });
+                // const users = await apiService.post<User[]>(GET_USERS, {
+                //     userId: subordinateIds
+                // });
 
+                const users = response.data as User[];
                 console.log('getTeamMembers: Users fetched:', users);
 
                 if (users && users.length > 0) {
@@ -113,8 +124,9 @@ export const dashboardService = {
     },
 
     async getDayWorkStatusByUser(userId: string, date: string): Promise<DayWorkStatusProject[]> {
-        return await apiService.get<DayWorkStatusProject[]>(
+        const response = await apiService.get<ApiResponse<DayWorkStatusProject[]>>(
             `${DAY_WORK_STATUS_BY_USER}?userId=${userId}&date=${date}`
         );
+        return response.data;
     },
 };
