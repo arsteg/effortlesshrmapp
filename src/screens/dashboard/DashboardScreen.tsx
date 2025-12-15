@@ -203,6 +203,11 @@ export const DashboardScreen = ({ navigation }: any) => {
         return `${hours}h ${minutes}m`;
     };
 
+    const calculatePercentage = (current: number, previous: number) => {
+        if (previous === 0) return current > 0 ? 100 : 0;
+        return ((current - previous) / previous) * 100;
+    };
+
     const getShortName = () => {
         if (!user) return '';
         const firstName = user.firstName || '';
@@ -376,24 +381,24 @@ export const DashboardScreen = ({ navigation }: any) => {
                     'Today',
                     hoursWorked.today,
                     hoursWorked.previousDay,
-                    hoursWorked.percentageDifference,
-                    hoursWorked.isLessThanPrevious
+                    calculatePercentage(hoursWorked.today, hoursWorked.previousDay),
+                    hoursWorked.today < hoursWorked.previousDay
                 )}
 
                 {weeklySummary && renderTimeCard(
                     'This Week',
                     weeklySummary.currentWeek,
                     weeklySummary.previousWeek,
-                    weeklySummary.percentageDifference,
-                    weeklySummary.isLessThanPrevious
+                    calculatePercentage(weeklySummary.currentWeek, weeklySummary.previousWeek),
+                    weeklySummary.currentWeek < weeklySummary.previousWeek
                 )}
 
                 {monthlySummary && renderTimeCard(
                     'This Month',
                     monthlySummary.currentMonth,
                     monthlySummary.previousMonth,
-                    monthlySummary.percentageDifference,
-                    monthlySummary.isLessThanPrevious
+                    calculatePercentage(monthlySummary.currentMonth, monthlySummary.previousMonth),
+                    monthlySummary.currentMonth < monthlySummary.previousMonth
                 )}
 
                 {/* Productivity Chart */}

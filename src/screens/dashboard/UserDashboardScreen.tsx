@@ -126,6 +126,11 @@ export const UserDashboardScreen = ({ navigation }: any) => {
         return `${hours}h ${Math.floor(remainingMinutes)}m`;
     };
 
+    const calculatePercentage = (current: number, previous: number) => {
+        if (previous === 0) return current > 0 ? 100 : 0;
+        return ((current - previous) / previous) * 100;
+    };
+
     const getTimeSpentData = () => {
         switch (selectedTimeSpent) {
             case 'Daily':
@@ -135,8 +140,8 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                     currentLabel: 'Today',
                     previousLabel: 'Yesterday',
                     formatter: formatTime,
-                    percentage: hoursWorked?.percentageDifference || 0,
-                    isLess: hoursWorked?.isLessThanPrevious || false,
+                    percentage: calculatePercentage(hoursWorked?.today || 0, hoursWorked?.previousDay || 0),
+                    isLess: (hoursWorked?.today || 0) < (hoursWorked?.previousDay || 0),
                 };
             case 'Weekly':
                 return {
@@ -145,8 +150,8 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                     currentLabel: 'This Week',
                     previousLabel: 'Last Week',
                     formatter: formatHoursAndMinutes,
-                    percentage: weeklySummary?.percentageDifference || 0,
-                    isLess: weeklySummary?.isLessThanPrevious || false,
+                    percentage: calculatePercentage(weeklySummary?.currentWeek || 0, weeklySummary?.previousWeek || 0),
+                    isLess: (weeklySummary?.currentWeek || 0) < (weeklySummary?.previousWeek || 0),
                 };
             case 'Monthly':
                 return {
@@ -155,8 +160,8 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                     currentLabel: 'This Month',
                     previousLabel: 'Last Month',
                     formatter: formatMinutesToHoursAndMinutes,
-                    percentage: monthlySummary?.percentageDifference || 0,
-                    isLess: monthlySummary?.isLessThanPrevious || false,
+                    percentage: calculatePercentage(monthlySummary?.currentMonth || 0, monthlySummary?.previousMonth || 0),
+                    isLess: (monthlySummary?.currentMonth || 0) < (monthlySummary?.previousMonth || 0),
                 };
         }
     };
