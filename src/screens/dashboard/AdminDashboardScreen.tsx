@@ -306,35 +306,32 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                         ))}
                     </View>
 
-                    <View style={styles.percentageSection}>
-                        <Text style={[
-                            styles.percentageText,
-                            { color: timeData.isLess ? theme.colors.error : theme.colors.success }
-                        ]}>
-                            {timeData.isLess ? '-' : '+'}{timeData.percentage.toFixed(2)}%
+                    <View style={styles.heroContent}>
+                        <Text style={styles.heroValue}>
+                            {timeData.formatter(timeData.current)}
                         </Text>
-                        <View style={styles.comparisonRow}>
-                            <Text style={styles.comparisonLabel}>{timeData.previousLabel}</Text>
+                        <View style={[
+                            styles.trendBadge,
+                            { backgroundColor: timeData.isLess ? '#FFE5E5' : '#E5F9E5' }
+                        ]}>
                             <Ionicons
-                                name={timeData.isLess ? 'arrow-down' : 'arrow-up'}
-                                size={20}
+                                name={timeData.isLess ? 'trending-down' : 'trending-up'}
+                                size={16}
                                 color={timeData.isLess ? theme.colors.error : theme.colors.success}
+                                style={{ marginRight: 4 }}
                             />
+                            <Text style={[
+                                styles.trendText,
+                                { color: timeData.isLess ? theme.colors.error : theme.colors.success }
+                            ]}>
+                                {timeData.percentage.toFixed(1)}%
+                            </Text>
                         </View>
                     </View>
 
-                    <View style={styles.divider} />
-
-                    <View style={styles.timeComparisonSection}>
-                        <View style={styles.timeBox}>
-                            <Text style={styles.timeLabel}>{timeData.currentLabel}</Text>
-                            <Text style={styles.timeValue}>{timeData.formatter(timeData.current)}</Text>
-                        </View>
-                        <View style={styles.timeBox}>
-                            <Text style={styles.timeLabel}>{timeData.previousLabel}</Text>
-                            <Text style={styles.timeValue}>{timeData.formatter(timeData.previous)}</Text>
-                        </View>
-                    </View>
+                    <Text style={styles.comparisonFooter}>
+                        vs {timeData.previousLabel}: {timeData.formatter(timeData.previous)}
+                    </Text>
                 </Card>
 
                 {/* Project-wise Time Spent Table */}
@@ -573,13 +570,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: theme.spacing.md,
+        marginBottom: theme.spacing.xs,
     },
     cardTitle: {
         fontSize: theme.typography.fontSize.lg,
         fontWeight: theme.typography.fontWeight.bold,
         color: theme.colors.textPrimary,
-        marginBottom: theme.spacing.md,
+        marginBottom: 0,
     },
     radioGroup: {
         flexDirection: 'row',
@@ -623,45 +620,33 @@ const styles = StyleSheet.create({
     fullWidthPicker: {
         height: 50,
     },
-    percentageSection: {
+    heroContent: {
         alignItems: 'center',
         marginVertical: theme.spacing.md,
     },
-    percentageText: {
-        fontSize: theme.typography.fontSize.xl,
-        fontWeight: theme.typography.fontWeight.bold,
-    },
-    comparisonRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: theme.spacing.xs,
-    },
-    comparisonLabel: {
-        fontSize: theme.typography.fontSize.sm,
-        color: theme.colors.textSecondary,
-        marginRight: theme.spacing.xs,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: theme.colors.gray300,
-        marginVertical: theme.spacing.md,
-    },
-    timeComparisonSection: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-    },
-    timeBox: {
-        alignItems: 'center',
-    },
-    timeLabel: {
-        fontSize: theme.typography.fontSize.sm,
-        color: theme.colors.textSecondary,
+    heroValue: {
+        fontSize: 42,
+        fontWeight: 'bold',
+        color: theme.colors.primary,
+        letterSpacing: -1,
         marginBottom: theme.spacing.xs,
     },
-    timeValue: {
-        fontSize: theme.typography.fontSize.xl,
-        fontWeight: theme.typography.fontWeight.bold,
-        color: theme.colors.textPrimary,
+    trendBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+    },
+    trendText: {
+        fontSize: theme.typography.fontSize.sm,
+        fontWeight: 'bold',
+    },
+    comparisonFooter: {
+        textAlign: 'center',
+        color: theme.colors.textSecondary,
+        fontSize: theme.typography.fontSize.sm,
+        marginTop: theme.spacing.xs,
     },
     tableCard: {
         marginBottom: theme.spacing.md,
