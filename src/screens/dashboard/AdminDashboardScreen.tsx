@@ -285,17 +285,25 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                 <Card style={styles.timeSpentCard}>
                     <View style={styles.timeSpentHeader}>
                         <Text style={styles.cardTitle}>Time Spent</Text>
-                        <View style={styles.pickerContainer}>
-                            <Picker
-                                selectedValue={selectedTimeSpent}
-                                onValueChange={(value) => setSelectedTimeSpent(value as TimeSpentPeriod)}
-                                style={styles.picker}
+                    </View>
+                    <View style={styles.radioGroup}>
+                        {['Daily', 'Weekly', 'Monthly'].map((period) => (
+                            <TouchableOpacity
+                                key={period}
+                                style={[
+                                    styles.radioButton,
+                                    selectedTimeSpent === period && styles.radioButtonSelected
+                                ]}
+                                onPress={() => setSelectedTimeSpent(period as TimeSpentPeriod)}
                             >
-                                <Picker.Item label="Daily" value="Daily" />
-                                <Picker.Item label="Weekly" value="Weekly" />
-                                <Picker.Item label="Monthly" value="Monthly" />
-                            </Picker>
-                        </View>
+                                <Text style={[
+                                    styles.radioButtonText,
+                                    selectedTimeSpent === period && styles.radioButtonTextSelected
+                                ]}>
+                                    {period}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
 
                     <View style={styles.percentageSection}>
@@ -573,15 +581,38 @@ const styles = StyleSheet.create({
         color: theme.colors.textPrimary,
         marginBottom: theme.spacing.md,
     },
-    pickerContainer: {
-        width: 120,
-        borderWidth: 1,
-        borderColor: theme.colors.gray300,
-        borderRadius: theme.borderRadius.sm,
-        backgroundColor: theme.colors.white,
+    radioGroup: {
+        flexDirection: 'row',
+        backgroundColor: theme.colors.gray100,
+        borderRadius: theme.borderRadius.md,
+        padding: 4,
+        marginBottom: theme.spacing.md,
     },
-    picker: {
-        height: 40,
+    radioButton: {
+        flex: 1,
+        paddingVertical: 8,
+        alignItems: 'center',
+        borderRadius: theme.borderRadius.sm,
+    },
+    radioButtonSelected: {
+        backgroundColor: theme.colors.white,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.20,
+        shadowRadius: 1.41,
+        elevation: 2,
+    },
+    radioButtonText: {
+        fontSize: theme.typography.fontSize.sm,
+        color: theme.colors.textSecondary,
+        fontWeight: theme.typography.fontWeight.medium,
+    },
+    radioButtonTextSelected: {
+        color: theme.colors.primary,
+        fontWeight: theme.typography.fontWeight.bold,
     },
     fullWidthPickerContainer: {
         borderWidth: 1,
