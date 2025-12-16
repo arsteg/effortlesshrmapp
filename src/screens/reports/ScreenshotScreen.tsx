@@ -11,6 +11,7 @@ import {
     Alert,
     ActivityIndicator,
     ScrollView,
+    Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,7 +22,7 @@ import { Loading } from '../../components/common/Loading';
 import { theme } from '../../theme';
 import { screenshotService, TimeLog } from '../../services/screenshotService';
 import { Dropdown } from 'react-native-element-dropdown';
- const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface TeamMember {
     id: string;
@@ -45,7 +46,7 @@ const ScreenshotScreen = () => {
     const isAdminPortal = useAppSelector((state) => state.auth.isAdminPortal);
     const [isFocus, setIsFocus] = useState(false);
 
-   
+
 
 
     // Check if user is admin based on multiple sources
@@ -122,8 +123,11 @@ const ScreenshotScreen = () => {
                 const response = await screenshotService.getSubordinates(user.id);
                 console.log('📋 Subordinates API response:', response);
 
-                if (response.data && response.data.length > 0) {
-                    const userIds = response.data.map((sub: any) => sub.subordinateId);
+                // Handle different response structures (unwrapped vs wrapped)
+                const subordinatesData = Array.isArray(response) ? response : (response.data || []);
+
+                if (subordinatesData && subordinatesData.length > 0) {
+                    const userIds = subordinatesData.map((sub: any) => sub.subordinateId);
                     console.log('👤 Fetching details for', userIds.length, 'subordinates');
 
                     const usersResponse = await screenshotService.getUsers(userIds);
@@ -174,7 +178,7 @@ const ScreenshotScreen = () => {
             // Convert TimeLog to ScreenshotData
             const screenshotData: ScreenshotData[] = data.map((log: TimeLog) => ({
                 id: log._id,
-                url: log.fileString ? `data:image/jpg;base64,${log.fileString}` : '',
+                url: log.url || (log.fileString ? `data:image/jpg;base64,${log.fileString}` : ''),
                 timestamp: log.endTime,
                 clicks: log.clicks,
                 keysPressed: log.keysPressed,
@@ -407,7 +411,7 @@ const ScreenshotScreen = () => {
                     </View>
                 )} */}
 
-  {isAdmin  && (
+                {isAdmin && (
                     <Card style={styles.memberCard}>
                         <Text style={styles.controlLabel}>
                             Viewing Data For:{' '}
@@ -607,17 +611,50 @@ const ScreenshotScreen = () => {
             </Modal>
 
             {/* Date Picker */}
-            {showDatePicker && (
-                <DateTimePicker
-                    value={selectedDate}
-                    mode="date"
-                    display="default"
-                    onChange={(event, date) => {
-                        setShowDatePicker(false);
-                        if (date) setSelectedDate(date);
-                    }}
-                    maximumDate={new Date()}
-                />
+            {/* Date Picker */}
+            {Platform.OS === 'ios' ? (
+                <Modal
+                    visible={showDatePicker}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setShowDatePicker(false)}
+                >
+                    <View style={styles.datePickerModalContainer}>
+                        <View style={styles.datePickerModalContent}>
+                            <View style={styles.datePickerHeader}>
+                                <TouchableOpacity
+                                    onPress={() => setShowDatePicker(false)}
+                                    style={styles.doneButton}
+                                >
+                                    <Text style={styles.doneButtonText}>Done</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <DateTimePicker
+                                value={selectedDate}
+                                mode="date"
+                                display="spinner"
+                                onChange={(event, date) => {
+                                    if (date) setSelectedDate(date);
+                                }}
+                                maximumDate={new Date()}
+                                style={styles.iosDatePicker}
+                            />
+                        </View>
+                    </View>
+                </Modal>
+            ) : (
+                showDatePicker && (
+                    <DateTimePicker
+                        value={selectedDate}
+                        mode="date"
+                        display="default"
+                        onChange={(event, date) => {
+                            setShowDatePicker(false);
+                            if (date) setSelectedDate(date);
+                        }}
+                        maximumDate={new Date()}
+                    />
+                )
             )}
 
             {/* Team Member Picker Modal */}
@@ -798,7 +835,38 @@ const styles = StyleSheet.create({
     },
     activityInfo: {
         flexDirection: 'row',
-        gap: theme.spacing.xs,
+    },
+    datePickerModalContainer: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    },
+    datePickerModalContent: {
+        backgroundColor: theme.colors.white,
+        borderTopLeftRadius: theme.borderRadius.lg,
+        borderTopRightRadius: theme.borderRadius.lg,
+        paddingBottom: theme.spacing.xl,
+    },
+    datePickerHeader: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        padding: theme.spacing.md,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.gray200,
+        backgroundColor: theme.colors.gray100,
+        borderTopLeftRadius: theme.borderRadius.lg,
+        borderTopRightRadius: theme.borderRadius.lg,
+    },
+    doneButton: {
+        padding: theme.spacing.xs,
+    },
+    doneButtonText: {
+        color: theme.colors.primary,
+        fontWeight: 'bold',
+        fontSize: theme.typography.fontSize.md,
+    },
+    iosDatePicker: {
+        height: 200,
     },
     activityText: {
         color: theme.colors.white,
@@ -1012,10 +1080,10 @@ const styles = StyleSheet.create({
         fontSize: theme.typography.fontSize.sm,
         color: theme.colors.textSecondary,
     },
-     memberCard: {
+    memberCard: {
         marginBottom: theme.spacing.sm,
     },
-     controlLabel: {
+    controlLabel: {
         fontSize: theme.typography.fontSize.sm,
         color: theme.colors.textSecondary,
         marginBottom: theme.spacing.xs,
@@ -1024,7 +1092,7 @@ const styles = StyleSheet.create({
         color: theme.colors.primary,
         fontWeight: theme.typography.fontWeight.bold,
     },
-     dropdown: {
+    dropdown: {
         height: 50,
         borderColor: theme.colors.gray300,
         borderWidth: 1,
@@ -1044,7 +1112,7 @@ const styles = StyleSheet.create({
         width: 20,
         height: 20,
     },
-     inputSearchStyle: {
+    inputSearchStyle: {
         height: 40,
         fontSize: theme.typography.fontSize.sm,
     },
