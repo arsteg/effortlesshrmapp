@@ -50,27 +50,8 @@ const ScreenshotScreen = () => {
 
 
     // Check if user is admin based on multiple sources
-    const isAdmin = React.useMemo(() => {
-        if (!user) return false;
-
-        // Check isAdmin flag
-        if (user.isAdmin) return true;
-
-        // Check isAdminPortal flag
-        if (isAdminPortal) return true;
-
-        // Check role string
-        if (typeof user.role === 'string' && user.role.toLowerCase() === 'admin') {
-            return true;
-        }
-
-        // Check role object
-        if (typeof user.role === 'object' && user.role && (user.role as any).name) {
-            return (user.role as any).name.toLowerCase() === 'admin';
-        }
-
-        return false;
-    }, [user, isAdminPortal]);
+    // Check if user is admin based on portal state (respects "Switch to User View")
+    const isAdmin = isAdminPortal;
 
     const [screenshots, setScreenshots] = useState<ScreenshotData[]>([]);
     const [loading, setLoading] = useState(false);
@@ -179,7 +160,7 @@ const ScreenshotScreen = () => {
                 clicks: log.clicks,
                 keysPressed: log.keysPressed,
                 scrolls: log.scrolls,
-                application: log.url,
+                //application: getDisplayApp(log.url),
                 isManualTime: log.isManualTime
             }));
 
