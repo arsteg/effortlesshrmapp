@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { dashboardService } from '../../services/dashboardService';
+import { logout } from './authSlice';
 import {
     HoursWorkedData,
     WeeklySummaryData,
@@ -177,6 +178,21 @@ const dashboardSlice = createSlice({
             })
             .addCase(fetchTeamMembers.fulfilled, (state, action) => {
                 state.teamMembers = action.payload;
+            })
+            .addCase(logout.fulfilled, (state) => {
+                state.hoursWorked = null;
+                state.weeklySummary = null;
+                state.monthlySummary = null;
+                state.applicationTimeSummary = [];
+                state.taskStatusCounts = [];
+                state.projectWiseTasks = [];
+                state.paymentInfo = null;
+                state.teamMembers = [];
+                state.selectedProductivityUserId = null;
+                state.selectedTaskUserId = null;
+                state.selectedProjectUserId = null;
+                state.selectedDate = new Date().toISOString();
+                state.error = null;
             });
     },
 });

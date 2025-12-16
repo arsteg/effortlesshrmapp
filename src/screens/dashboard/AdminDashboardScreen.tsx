@@ -60,8 +60,18 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
     }, [user?.id, dispatch]);
 
     useEffect(() => {
-        if (teamMembers.length > 0 && !selectedMember) {
-            setSelectedMember(teamMembers[0]);
+        if (teamMembers.length > 0) {
+            if (!selectedMember) {
+                // Initial selection
+                setSelectedMember(teamMembers[0]);
+            } else {
+                // Check if selected member still exists in the new list
+                const exists = teamMembers.find(m => m.id === selectedMember.id);
+                if (!exists) {
+                    // Reset to first member (Admin/Me) if selected user is no longer in list
+                    setSelectedMember(teamMembers[0]);
+                }
+            }
         }
     }, [teamMembers]);
 
