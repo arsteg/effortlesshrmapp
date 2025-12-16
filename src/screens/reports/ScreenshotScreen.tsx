@@ -20,8 +20,8 @@ import { Card } from '../../components/common/Card';
 import { Loading } from '../../components/common/Loading';
 import { theme } from '../../theme';
 import { screenshotService, TimeLog } from '../../services/screenshotService';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+import { Dropdown } from 'react-native-element-dropdown';
+ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface TeamMember {
     id: string;
@@ -43,6 +43,10 @@ interface ScreenshotData {
 const ScreenshotScreen = () => {
     const { user } = useAppSelector((state) => state.auth);
     const isAdminPortal = useAppSelector((state) => state.auth.isAdminPortal);
+    const [isFocus, setIsFocus] = useState(false);
+
+   
+
 
     // Check if user is admin based on multiple sources
     const isAdmin = React.useMemo(() => {
@@ -388,7 +392,7 @@ const ScreenshotScreen = () => {
                 </View>
 
                 {/* Team Member Selection (Admin Only) */}
-                {isAdmin && (
+                {/* {isAdmin && (
                     <View style={styles.memberSelector}>
                         <Text style={styles.memberLabel}>Team Member:</Text>
                         <TouchableOpacity
@@ -401,6 +405,44 @@ const ScreenshotScreen = () => {
                             <Ionicons name="chevron-down" size={20} color={theme.colors.primary} />
                         </TouchableOpacity>
                     </View>
+                )} */}
+
+  {isAdmin  && (
+                    <Card style={styles.memberCard}>
+                        <Text style={styles.controlLabel}>
+                            Viewing Data For:{' '}
+                            <Text style={styles.selectedMemberText}>
+                                {selectedMember?.name
+                                    || 'Select a member'}
+                            </Text>
+                        </Text>
+
+                        <Dropdown
+                            style={[styles.dropdown, isFocus && { borderColor: theme.colors.primary }]}
+                            placeholderStyle={styles.placeholderStyle}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            inputSearchStyle={styles.inputSearchStyle}
+                            iconStyle={styles.iconStyle}
+                            data={teamMembers.map(member => ({
+                                label: member.name,
+                                value: member.id,
+                            }))}
+                            search
+                            maxHeight={300}
+                            labelField="label"
+                            valueField="value"
+                            placeholder={!isFocus ? 'Select member' : '...'}
+                            searchPlaceholder="Search..."
+                            value={selectedMember?.id}
+                            onFocus={() => setIsFocus(true)}
+                            onBlur={() => setIsFocus(false)}
+                            onChange={item => {
+                                const member = teamMembers.find(m => m.id === item.value);
+                                if (member) setSelectedMember(member);
+                                setIsFocus(false);
+                            }}
+                        />
+                    </Card>
                 )}
 
                 {/* Date Navigation */}
@@ -969,6 +1011,42 @@ const styles = StyleSheet.create({
     pickerItemEmail: {
         fontSize: theme.typography.fontSize.sm,
         color: theme.colors.textSecondary,
+    },
+     memberCard: {
+        marginBottom: theme.spacing.sm,
+    },
+     controlLabel: {
+        fontSize: theme.typography.fontSize.sm,
+        color: theme.colors.textSecondary,
+        marginBottom: theme.spacing.xs,
+    },
+    selectedMemberText: {
+        color: theme.colors.primary,
+        fontWeight: theme.typography.fontWeight.bold,
+    },
+     dropdown: {
+        height: 50,
+        borderColor: theme.colors.gray300,
+        borderWidth: 1,
+        borderRadius: theme.borderRadius.sm,
+        paddingHorizontal: 10,
+        backgroundColor: theme.colors.white,
+    },
+    placeholderStyle: {
+        fontSize: theme.typography.fontSize.sm,
+        color: theme.colors.textSecondary,
+    },
+    selectedTextStyle: {
+        fontSize: theme.typography.fontSize.sm,
+        color: theme.colors.textPrimary,
+    },
+    iconStyle: {
+        width: 20,
+        height: 20,
+    },
+     inputSearchStyle: {
+        height: 40,
+        fontSize: theme.typography.fontSize.sm,
     },
 });
 

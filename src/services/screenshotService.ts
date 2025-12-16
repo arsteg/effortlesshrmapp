@@ -37,23 +37,33 @@ export interface WeeklyTimeData {
 }
 
 export const screenshotService = {
-    async getLogsWithImages(
-        userId: string,
-        date: string
-    ): Promise<TimeLog[]> {
-        const response = await apiService.get<{ data: TimeLog[] }>(
-            `timeLogs/getLogsWithImages?userId=${userId}&date=${date}`
-        );
-        return response.data || [];
-    },
+   async getLogsWithImages(
+    userId: string,
+    date: string
+): Promise<TimeLog[]> {
+    const response = await apiService.post<{ data: TimeLog[] }>(
+        'timeLogs/getLogsWithImages', // endpoint
+        {
+            user:userId,
+            date,
+        } // request body
+    );
+
+    return response.data || []; // adjust based on your actual response shape
+},
 
     async getCurrentWeekTotalTime(
         userId: string,
         startDate: string,
         endDate: string
     ): Promise<TimeLog[]> {
-        const response = await apiService.get<{ data: TimeLog[] }>(
-            `timeLogs/getCurrentWeekTotalTime?userId=${userId}&startDate=${startDate}&endDate=${endDate}`
+        const response = await apiService.post<{ data: TimeLog[] }>(
+            `timeLogs/getCurrentWeekTotalTime`,
+            {
+                user:userId,
+                startDate,
+                endDate
+            }
         );
         return response.data || [];
     },
@@ -64,7 +74,7 @@ export const screenshotService = {
 
     // Get subordinates for admin users
     async getSubordinates(userId: string): Promise<any> {
-        return await apiService.get(`auth/roles/getSubordinates?userId=${userId}`);
+        return await apiService.get(`auth/roles/getSubordinates/${userId}`);
     },
 
     // Get users by IDs
@@ -77,7 +87,7 @@ export const screenshotService = {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}T00:00:00.000+00:00`;
+        return `${year}-${month}-${day}`;
     },
 
     // Helper function to get Monday of current week
