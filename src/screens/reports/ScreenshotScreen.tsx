@@ -127,26 +127,22 @@ const ScreenshotScreen = () => {
                 const subordinatesData = Array.isArray(response) ? response : (response.data || []);
 
                 if (subordinatesData && subordinatesData.length > 0) {
-                    const userIds = subordinatesData.map((sub: any) => sub.subordinateId);
-                    console.log('👤 Fetching details for', userIds.length, 'subordinates');
+                    console.log('👤 Found', subordinatesData.length, 'subordinates');
 
-                    const usersResponse = await screenshotService.getUsers(userIds);
-                    console.log('✅ Users API response:', usersResponse);
+                    // The dashboardService suggests getSubordinates returns User objects directly
+                    // So we map them directly to our TeamMember interface
+                    const subordinates: TeamMember[] = subordinatesData
+                        .filter((u: any) => u.id !== user.id)
+                        .map((u: any) => ({
+                            id: u.id,
+                            name: u.firstName ? `${u.firstName} ${u.lastName || ''}`.trim() : (u.FullName || u.email || 'Unknown'),
+                            email: u.email || ''
+                        }))
+                        .sort((a: TeamMember, b: TeamMember) =>
+                            a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+                        );
 
-                    if (usersResponse.data) {
-                        const subordinates = usersResponse.data
-                            .filter((u: any) => u.id !== user.id)
-                            .map((u: any) => ({
-                                id: u.id,
-                                name: `${u.firstName} ${u.lastName}`,
-                                email: u.email
-                            }))
-                            .sort((a: TeamMember, b: TeamMember) =>
-                                a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-                            );
-
-                        members.push(...subordinates);
-                    }
+                    members.push(...subordinates);
                 }
             }
 
