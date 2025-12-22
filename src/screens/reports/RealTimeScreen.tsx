@@ -84,8 +84,8 @@ const RealTimeScreen = () => {
         }
     };
 
-    const handleLiveView = (userIds: string[]) => {
-        navigation.navigate('LiveScreen', { userIds });
+    const handleLiveView = (users: { id: string, name: string }[]) => {
+        navigation.navigate('LiveScreen', { users });
     };
 
     const renderUserItem = ({ item }: { item: RealTimeData['onlineUsers'][0] }) => {
@@ -122,7 +122,7 @@ const RealTimeScreen = () => {
 
                     <TouchableOpacity
                         style={[styles.liveButton, !item.isOnline && styles.disabledButton]}
-                        onPress={() => item.isOnline && handleLiveView([item.user.id])}
+                        onPress={() => item.isOnline && handleLiveView([{ id: item.user.id, name: `${item.user.firstName} ${item.user.lastName}` }])}
                         disabled={!item.isOnline}
                     >
                         <Ionicons
@@ -154,7 +154,7 @@ const RealTimeScreen = () => {
                 <View style={styles.headerActions}>
                     {onlineUserIds.length > 0 && (
                         <TouchableOpacity
-                            onPress={() => handleLiveView(onlineUserIds)}
+                            onPress={() => handleLiveView(filteredUsers.filter(u => u.isOnline).map(u => ({ id: u.user.id, name: `${u.user.firstName} ${u.user.lastName}` })))}
                             style={styles.allLiveButton}
                         >
                             <Ionicons name="videocam" size={20} color={theme.colors.white} />

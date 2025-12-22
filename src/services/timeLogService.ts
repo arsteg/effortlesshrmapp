@@ -22,9 +22,7 @@ export interface RealTimeData {
 class TimeLogService {
     async getRealTimeUsers(users: string[] = [], projects: string[] = [], tasks: string[] = []): Promise<RealTimeData[]> {
         const payload = {
-            users,
-            projects,
-            tasks
+           
         };
         const response = await apiService.post<ApiResponse<RealTimeData[]>>(GET_LOGIN_USERS, payload);
         return response.data;
