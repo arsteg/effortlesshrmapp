@@ -23,6 +23,8 @@ import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { ChangePasswordScreen } from '../screens/profile/ChangePasswordScreen';
 import { SettingsScreen } from '../screens/settings/SettingsScreen';
 import { HelpScreen } from '../screens/support/HelpScreen';
+import RealTimeScreen from '../screens/reports/RealTimeScreen';
+import LiveScreen from '../screens/reports/LiveScreen';
 
 // Import all screens
 
@@ -219,6 +221,17 @@ const MainNavigator = () => {
                             title: 'Timesheets',
                         }}
                     />
+
+                    <Drawer.Screen
+                        name="RealTime"
+                        component={RealTimeScreen}
+                        options={{
+                            drawerIcon: ({ color, size }) => (
+                                <Ionicons name="pulse-outline" size={size} color={color} />
+                            ),
+                            title: 'RealTime',
+                        }}
+                    />
                 </>
             )}
 
@@ -274,6 +287,15 @@ const MainNavigator = () => {
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="camera-outline" size={size} color={color} />
                     ),
+                }}
+            />
+
+            <Drawer.Screen
+                name="LiveScreen"
+                component={LiveScreen}
+                options={{
+                    drawerItemStyle: { display: 'none' },
+                    title: 'Live Monitoring'
                 }}
             />
         </Drawer.Navigator>

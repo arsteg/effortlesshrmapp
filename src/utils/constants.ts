@@ -1,4 +1,5 @@
 export const API_BASE_URL = 'https://effortlesshrm-e029cd6a5095.herokuapp.com/api/v1/';
+export const WEBSOCKET_URL = 'wss://effortlesshrm-e029cd6a5095.herokuapp.com/';
 export const PORTAL_BASE_URL = 'https://www.effortlesshrm.com/';
 
 // API Success/Failure codes
@@ -53,6 +54,8 @@ export const CREATE_NEW_TASK = 'task/newtask';
 
 // RealTime API's
 export const GET_LOGIN_USERS = 'timelogs/getLogInUsers';
+export const SET_LIVE_TRACKING = 'liveTracking/setLiveTrackingByUser';
+export const REMOVE_LIVE_TRACKING = 'liveTracking/removeUserFromLiveTracking';
 
 // Employees API's
 export const GET_ROLES = 'auth/roles';
