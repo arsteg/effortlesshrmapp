@@ -81,24 +81,32 @@ const AddNewTaskModal = ({ isVisible, onClose, onSuccess, isAdmin }: AddNewTaskM
 
         setSaving(true);
         try {
-            await taskService.addTask({
-                ...form,
-                user: isAdmin ? form.user : user?.id,
-            });
-            Alert.alert('Success', 'Task created successfully');
-            onSuccess();
-            onClose();
-            // Reset form
-            setForm({
-                taskName: '',
-                description: '',
-                project: '',
-                priority: 'Medium',
-                status: 'To Do',
-                startDate: new Date().toISOString(),
-                endDate: new Date().toISOString(),
-                user: '',
-            });
+            const payload: any = { ...form };
+            if (!isAdmin) {
+                payload.user = user?.id;
+            } else if (!form.user) {
+                delete payload.user;
+            }
+
+            const res = await taskService.addTask(payload);
+            if (res.status === 'success') {
+                Alert.alert('Success', 'Task created successfully');
+                onSuccess();
+                onClose();
+                // Reset form
+                setForm({
+                    taskName: '',
+                    description: '',
+                    project: '',
+                    priority: 'Medium',
+                    status: 'To Do',
+                    startDate: new Date().toISOString(),
+                    endDate: new Date().toISOString(),
+                    user: '',
+                });
+            } else {
+                Alert.alert('Error', res.message || 'Failed to create task');
+            }
         } catch (error: any) {
             Alert.alert('Error', error.message || 'Failed to create task');
         } finally {

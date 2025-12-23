@@ -156,7 +156,7 @@ export const TaskScreen = () => {
 
         try {
             const res = await taskService.updateTask(taskId, { status: nextStatus });
-            if (res.status === 'Success') {
+            if (res.status === 'success') {
                 loadTasks();
             } else {
                 Alert.alert('Error', res.message || 'Failed to update status');

@@ -57,6 +57,26 @@ const MainNavigator = () => {
                 }}
             />
 
+             <Drawer.Screen
+                name="Screenshots"
+                component={ScreenshotScreen}
+                options={{
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="camera-outline" size={size} color={color} />
+                    ),
+                }}
+            />
+             <Drawer.Screen
+                        name="Real Time"
+                        component={RealTimeScreen}
+                        options={{
+                            drawerIcon: ({ color, size }) => (
+                                <Ionicons name="pulse-outline" size={size} color={color} />
+                            ),
+                            title: 'RealTime',
+                        }}
+                    />
+
             {/* Non-admin screens */}
             {!isAdminPortal && (
                 <>
@@ -222,16 +242,7 @@ const MainNavigator = () => {
                         }}
                     />
 
-                    <Drawer.Screen
-                        name="RealTime"
-                        component={RealTimeScreen}
-                        options={{
-                            drawerIcon: ({ color, size }) => (
-                                <Ionicons name="pulse-outline" size={size} color={color} />
-                            ),
-                            title: 'RealTime',
-                        }}
-                    />
+                   
                 </>
             )}
 
@@ -280,15 +291,7 @@ const MainNavigator = () => {
                 }}
             />
 
-            <Drawer.Screen
-                name="Screenshots"
-                component={ScreenshotScreen}
-                options={{
-                    drawerIcon: ({ color, size }) => (
-                        <Ionicons name="camera-outline" size={size} color={color} />
-                    ),
-                }}
-            />
+           
 
             <Drawer.Screen
                 name="LiveScreen"
