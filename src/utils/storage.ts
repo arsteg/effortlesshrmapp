@@ -94,4 +94,13 @@ export const clearAuthData = async () => {
     await storage.removeItem('Email');
     await secureStorage.removeItem('Password');
     await storage.removeItem('IsRemember');
+    await storage.removeItem('PortalMode');
+};
+
+export const savePortalMode = async (mode: 'admin' | 'user') => {
+    await storage.setItem('PortalMode', mode);
+};
+
+export const getPortalMode = async () => {
+    return await storage.getItem('PortalMode');
 };

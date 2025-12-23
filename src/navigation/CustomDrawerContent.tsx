@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { togglePortalMode, logout } from '../store/slices/authSlice';
+import { togglePortalMode, logout, switchPortalMode } from '../store/slices/authSlice';
 import { theme } from '../theme';
 
 export const CustomDrawerContent = (props: any) => {
@@ -15,7 +15,7 @@ export const CustomDrawerContent = (props: any) => {
     };
 
     const handleSwitchPortal = () => {
-        dispatch(togglePortalMode());
+        dispatch(switchPortalMode());
         props.navigation.closeDrawer();
     };
 

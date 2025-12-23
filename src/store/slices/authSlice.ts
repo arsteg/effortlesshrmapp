@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
-import { saveToken, saveUserData, clearAuthData, getToken, getUserData } from '../../utils/storage';
+import { saveToken, saveUserData, clearAuthData, getToken, getUserData, getPortalMode, savePortalMode } from '../../utils/storage';
 import { LoginRequest, User, LoginResponse } from '../../types';
 
 interface AuthState {
@@ -51,9 +51,10 @@ export const checkAuthStatus = createAsyncThunk(
         try {
             const token = await getToken();
             const userData = await getUserData();
+            const portalMode = await getPortalMode();
 
             if (token && userData) {
-                return { token, user: userData.user };
+                return { token, user: userData.user, portalMode };
             }
             return null;
         } catch (error: any) {
@@ -71,6 +72,21 @@ export const logout = createAsyncThunk(
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
+    }
+);
+
+export const switchPortalMode = createAsyncThunk(
+    'auth/switchPortalMode',
+    async (_, { getState, dispatch }) => {
+        const state = getState() as any;
+        const currentMode = state.auth.isAdminPortal;
+        const newMode = !currentMode;
+
+        // Save to storage
+        await savePortalMode(newMode ? 'admin' : 'user');
+
+        // Return new mode to update state in reducer
+        return newMode;
     }
 );
 
@@ -114,7 +130,10 @@ const authSlice = createSlice({
                             isAdmin = (user.role as any).name.toLowerCase() === 'admin';
                         }
                     }
+                    // Default to Admin portal if user is Admin, otherwise User portal
                     state.isAdminPortal = !!isAdmin;
+                    // Also save this default state
+                    savePortalMode(isAdmin ? 'admin' : 'user');
                 } else {
                     state.isAdminPortal = false;
                 }
@@ -131,8 +150,35 @@ const authSlice = createSlice({
                 if (action.payload) {
                     state.isAuthenticated = true;
                     state.token = action.payload.token;
+                    state.token = action.payload.token;
                     state.user = action.payload.user;
+
+                    // Restore portal mode
+                    const portalMode = action.payload.portalMode;
+                    if (portalMode) {
+                        state.isAdminPortal = portalMode === 'admin';
+                    } else {
+                        // Fallback logic if no persisted mode
+                        const user = action.payload.user;
+                        if (user) {
+                            let isAdmin = user.isAdmin;
+                            if (!isAdmin && user.role) {
+                                if (typeof user.role === 'string') {
+                                    isAdmin = user.role.toLowerCase() === 'admin';
+                                } else if (typeof user.role === 'object' && (user.role as any).name) {
+                                    isAdmin = (user.role as any).name.toLowerCase() === 'admin';
+                                }
+                            }
+                            state.isAdminPortal = !!isAdmin;
+                        } else {
+                            state.isAdminPortal = false;
+                        }
+                    }
                 }
+            })
+            // Switch Portal Mode
+            .addCase(switchPortalMode.fulfilled, (state, action) => {
+                state.isAdminPortal = action.payload;
             });
 
         // Logout
