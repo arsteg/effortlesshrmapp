@@ -25,6 +25,7 @@ import { SettingsScreen } from '../screens/settings/SettingsScreen';
 import { HelpScreen } from '../screens/support/HelpScreen';
 import RealTimeScreen from '../screens/reports/RealTimeScreen';
 import LiveScreen from '../screens/reports/LiveScreen';
+import ReportsScreen from '../screens/reports/ReportsScreen';
 
 // Import all screens
 
@@ -57,7 +58,7 @@ const MainNavigator = () => {
                 }}
             />
 
-             <Drawer.Screen
+            <Drawer.Screen
                 name="Screenshots"
                 component={ScreenshotScreen}
                 options={{
@@ -66,16 +67,16 @@ const MainNavigator = () => {
                     ),
                 }}
             />
-             <Drawer.Screen
-                        name="Real Time"
-                        component={RealTimeScreen}
-                        options={{
-                            drawerIcon: ({ color, size }) => (
-                                <Ionicons name="pulse-outline" size={size} color={color} />
-                            ),
-                            title: 'RealTime',
-                        }}
-                    />
+            <Drawer.Screen
+                name="Real Time"
+                component={RealTimeScreen}
+                options={{
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="pulse-outline" size={size} color={color} />
+                    ),
+                    title: 'RealTime',
+                }}
+            />
 
             {/* Non-admin screens */}
             {!isAdminPortal && (
@@ -101,14 +102,15 @@ const MainNavigator = () => {
                     />
 
                     <Drawer.Screen
-                        name="Timesheets"
-                        component={TimesheetScreen}
+                        name="Reports"
+                        component={ReportsScreen}
                         options={{
                             drawerIcon: ({ color, size }) => (
-                                <Ionicons name="time-outline" size={size} color={color} />
+                                <Ionicons name="bar-chart-outline" size={size} color={color} />
                             ),
                         }}
                     />
+
 
                     <Drawer.Screen
                         name="Leaves"
@@ -232,17 +234,17 @@ const MainNavigator = () => {
                     />
 
                     <Drawer.Screen
-                        name="Admin Timesheets"
-                        component={TimesheetScreen}
+                        name="Reports"
+                        component={ReportsScreen}
                         options={{
                             drawerIcon: ({ color, size }) => (
-                                <Ionicons name="timer-outline" size={size} color={color} />
+                                <Ionicons name="bar-chart-outline" size={size} color={color} />
                             ),
-                            title: 'Timesheets',
+                            title: 'Reports',
                         }}
                     />
 
-                   
+
                 </>
             )}
 
@@ -291,7 +293,7 @@ const MainNavigator = () => {
                 }}
             />
 
-           
+
 
             <Drawer.Screen
                 name="LiveScreen"

@@ -98,6 +98,46 @@ export const TaskScreen = () => {
         }
     };
 
+    const loadProjects = async () => {
+        if (!user?.id) return;
+
+        try {
+            // Add current user as "Me"
+            const members: TeamMember[] = [
+                { id: user.id, name: 'Me', email: user.email || '' }
+            ];
+
+            // Load subordinates
+            const response = await taskService.getSubordinates(user.id);
+
+            // Handle different response structures
+            const subordinatesData = Array.isArray(response) ? response : (response.data || []);
+
+            if (subordinatesData && subordinatesData.length > 0) {
+                const subordinates: TeamMember[] = subordinatesData
+                    .filter((u: any) => u.id !== user.id)
+                    .map((u: any) => ({
+                        id: u.id,
+                        name: u.firstName ? `${u.firstName} ${u.lastName || ''}`.trim() : (u.FullName || u.email || 'Unknown'),
+                        email: u.email || ''
+                    }))
+                    .sort((a: TeamMember, b: TeamMember) =>
+                        a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+                    );
+
+                members.push(...subordinates);
+            }
+
+            setTeamMembers(members);
+            setSelectedUser(members[0]); // Default to "Me"
+        } catch (error) {
+            console.error('Failed to load team members:', error);
+            const fallbackMember = { id: user.id, name: 'Me', email: user.email || '' };
+            setTeamMembers([fallbackMember]);
+            setSelectedUser(fallbackMember);
+        }
+    };
+
     const loadTasks = async (isRefresh = false) => {
         if (isRefresh) setRefreshing(true);
         else setLoading(true);

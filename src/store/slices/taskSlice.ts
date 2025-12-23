@@ -1,9 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Task } from '../../types';
+import { Task ,Project} from '../../types';
 
 interface TaskState {
     tasks: Task[];
     selectedTask: Task | null;
+    projects: Project[];
+    selectedProject: Project | null;
     isLoading: boolean;
     error: string | null;
 }
@@ -11,6 +13,8 @@ interface TaskState {
 const initialState: TaskState = {
     tasks: [],
     selectedTask: null,
+    projects: [],
+    selectedProject: null,
     isLoading: false,
     error: null,
 };
@@ -24,6 +28,12 @@ const taskSlice = createSlice({
         },
         setSelectedTask: (state, action: PayloadAction<Task | null>) => {
             state.selectedTask = action.payload;
+        },
+        setProjects: (state, action: PayloadAction<Project[]>) => {
+            state.projects = action.payload;
+        },
+        setSelectedProject: (state, action: PayloadAction<Project | null>) => {
+            state.selectedProject = action.payload;
         },
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.isLoading = action.payload;
