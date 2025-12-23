@@ -43,8 +43,10 @@ export const ApplyLeaveScreen = ({ navigation }: any) => {
         try {
             if (user?.id) {
                 // Assuming getLeaveTypes exists or using existing method
-                const types = await leaveService.getLeaveTypes(user.id);
-                setLeaveTypes(types || []);
+                const res = await leaveService.getLeaveCategoriesByUser(user.id);
+                // API likely returns { data: [...] }
+                const types = res.data || res || [];
+                setLeaveTypes(types);
                 if (types && types.length > 0) {
                     setForm(prev => ({ ...prev, leaveTypeId: types[0].id }));
                 }
@@ -86,7 +88,7 @@ export const ApplyLeaveScreen = ({ navigation }: any) => {
                 dayType: form.dayType,
             };
 
-            await leaveService.applyLeave(payload);
+            await leaveService.addLeaveApplication(payload);
             Alert.alert('Success', 'Leave application submitted successfully', [
                 { text: 'OK', onPress: () => navigation.goBack() }
             ]);

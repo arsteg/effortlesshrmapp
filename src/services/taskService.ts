@@ -58,7 +58,11 @@ export const taskService = {
     getSubordinates: async (managerId: string) => {
         return apiService.get<ApiResponse<any>>(`${CONSTANTS.GET_SUBORDINATES}/${managerId}`);
     },
-     projectListByUser: async (userId: string) => {
+    projectListByUser: async (userId: string) => {
         return apiService.get<ApiResponse<any>>(`${CONSTANTS.PROJECT_LIST_BY_USER}/${userId}`);
+    },
+
+    getUserTaskListByProject: async (userId: string, projectId: string, skip: string = '', next: string = '') => {
+        return apiService.post<ApiResponse<any>>('task/getUserTaskListByProject', { userId, projectId, skip, next });
     }
 };

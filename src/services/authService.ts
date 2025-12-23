@@ -24,4 +24,12 @@ export const authService = {
     async register(data: RegisterRequest): Promise<BaseResponse> {
         return await apiService.post<BaseResponse>(SIGNUP, data);
     },
+
+    getUserManagers: async (userId: string) => {
+        return apiService.get<any>(`users/getUserManagers/${userId}`);
+    },
+
+    getUserProjects: async (userId: string) => {
+        return apiService.get<any>(`users/getUserProjects/${userId}`);
+    },
 };

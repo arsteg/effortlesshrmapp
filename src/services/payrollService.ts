@@ -13,13 +13,11 @@ export interface Payslip {
 }
 
 export const payrollService = {
-    getPayslips: async (year: number) => {
-        return apiService.post<any[]>('/payroll/payroll-by-company', { year });
+    getAllGeneratedPayroll: async () => {
+        return apiService.post<ApiResponse<any>>('payroll/generatedPayroll-by-company', {});
     },
-    // Add other methods if needed, e.g., to download a specific payslip
-    downloadPayslip: async (id: string, month: number, year: number) => {
-        // This might return a file blob or a URL depending on the API. 
-        // For now, assuming it returns a file or we construct a URL.
-        return apiService.get<any>(`/payroll/download/${id}?month=${month}&year=${year}`, { responseType: 'blob' });
+
+    getGeneratedPayrollByUser: async (userId: string) => {
+        return apiService.get<ApiResponse<any>>(`payroll/generatedPayroll-by-userId/${userId}`);
     }
 };

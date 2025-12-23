@@ -6,103 +6,90 @@ import {
     FlatList,
     ActivityIndicator,
     TouchableOpacity,
-    Alert,
-    Platform,
+    Modal,
+    ScrollView,
+    Alert
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { theme } from '../../theme';
-import { payrollService } from '../../services/payrollService'; // You need to implement this
+import { payrollService } from '../../services/payrollService';
 import { useAppSelector } from '../../store/hooks';
 import { Ionicons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
 
 export const PayslipScreen = () => {
-    const { user } = useAppSelector((state) => state.auth);
+    const { user, isAdminPortal } = useAppSelector((state) => state.auth);
     const [payslips, setPayslips] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [downloading, setDownloading] = useState<string | null>(null);
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+    // Details Modal
+    const [showDetails, setShowDetails] = useState(false);
+    const [selectedPayslip, setSelectedPayslip] = useState<any>(null);
 
     useEffect(() => {
         loadPayslips();
-    }, [selectedYear]);
+    }, [isAdminPortal]);
 
     const loadPayslips = async () => {
+        if (!user?.id) return;
         setLoading(true);
         try {
-            // Adjust payload as per actual API requirements found in Angular app
-            const data = await payrollService.getPayslips(selectedYear);
-            // Filter for current user if API returns all (unlikely for user endpoint but safe to check)
-            // const userPayslips = data.filter(p => p.employeeId === user?.id); 
-            setPayslips(data || []);
+            let res;
+            if (isAdminPortal) {
+                res = await payrollService.getAllGeneratedPayroll();
+            } else {
+                res = await payrollService.getGeneratedPayrollByUser(user.id);
+            }
+            setPayslips(res.data || []);
         } catch (error) {
             console.error('Failed to load payslips', error);
-            // Alert.alert('Error', 'Failed to load payslips');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDownload = async (item: any) => {
-        setDownloading(item.id);
-        try {
-            // const pdfUrl = item.pdfUrl; // If available directly
-            // For now, simulating download or using a service method that returns a URL/Blob
-            // In a real scenario, you might need to use FileSystem.downloadAsync if you have a direct URL
-
-            // Example if you have a direct URL:
-            // const fileUri = FileSystem.documentDirectory + `payslip_${item.month}_${item.year}.pdf`;
-            // const { uri } = await FileSystem.downloadAsync(pdfUrl, fileUri);
-
-            // Mocking for now as we don't have the exact download mechanism fully confirmed
-            Alert.alert('Info', 'Download functionality requires exact API endpoint details. Implemented as placeholder.');
-
-            // If you had the file locally:
-            // await Sharing.shareAsync(uri);
-
-        } catch (error) {
-            console.error('Download failed', error);
-            Alert.alert('Error', 'Failed to download payslip');
-        } finally {
-            setDownloading(null);
-        }
+    const handleView = (item: any) => {
+        setSelectedPayslip(item);
+        setShowDetails(true);
     };
 
-    const getMonthName = (monthNumber: number) => {
-        const date = new Date();
-        date.setMonth(monthNumber - 1);
-        return date.toLocaleString('default', { month: 'long' });
-    };
+    const renderItem = ({ item }: { item: any }) => {
+        // Data Extraction based on Angular: row?.PayrollUser?.user
+        const payrollUser = item.PayrollUser || {};
+        const employee = payrollUser.user || {};
+        const payroll = payrollUser.payroll || {};
+        const employeeName = `${employee.firstName || ''} ${employee.lastName || ''}`;
+        const period = `${payroll.month || ''}-${payroll.year || ''}`;
+        const status = payroll.status || 'Unknown';
 
-    const renderItem = ({ item }: { item: any }) => (
-        <View style={styles.card}>
-            <View style={styles.header}>
-                <View>
-                    <Text style={styles.monthText}>{getMonthName(item.month)} {item.year}</Text>
-                    {item.netPay && <Text style={styles.amountText}>Net Pay: ${item.netPay}</Text>}
+        // Show Pay details if available in structure
+        // Angular doesn't show amount in list, only in details.
+
+        return (
+            <TouchableOpacity style={styles.card} onPress={() => handleView(item)}>
+                <View style={styles.row}>
+                    <View>
+                        <Text style={styles.employeeName}>{employeeName}</Text>
+                        <Text style={styles.periodText}>{period}</Text>
+                    </View>
+                    <View>
+                        <Text style={[
+                            styles.statusText,
+                            { color: status === 'Generate' ? 'green' : 'orange' }
+                        ]}>{status}</Text>
+                    </View>
                 </View>
-                <TouchableOpacity
-                    style={styles.downloadButton}
-                    onPress={() => handleDownload(item)}
-                    disabled={!!downloading}
-                >
-                    {downloading === item.id ? (
-                        <ActivityIndicator color={theme.colors.primary} size="small" />
-                    ) : (
-                        <Ionicons name="download-outline" size={24} color={theme.colors.primary} />
-                    )}
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
+                <Ionicons name="chevron-forward" size={20} color={theme.colors.gray400} />
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <View style={styles.container}>
-            <StatusBar style="light" backgroundColor={theme.colors.primary} />
-            <View style={styles.filterContainer}>
-                <Text style={styles.headerTitle}>Payslips</Text>
-                {/* Year Selector could go here */}
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>{isAdminPortal ? 'All Payslips' : 'My Payslips'}</Text>
+                <TouchableOpacity onPress={loadPayslips}>
+                    <Ionicons name="refresh" size={24} color={theme.colors.primary} />
+                </TouchableOpacity>
             </View>
 
             {loading ? (
@@ -111,11 +98,58 @@ export const PayslipScreen = () => {
                 <FlatList
                     data={payslips}
                     renderItem={renderItem}
-                    keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+                    keyExtractor={(item, index) => index.toString()}
                     contentContainerStyle={styles.list}
-                    ListEmptyComponent={<Text style={styles.emptyText}>No payslips found for this year.</Text>}
+                    ListEmptyComponent={<Text style={styles.emptyText}>No payslips found.</Text>}
                 />
             )}
+
+            <Modal
+                visible={showDetails}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowDetails(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>Payslip Details</Text>
+                        <TouchableOpacity onPress={() => setShowDetails(false)}>
+                            <Ionicons name="close" size={24} color="black" />
+                        </TouchableOpacity>
+                    </View>
+                    <ScrollView contentContainerStyle={styles.detailsContent}>
+                        {selectedPayslip && (
+                            <View>
+                                <Text style={styles.detailLabel}>Employee</Text>
+                                <Text style={styles.detailValue}>
+                                    {selectedPayslip.PayrollUser?.user?.firstName} {selectedPayslip.PayrollUser?.user?.lastName}
+                                </Text>
+
+                                <Text style={styles.detailLabel}>Period</Text>
+                                <Text style={styles.detailValue}>
+                                    {selectedPayslip.PayrollUser?.payroll?.month}-{selectedPayslip.PayrollUser?.payroll?.year}
+                                </Text>
+
+                                <Text style={styles.detailLabel}>Status</Text>
+                                <Text style={styles.detailValue}>{selectedPayslip.PayrollUser?.payroll?.status}</Text>
+
+                                <View style={styles.divider} />
+
+                                <Text style={styles.sectionHeader}>Summary</Text>
+                                {/* Add specific salary details if structure allows. 
+                                     Angular uses a complex view-payslip component.
+                                     For now, showing basic info available in list object. 
+                                     Assuming selectedPayslip contains generated payroll details.
+                                 */}
+                                <Text style={{ fontStyle: 'italic', color: 'gray' }}>
+                                    Detailed breakdown requires full object inspection.
+                                    (Placeholder for detailed earnings/deductions)
+                                </Text>
+                            </View>
+                        )}
+                    </ScrollView>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -123,63 +157,109 @@ export const PayslipScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: theme.colors.backgroundSecondary,
+        backgroundColor: theme.colors.background,
     },
-    filterContainer: {
-        padding: theme.spacing.md,
-        backgroundColor: theme.colors.white,
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 16,
+        backgroundColor: 'white',
         borderBottomWidth: 1,
         borderBottomColor: theme.colors.gray200,
     },
     headerTitle: {
-        fontSize: theme.typography.fontSize.xl,
+        fontSize: 20,
         fontWeight: 'bold',
-        color: theme.colors.textPrimary,
+        color: theme.colors.text,
     },
     loader: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        marginTop: 20,
     },
     list: {
-        padding: theme.spacing.md,
+        padding: 16,
     },
     card: {
-        backgroundColor: theme.colors.white,
-        borderRadius: theme.borderRadius.md,
-        padding: theme.spacing.md,
-        marginBottom: theme.spacing.md,
-        ...theme.shadows.small,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        padding: 16,
+        marginBottom: 12,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
     },
-    header: {
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        marginRight: 10,
         alignItems: 'center',
     },
-    monthText: {
-        fontSize: theme.typography.fontSize.lg,
+    employeeName: {
+        fontSize: 16,
         fontWeight: 'bold',
-        color: theme.colors.textPrimary,
-        marginBottom: theme.spacing.xs,
+        color: theme.colors.text,
     },
-    amountText: {
-        fontSize: theme.typography.fontSize.md,
-        color: theme.colors.success,
+    periodText: {
+        fontSize: 14,
+        color: theme.colors.gray600,
+        marginTop: 4,
+    },
+    statusText: {
         fontWeight: 'bold',
-    },
-    downloadButton: {
-        padding: theme.spacing.sm,
-        borderRadius: theme.borderRadius.round,
-        backgroundColor: theme.colors.background,
+        fontSize: 14,
     },
     emptyText: {
         textAlign: 'center',
-        marginTop: theme.spacing.xl,
-        color: theme.colors.textSecondary,
-        fontSize: theme.typography.fontSize.md,
+        marginTop: 20,
+        color: theme.colors.gray500,
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 16,
+        backgroundColor: 'white',
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    detailsContent: {
+        padding: 16,
+    },
+    detailLabel: {
+        fontSize: 14,
+        color: theme.colors.gray600,
+        marginTop: 12,
+    },
+    detailValue: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: theme.colors.text,
+        marginTop: 4,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: theme.colors.gray300,
+        marginVertical: 20,
+    },
+    sectionHeader: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 10,
     },
 });
+
+export default PayslipScreen;

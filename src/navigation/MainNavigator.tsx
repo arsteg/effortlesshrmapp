@@ -12,6 +12,7 @@ import TimesheetScreen from '../screens/projects/TimesheetScreen';
 import { LeaveReportScreen } from '../screens/leaves/LeaveReportScreen';
 import { ExpenseScreen } from '../screens/expenses/ExpenseScreen';
 import ManualTimeScreen from '../screens/manualTime/ManualTimeScreen';
+import ApprovalScreen from '../screens/approvals/ApprovalScreen';
 import EmployeesScreen from '../screens/employee/EmployeesScreen';
 import ProjectsScreen from '../screens/projects/ProjectsScreen';
 import TeamMembersScreen from '../screens/projects/TeamMembersScreen';
@@ -123,35 +124,11 @@ const MainNavigator = () => {
                     />
 
                     <Drawer.Screen
-                        name="ApplyLeave"
-                        component={ApplyLeaveScreen}
-                        options={{
-                            drawerLabel: 'Apply Leave',
-                            drawerIcon: ({ color, size }) => (
-                                <Ionicons name="add-circle-outline" size={size} color={color} />
-                            ),
-                            drawerItemStyle: { display: 'none' } // Hidden from direct menu, access via FAB
-                        }}
-                    />
-
-                    <Drawer.Screen
                         name="Expenses"
                         component={ExpenseScreen}
                         options={{
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="wallet-outline" size={size} color={color} />
-                            ),
-                        }}
-                    />
-
-                    <Drawer.Screen
-                        name="AddExpense"
-                        component={AddExpenseScreen}
-                        options={{
-                            drawerLabel: 'Add Expense',
-                            drawerItemStyle: { display: 'none' },
-                            drawerIcon: ({ color, size }) => (
-                                <Ionicons name="add-circle-outline" size={size} color={color} />
                             ),
                         }}
                     />
@@ -244,7 +221,45 @@ const MainNavigator = () => {
                         }}
                     />
 
+                    <Drawer.Screen
+                        name="Manual Time"
+                        component={ManualTimeScreen}
+                        options={{
+                            drawerIcon: ({ color, size }) => (
+                                <Ionicons name="watch-outline" size={size} color={color} />
+                            ),
+                        }}
+                    />
 
+                    <Drawer.Screen
+                        name="Leaves"
+                        component={LeaveReportScreen}
+                        options={{
+                            drawerIcon: ({ color, size }) => (
+                                <Ionicons name="calendar-outline" size={size} color={color} />
+                            ),
+                        }}
+                    />
+
+                    <Drawer.Screen
+                        name="Payslips"
+                        component={PayslipScreen}
+                        options={{
+                            drawerIcon: ({ color, size }) => (
+                                <Ionicons name="document-text-outline" size={size} color={color} />
+                            ),
+                        }}
+                    />
+
+                    <Drawer.Screen
+                        name="Approvals"
+                        component={ApprovalScreen}
+                        options={{
+                            drawerIcon: ({ color, size }) => (
+                                <Ionicons name="checkmark-done-outline" size={size} color={color} />
+                            ),
+                        }}
+                    />
                 </>
             )}
 
@@ -301,6 +316,30 @@ const MainNavigator = () => {
                 options={{
                     drawerItemStyle: { display: 'none' },
                     title: 'Live Monitoring'
+                }}
+            />
+
+            <Drawer.Screen
+                name="ApplyLeave"
+                component={ApplyLeaveScreen}
+                options={{
+                    drawerLabel: 'Apply Leave',
+                    drawerItemStyle: { display: 'none' },
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="add-circle-outline" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Drawer.Screen
+                name="AddExpense"
+                component={AddExpenseScreen}
+                options={{
+                    drawerLabel: 'Add Expense',
+                    drawerItemStyle: { display: 'none' },
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="add-circle-outline" size={size} color={color} />
+                    ),
                 }}
             />
         </Drawer.Navigator>

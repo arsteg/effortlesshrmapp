@@ -11,13 +11,23 @@ export interface LeaveData {
 }
 
 export const leaveService = {
-    getLeaves: async (req: AttendanceRequest) => {
-        return apiService.post<LeaveData[]>('/leaves/get', req);
+    getLeaveApplicationList: async (req: any) => { // Admin list
+        return apiService.post<ApiResponse<any>>('Leave/employee-leave-application-list', req);
     },
-    getLeaveTypes: async (userId: string) => {
-        return apiService.get<any[]>(`/leave/leave-categories-by-userv1/${userId}`);
+
+    getLeaveApplicationByUser: async (userId: string, req: any) => { // User list
+        return apiService.post<ApiResponse<any>>(`Leave/employee-leave-application-by-user/${userId}`, req);
     },
-    applyLeave: async (data: any) => {
-        return apiService.post('/Leave/employee-leave-application', data);
+
+    getLeaveCategoriesByUser: async (userId: string) => {
+        return apiService.get<any>(`leave/leave-categories-by-userv1/${userId}`);
     },
+
+    addLeaveApplication: async (data: any) => {
+        return apiService.post<ApiResponse<any>>('Leave/employee-leave-application', data);
+    },
+
+    // Legacy or specific report endpoint? 
+    // The previous getLeaves mapped to '/leaves/get' which seems wrong based on Angular.
+    // I will keep it deprecated or remove if unused effectively.
 };
