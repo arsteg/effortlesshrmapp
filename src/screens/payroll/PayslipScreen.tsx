@@ -15,6 +15,7 @@ import { theme } from '../../theme';
 import { payrollService } from '../../services/payrollService';
 import { useAppSelector } from '../../store/hooks';
 import { Ionicons } from '@expo/vector-icons';
+import { User } from '../../types';
 
 export const PayslipScreen = () => {
     const { user, isAdminPortal } = useAppSelector((state) => state.auth);
@@ -40,7 +41,8 @@ export const PayslipScreen = () => {
             console.log('Loading payslips for:', isAdminPortal ? 'Admin' : 'User', user.id);
 
             if (isAdminPortal) {
-                res = await payrollService.getAllGeneratedPayroll();
+                 const companyId = user.company?.id || (user as any).companyId;
+                res = await payrollService.getAllGeneratedPayroll(companyId);
             } else {
                 res = await payrollService.getGeneratedPayrollByUser(user.id);
             }

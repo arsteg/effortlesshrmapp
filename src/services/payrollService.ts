@@ -14,8 +14,8 @@ export interface Payslip {
 }
 
 export const payrollService = {
-    getAllGeneratedPayroll: async () => {
-        return apiService.post<ApiResponse<any>>('payroll/generatedPayroll-by-company', {});
+    getAllGeneratedPayroll: async (companyId: string) => {
+        return apiService.post<ApiResponse<any>>('payroll/generatedPayroll-by-company',  { companyId });
     },
 
     getGeneratedPayrollByUser: async (userId: string) => {
