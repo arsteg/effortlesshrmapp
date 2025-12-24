@@ -10,6 +10,7 @@ export interface User {
     phone?: string;
     profilePicture?: string;
     createdAt?: string;
+    company?: any;
 }
 
 // Authentication types
