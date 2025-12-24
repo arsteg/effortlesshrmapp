@@ -388,6 +388,15 @@ const ManualTimeScreen = () => {
                     </Text>
                     <Ionicons name="calendar-outline" size={16} color={theme.colors.gray600} />
                 </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.filterDateBtn, { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }]}
+                    onPress={handleSearch}
+                >
+                    <Text style={[styles.filterDateText, { color: 'white', fontWeight: 'bold' }]}>
+                        Search
+                    </Text>
+                    <Ionicons name="search" size={16} color="white" />
+                </TouchableOpacity>
             </View>
             <TouchableOpacity
                 style={styles.clearFilterBtn}

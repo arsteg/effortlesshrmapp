@@ -68,16 +68,7 @@ const MainNavigator = () => {
                     ),
                 }}
             />
-            <Drawer.Screen
-                name="Real Time"
-                component={RealTimeScreen}
-                options={{
-                    drawerIcon: ({ color, size }) => (
-                        <Ionicons name="pulse-outline" size={size} color={color} />
-                    ),
-                    title: 'RealTime',
-                }}
-            />
+
 
             {/* Non-admin screens */}
             {!isAdminPortal && (
@@ -123,15 +114,7 @@ const MainNavigator = () => {
                         }}
                     />
 
-                    <Drawer.Screen
-                        name="Expenses"
-                        component={ExpenseScreen}
-                        options={{
-                            drawerIcon: ({ color, size }) => (
-                                <Ionicons name="wallet-outline" size={size} color={color} />
-                            ),
-                        }}
-                    />
+
 
                     <Drawer.Screen
                         name="Payslips"
@@ -168,15 +151,7 @@ const MainNavigator = () => {
                         }}
                     />
 
-                    <Drawer.Screen
-                        name="Projects"
-                        component={ProjectsScreen}
-                        options={{
-                            drawerIcon: ({ color, size }) => (
-                                <Ionicons name="briefcase-outline" size={size} color={color} />
-                            ),
-                        }}
-                    />
+
 
                     <Drawer.Screen
                         name="Team Tasks"
@@ -218,6 +193,17 @@ const MainNavigator = () => {
                                 <Ionicons name="bar-chart-outline" size={size} color={color} />
                             ),
                             title: 'Reports',
+                        }}
+                    />
+
+                    <Drawer.Screen
+                        name="Real Time"
+                        component={RealTimeScreen}
+                        options={{
+                            drawerIcon: ({ color, size }) => (
+                                <Ionicons name="pulse-outline" size={size} color={color} />
+                            ),
+                            title: 'RealTime',
                         }}
                     />
 
