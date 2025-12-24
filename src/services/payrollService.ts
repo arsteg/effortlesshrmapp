@@ -1,4 +1,5 @@
 import { apiService } from './api';
+import { ApiResponse } from '../types';
 
 export interface Payslip {
     id: string; // or number depending on backend

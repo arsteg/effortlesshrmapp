@@ -30,18 +30,30 @@ export const PayslipScreen = () => {
     }, [isAdminPortal]);
 
     const loadPayslips = async () => {
-        if (!user?.id) return;
+        if (!user?.id) {
+            console.log('No user ID available');
+            return;
+        }
         setLoading(true);
         try {
             let res;
+            console.log('Loading payslips for:', isAdminPortal ? 'Admin' : 'User', user.id);
+
             if (isAdminPortal) {
                 res = await payrollService.getAllGeneratedPayroll();
             } else {
                 res = await payrollService.getGeneratedPayrollByUser(user.id);
             }
-            setPayslips(res.data || []);
-        } catch (error) {
-            console.error('Failed to load payslips', error);
+
+            console.log('Payslip API Response:', res);
+            const data = res.data || [];
+            console.log('Payslip data count:', data.length);
+
+            setPayslips(data);
+        } catch (error: any) {
+            console.error('Failed to load payslips:', error);
+            console.error('Error details:', error.message);
+            Alert.alert('Error', 'Failed to load payslips. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -53,32 +65,34 @@ export const PayslipScreen = () => {
     };
 
     const renderItem = ({ item }: { item: any }) => {
-        // Data Extraction based on Angular: row?.PayrollUser?.user
         const payrollUser = item.PayrollUser || {};
         const employee = payrollUser.user || {};
         const payroll = payrollUser.payroll || {};
-        const employeeName = `${employee.firstName || ''} ${employee.lastName || ''}`;
+        const employeeName = `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || 'Unknown';
         const period = `${payroll.month || ''}-${payroll.year || ''}`;
         const status = payroll.status || 'Unknown';
-
-        // Show Pay details if available in structure
-        // Angular doesn't show amount in list, only in details.
+        const generatedDate = payroll.date ? new Date(payroll.date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        }) : 'N/A';
 
         return (
             <TouchableOpacity style={styles.card} onPress={() => handleView(item)}>
-                <View style={styles.row}>
-                    <View>
+                <View style={styles.cardContent}>
+                    <View style={styles.cardLeft}>
                         <Text style={styles.employeeName}>{employeeName}</Text>
                         <Text style={styles.periodText}>{period}</Text>
+                        <Text style={styles.generatedText}>Generated: {generatedDate}</Text>
                     </View>
-                    <View>
+                    <View style={styles.cardRight}>
                         <Text style={[
                             styles.statusText,
-                            { color: status === 'Generate' ? 'green' : 'orange' }
+                            { color: status === 'Generate' ? theme.colors.success : theme.colors.warning }
                         ]}>{status}</Text>
+                        <Ionicons name="chevron-forward" size={20} color={theme.colors.gray400} style={{ marginTop: 4 }} />
                     </View>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={theme.colors.gray400} />
             </TouchableOpacity>
         );
     };
@@ -130,20 +144,26 @@ export const PayslipScreen = () => {
                                     {selectedPayslip.PayrollUser?.payroll?.month}-{selectedPayslip.PayrollUser?.payroll?.year}
                                 </Text>
 
+                                <Text style={styles.detailLabel}>Generated On</Text>
+                                <Text style={styles.detailValue}>
+                                    {selectedPayslip.PayrollUser?.payroll?.date
+                                        ? new Date(selectedPayslip.PayrollUser.payroll.date).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })
+                                        : 'N/A'}
+                                </Text>
+
                                 <Text style={styles.detailLabel}>Status</Text>
                                 <Text style={styles.detailValue}>{selectedPayslip.PayrollUser?.payroll?.status}</Text>
 
                                 <View style={styles.divider} />
 
-                                <Text style={styles.sectionHeader}>Summary</Text>
-                                {/* Add specific salary details if structure allows. 
-                                     Angular uses a complex view-payslip component.
-                                     For now, showing basic info available in list object. 
-                                     Assuming selectedPayslip contains generated payroll details.
-                                 */}
-                                <Text style={{ fontStyle: 'italic', color: 'gray' }}>
-                                    Detailed breakdown requires full object inspection.
-                                    (Placeholder for detailed earnings/deductions)
+                                <Text style={styles.sectionHeader}>Payslip Information</Text>
+                                <Text style={styles.infoText}>
+                                    Complete payslip details are available in the web application.
+                                    This view shows basic payslip information.
                                 </Text>
                             </View>
                         )}
@@ -184,14 +204,22 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 16,
         marginBottom: 12,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
         elevation: 2,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
+    },
+    cardContent: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    cardLeft: {
+        flex: 1,
+    },
+    cardRight: {
+        alignItems: 'flex-end',
     },
     row: {
         flexDirection: 'row',
@@ -210,6 +238,11 @@ const styles = StyleSheet.create({
         color: theme.colors.gray600,
         marginTop: 4,
     },
+    generatedText: {
+        fontSize: 12,
+        color: theme.colors.gray500,
+        marginTop: 2,
+    },
     statusText: {
         fontWeight: 'bold',
         fontSize: 14,
@@ -218,6 +251,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 20,
         color: theme.colors.gray500,
+    },
+    infoText: {
+        fontSize: 14,
+        color: theme.colors.gray600,
+        fontStyle: 'italic',
+        lineHeight: 20,
     },
     modalContainer: {
         flex: 1,
