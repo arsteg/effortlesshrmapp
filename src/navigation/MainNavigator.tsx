@@ -27,6 +27,7 @@ import { HelpScreen } from '../screens/support/HelpScreen';
 import RealTimeScreen from '../screens/reports/RealTimeScreen';
 import LiveScreen from '../screens/reports/LiveScreen';
 import ReportsScreen from '../screens/reports/ReportsScreen';
+import LeaveApplicationScreen from '../screens/leaves/LeaveApplicationScreen';
 
 // Import all screens
 
@@ -82,17 +83,6 @@ const MainNavigator = () => {
                             ),
                         }}
                     />
-
-                    <Drawer.Screen
-                        name="Attendance"
-                        component={AttendanceScreen}
-                        options={{
-                            drawerIcon: ({ color, size }) => (
-                                <Ionicons name="time-outline" size={size} color={color} />
-                            ),
-                        }}
-                    />
-
                     <Drawer.Screen
                         name="Reports"
                         component={ReportsScreen}
@@ -106,7 +96,7 @@ const MainNavigator = () => {
 
                     <Drawer.Screen
                         name="Leaves"
-                        component={LeaveReportScreen}
+                        component={LeaveApplicationScreen}
                         options={{
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="calendar-outline" size={size} color={color} />
@@ -175,13 +165,12 @@ const MainNavigator = () => {
                     />
 
                     <Drawer.Screen
-                        name="Admin Attendance"
-                        component={AttendanceScreen}
+                        name="Leave Application"
+                        component={LeaveApplicationScreen}
                         options={{
                             drawerIcon: ({ color, size }) => (
-                                <Ionicons name="calendar-number-outline" size={size} color={color} />
+                                <Ionicons name="document-text-outline" size={size} color={color} />
                             ),
-                            title: 'Attendance',
                         }}
                     />
 
@@ -213,16 +202,6 @@ const MainNavigator = () => {
                         options={{
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="watch-outline" size={size} color={color} />
-                            ),
-                        }}
-                    />
-
-                    <Drawer.Screen
-                        name="Leaves"
-                        component={LeaveReportScreen}
-                        options={{
-                            drawerIcon: ({ color, size }) => (
-                                <Ionicons name="calendar-outline" size={size} color={color} />
                             ),
                         }}
                     />

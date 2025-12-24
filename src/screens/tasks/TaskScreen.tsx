@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Card } from '../../components/common/Card';
 import AddNewTaskModal from '../../components/modals/AddNewTaskModal';
+import { Project } from '../../types';
 
 interface TeamMember {
     id: string;
@@ -103,12 +104,10 @@ export const TaskScreen = () => {
 
         try {
             // Add current user as "Me"
-            const members: TeamMember[] = [
-                { id: user.id, name: 'Me', email: user.email || '' }
-            ];
+            const projects: Project[] = [];
 
             // Load subordinates
-            const response = await taskService.getSubordinates(user.id);
+            const response = await taskService.projectListByUser(user.id);
 
             // Handle different response structures
             const subordinatesData = Array.isArray(response) ? response : (response.data || []);
@@ -125,10 +124,10 @@ export const TaskScreen = () => {
                         a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
                     );
 
-                members.push(...subordinates);
+                projects.push(...subordinates);
             }
 
-            setTeamMembers(members);
+            setProjects(projects);
             setSelectedUser(members[0]); // Default to "Me"
         } catch (error) {
             console.error('Failed to load team members:', error);

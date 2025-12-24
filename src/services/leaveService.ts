@@ -1,4 +1,5 @@
 import { apiService } from './api';
+import { ApiResponse } from '../types';
 import { AttendanceRequest } from './attendanceService'; // Reusing BaseRequestModel equivalent
 
 export interface LeaveData {
@@ -27,7 +28,15 @@ export const leaveService = {
         return apiService.post<ApiResponse<any>>('Leave/employee-leave-application', data);
     },
 
-    // Legacy or specific report endpoint? 
-    // The previous getLeaves mapped to '/leaves/get' which seems wrong based on Angular.
-    // I will keep it deprecated or remove if unused effectively.
+    getLeaveApplicationByTeam: async (req: any) => {
+        return apiService.post<ApiResponse<any>>('Leave/employee-leave-application-by-team', req);
+    },
+
+    updateLeaveApplication: async (id: string, data: any) => {
+        return apiService.put<ApiResponse<any>>(`Leave/employee-leave-application/${id}`, data);
+    },
+
+    deleteLeaveApplication: async (id: string) => {
+        return apiService.delete<ApiResponse<any>>(`Leave/employee-leave-application/${id}`);
+    }
 };

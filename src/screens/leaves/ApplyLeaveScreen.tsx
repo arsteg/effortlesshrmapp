@@ -114,9 +114,13 @@ export const ApplyLeaveScreen = ({ navigation }: any) => {
                             selectedValue={form.leaveTypeId}
                             onValueChange={(itemValue) => setForm({ ...form, leaveTypeId: itemValue })}
                         >
-                            {leaveTypes.map((type) => (
-                                <Picker.Item key={type.id} label={type.name} value={type.id} />
-                            ))}
+                            {leaveTypes && leaveTypes.length > 0 ? (
+                                leaveTypes.map((type) => (
+                                    <Picker.Item key={type.id} label={type.name} value={type.id} />
+                                ))
+                            ) : (
+                                <Picker.Item label="No leave types available" value="" />
+                            )}
                         </Picker>
                     </View>
                 </View>
