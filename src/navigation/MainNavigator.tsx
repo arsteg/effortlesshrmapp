@@ -7,7 +7,7 @@ import { theme } from '../theme';
 import { UserDashboardScreen } from '../screens/dashboard/UserDashboardScreen';
 import { AdminDashboardScreen } from '../screens/dashboard/AdminDashboardScreen';
 import { TaskScreen } from '../screens/tasks/TaskScreen';
-import { AttendanceScreen } from '../screens/attendance/AttendanceScreen';
+import AttendanceScreen from '../screens/attendance/AttendanceScreen';
 import TimesheetScreen from '../screens/projects/TimesheetScreen';
 import { LeaveReportScreen } from '../screens/leaves/LeaveReportScreen';
 import { ExpenseScreen } from '../screens/expenses/ExpenseScreen';
@@ -28,6 +28,8 @@ import RealTimeScreen from '../screens/reports/RealTimeScreen';
 import LiveScreen from '../screens/reports/LiveScreen';
 import ReportsScreen from '../screens/reports/ReportsScreen';
 import LeaveApplicationScreen from '../screens/leaves/LeaveApplicationScreen';
+import AttendanceSettingsScreen from '../screens/attendance/AttendanceSettingsScreen';
+import ManualAttendanceScreen from '../screens/attendance/ManualAttendanceScreen';
 
 // Import all screens
 
@@ -92,8 +94,6 @@ const MainNavigator = () => {
                             ),
                         }}
                     />
-
-
                     <Drawer.Screen
                         name="Leaves"
                         component={LeaveApplicationScreen}
@@ -103,9 +103,6 @@ const MainNavigator = () => {
                             ),
                         }}
                     />
-
-
-
                     <Drawer.Screen
                         name="Payslips"
                         component={PayslipScreen}
@@ -115,7 +112,15 @@ const MainNavigator = () => {
                             ),
                         }}
                     />
-
+                    <Drawer.Screen
+                        name="Attendance"
+                        component={AttendanceScreen}
+                        options={{
+                            drawerIcon: ({ color, size }) => (
+                                <Ionicons name="time-outline" size={size} color={color} />
+                            ),
+                        }}
+                    />
                     <Drawer.Screen
                         name="Manual Time"
                         component={ManualTimeScreen}
@@ -140,9 +145,6 @@ const MainNavigator = () => {
                             ),
                         }}
                     />
-
-
-
                     <Drawer.Screen
                         name="Team Tasks"
                         component={TaskScreen}
@@ -153,7 +155,6 @@ const MainNavigator = () => {
                             title: 'Tasks',
                         }}
                     />
-
                     <Drawer.Screen
                         name="Team Members"
                         component={TeamMembersScreen}
@@ -163,7 +164,6 @@ const MainNavigator = () => {
                             ),
                         }}
                     />
-
                     <Drawer.Screen
                         name="Leave Application"
                         component={LeaveApplicationScreen}
@@ -173,7 +173,6 @@ const MainNavigator = () => {
                             ),
                         }}
                     />
-
                     <Drawer.Screen
                         name="Reports"
                         component={ReportsScreen}
@@ -184,7 +183,6 @@ const MainNavigator = () => {
                             title: 'Reports',
                         }}
                     />
-
                     <Drawer.Screen
                         name="Real Time"
                         component={RealTimeScreen}
@@ -195,7 +193,15 @@ const MainNavigator = () => {
                             title: 'RealTime',
                         }}
                     />
-
+                    <Drawer.Screen
+                        name="Attendance"
+                        component={AttendanceScreen}
+                        options={{
+                            drawerIcon: ({ color, size }) => (
+                                <Ionicons name="time-outline" size={size} color={color} />
+                            ),
+                        }}
+                    />
                     <Drawer.Screen
                         name="Manual Time"
                         component={ManualTimeScreen}
@@ -205,7 +211,6 @@ const MainNavigator = () => {
                             ),
                         }}
                     />
-
                     <Drawer.Screen
                         name="Payslips"
                         component={PayslipScreen}
@@ -215,7 +220,6 @@ const MainNavigator = () => {
                             ),
                         }}
                     />
-
                     <Drawer.Screen
                         name="Approvals"
                         component={ApprovalScreen}
@@ -238,7 +242,6 @@ const MainNavigator = () => {
                     ),
                 }}
             />
-
             <Drawer.Screen
                 name="Help"
                 component={HelpScreen}
@@ -260,7 +263,6 @@ const MainNavigator = () => {
                     ),
                 }}
             />
-
             <Drawer.Screen
                 name="ChangePassword"
                 component={ChangePasswordScreen}
@@ -272,9 +274,6 @@ const MainNavigator = () => {
                     title: 'Change Password',
                 }}
             />
-
-
-
             <Drawer.Screen
                 name="LiveScreen"
                 component={LiveScreen}
@@ -283,7 +282,6 @@ const MainNavigator = () => {
                     title: 'Live Monitoring'
                 }}
             />
-
             <Drawer.Screen
                 name="ApplyLeave"
                 component={ApplyLeaveScreen}
@@ -295,7 +293,6 @@ const MainNavigator = () => {
                     ),
                 }}
             />
-
             <Drawer.Screen
                 name="AddExpense"
                 component={AddExpenseScreen}
@@ -305,6 +302,22 @@ const MainNavigator = () => {
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="add-circle-outline" size={size} color={color} />
                     ),
+                }}
+            />
+            <Drawer.Screen
+                name="Office Settings"
+                component={AttendanceSettingsScreen}
+                options={{
+                    drawerItemStyle: { display: 'none' },
+                    title: 'Office Management'
+                }}
+            />
+            <Drawer.Screen
+                name="Attendance Requests"
+                component={ManualAttendanceScreen}
+                options={{
+                    drawerItemStyle: { display: 'none' },
+                    title: 'Attendance Requests'
                 }}
             />
         </Drawer.Navigator>

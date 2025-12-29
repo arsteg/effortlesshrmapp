@@ -103,6 +103,14 @@ export const USER_LOCATIONS_API_URL = 'settings/user-locations';
 export const USER_CHECKIN_URL = 'timelogs/userCheckin';
 export const USER_CHECKOUT_URL = 'timelogs/userCheckOut';
 
+// Refactored Attendance API's
+export const ATTENDANCE_OFFICES = 'attendance/admin/offices';
+export const ATTENDANCE_CHECKIN = 'attendance/check-in';
+export const ATTENDANCE_CHECKOUT = 'attendance/check-out';
+export const ATTENDANCE_HISTORY = 'attendance/history';
+export const MANUAL_ATTENDANCE_REQUEST = 'attendance/manual-request';
+export const APPROVE_MANUAL_ATTENDANCE = 'attendance/admin/approve-manual';
+
 // Approvals
 export const MANUAL_TIME_REQUEST_FOR_APPROVAL = 'manualTime/getManualTimeRequestsForApproval';
 export const UPDATE_MANUAL_TIME_REQUEST = 'manualTime/updateManualTimeRequest';
