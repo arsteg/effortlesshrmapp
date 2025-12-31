@@ -193,12 +193,17 @@ const AttendanceScreen = () => {
                 return;
             }
 
+            const companyId = user?.company?.id || user?.company || (user as any)?.companyId;
+            const userId = user?.id;
+
             const response: any = await attendanceService.clockIn({
                 officeId: selectedOffice._id,
                 latitude: loc.coords.latitude,
                 longitude: loc.coords.longitude,
                 selfieUrl: img,
-                deviceId: 'Mobile-App'
+                deviceId: 'Mobile-App',
+                company: companyId,
+                user: userId
             });
 
             if (response.status?.toLowerCase() === 'success') {
@@ -223,10 +228,15 @@ const AttendanceScreen = () => {
                 return;
             }
 
+            const companyId = user?.company?.id || user?.company || (user as any)?.companyId;
+            const userId = user?.id;
+
             const response: any = await attendanceService.clockOut({
                 officeId: selectedOffice?._id,
                 latitude: loc.coords.latitude,
-                longitude: loc.coords.longitude
+                longitude: loc.coords.longitude,
+                company: companyId,
+                user: userId
             });
 
             if (response.status?.toLowerCase() === 'success') {
