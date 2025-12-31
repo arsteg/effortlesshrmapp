@@ -27,6 +27,9 @@ import { calculateDistance } from '../../utils/distance';
 interface Office {
     _id: string;
     name: string;
+    latitude: number;
+    longitude: number;
+    geofence_radius: number;
     location: {
         type: string;
         coordinates: number[]; // [lng, lat]
@@ -51,6 +54,7 @@ const AttendanceScreen = () => {
 
     const navigation = useNavigation<any>();
     const isAdminPortal = useAppSelector((state) => state.auth.isAdminPortal);
+    const user = useAppSelector((state) => state.auth.user);
 
     const [offices, setOffices] = useState<Office[]>([]);
     const [selectedOffice, setSelectedOffice] = useState<Office | null>(null);
@@ -72,15 +76,18 @@ const AttendanceScreen = () => {
     const loadData = useCallback(async () => {
         try {
             setLoading(true);
+            const companyId = user?.company?.id || user?.company || (user as any)?.companyId;
+
             const [officesRes, historyRes]: [any, any] = await Promise.all([
-                attendanceService.getOffices(),
-                attendanceService.getHistory()
+                attendanceService.getOffices({ company: companyId }),
+                attendanceService.getHistory({ company: companyId })
             ]);
 
             if (officesRes.status?.toLowerCase() === 'success') {
-                setOffices(officesRes.data?.offices || []);
-                if (officesRes.data?.offices?.length > 0) {
-                    setSelectedOffice(officesRes.data.offices[0]);
+                const officesData = officesRes.data?.offices || [];
+                setOffices(officesData);
+                if (officesData.length > 0) {
+                    setSelectedOffice(officesData[0]);
                 }
             }
 
@@ -109,8 +116,8 @@ const AttendanceScreen = () => {
             const dist = calculateDistance(
                 location.coords.latitude,
                 location.coords.longitude,
-                selectedOffice.location.coordinates[1],
-                selectedOffice.location.coordinates[0]
+                selectedOffice.latitude || selectedOffice.location.coordinates[1],
+                selectedOffice.longitude || selectedOffice.location.coordinates[0]
             );
             setDistance(dist);
         }
@@ -139,14 +146,16 @@ const AttendanceScreen = () => {
             const dist = calculateDistance(
                 loc.coords.latitude,
                 loc.coords.longitude,
-                selectedOffice.location.coordinates[1],
-                selectedOffice.location.coordinates[0]
+                selectedOffice.latitude || selectedOffice.location.coordinates[1],
+                selectedOffice.longitude || selectedOffice.location.coordinates[0]
             );
 
-            if (dist > selectedOffice.radius) {
+            const allowedRadius = selectedOffice.geofence_radius || selectedOffice.radius;
+
+            if (dist > allowedRadius) {
                 Alert.alert(
                     'Outside Geofence',
-                    `You are ${Math.round(dist)}m away from ${selectedOffice.name}. The allowed radius is ${selectedOffice.radius}m.`
+                    `You are ${Math.round(dist)}m away from ${selectedOffice.name}. The allowed radius is ${allowedRadius}m.`
                 );
                 setActionLoading(false);
                 return;

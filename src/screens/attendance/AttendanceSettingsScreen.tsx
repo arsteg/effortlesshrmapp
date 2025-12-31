@@ -164,7 +164,7 @@ const AttendanceSettingsScreen = () => {
             <View style={styles.officeInfo}>
                 <Text style={styles.officeName}>{item.name}</Text>
                 <Text style={styles.officeCoords}>
-                    {item.latitude.toFixed(6)}, {item.longitude.toFixed(6)}
+                    {item?.latitude?.toFixed(6)}, {item?.longitude?.toFixed(6)}
                 </Text>
                 <Text style={styles.officeDetails}>
                     Radius: {item.geofence_radius}m
