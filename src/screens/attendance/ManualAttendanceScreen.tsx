@@ -16,7 +16,10 @@ import { useAppSelector } from '../../store/hooks';
 import { theme } from '../../theme';
 import { attendanceService } from '../../services/attendanceService';
 
+import { useNavigation } from '@react-navigation/native';
+
 const ManualAttendanceScreen = () => {
+    const navigation = useNavigation<any>();
     const isAdminPortal = useAppSelector((state) => state.auth.isAdminPortal);
     const [requests, setRequests] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -121,6 +124,16 @@ const ManualAttendanceScreen = () => {
 
     return (
         <SafeAreaView style={styles.container}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', padding: 15, backgroundColor: '#fff' }}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Attendance')}
+                    style={{ marginRight: 15 }}
+                >
+                    <Ionicons name="arrow-back" size={24} color={theme.colors.gray900} />
+                </TouchableOpacity>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.gray900 }}>Attendance Requests</Text>
+            </View>
+
             <View style={styles.filterRow}>
                 <TouchableOpacity
                     style={[styles.filterBtn, filter === 'pending' && styles.activeFilter]}
