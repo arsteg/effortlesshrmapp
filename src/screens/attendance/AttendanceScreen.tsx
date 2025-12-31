@@ -23,6 +23,7 @@ import { useCamera } from '../../hooks/useCamera';
 import { attendanceService } from '../../services/attendanceService';
 import { theme } from '../../theme';
 import { calculateDistance } from '../../utils/distance';
+import { authService } from '../../services/authService';
 
 interface Office {
     _id: string;
@@ -39,7 +40,7 @@ interface Office {
 
 interface AttendanceLog {
     _id: string;
-    type: 'check_in' | 'check_out';
+    type: 'check-in' | 'check-out';
     timestamp: string;
     status: string;
     anomaly?: {
@@ -67,10 +68,14 @@ const AttendanceScreen = () => {
 
     // Manual Request Modal State
     const [manualModalVisible, setManualModalVisible] = useState(false);
+    const [managers, setManagers] = useState<any[]>([]);
     const [manualForm, setManualForm] = useState({
         date: new Date().toISOString().split('T')[0],
+        checkInTime: '09:00',
+        checkOutTime: '18:00',
         reason: '',
-        photoUrl: ''
+        photoUrl: '',
+        managerId: ''
     });
 
     const loadData = useCallback(async () => {
@@ -109,7 +114,26 @@ const AttendanceScreen = () => {
 
     useEffect(() => {
         loadData();
+        loadManagers();
     }, [loadData]);
+
+    const loadManagers = async () => {
+        if (!user?.id) return;
+        try {
+            const response: any = await authService.getUserManagers(user.id);
+            if (response.status?.toLowerCase() === 'success' || response.data) {
+                const managersData = response.data || [];
+                setManagers(managersData.map((m: any) => ({
+                    label: m.name || `${m.firstName} ${m.lastName}`,
+                    value: m.id || m._id,
+                    _id: m.id || m._id,
+                    firstName: m.firstName || m.name
+                })));
+            }
+        } catch (error) {
+            console.error('Failed to load managers:', error);
+        }
+    };
 
     useEffect(() => {
         if (location && selectedOffice) {
@@ -224,13 +248,38 @@ const AttendanceScreen = () => {
             return;
         }
 
+        if (!manualForm.photoUrl) {
+            Alert.alert('Photo Required', 'Please attach a photo for verification.');
+            return;
+        }
+
+        if (!manualForm.managerId) {
+            Alert.alert('Manager Required', 'Please select a manager to review your request.');
+            return;
+        }
+
         setActionLoading(true);
         try {
-            const response: any = await attendanceService.requestManualAttendance(manualForm);
+            const companyId = user?.company?.id || user?.company || (user as any)?.companyId;
+            const userId = user?.id;
+
+            const response: any = await attendanceService.requestManualAttendance({
+                ...manualForm,
+                userId: userId!,
+                company: companyId!,
+                managerId: manualForm.managerId
+            });
             if (response.status?.toLowerCase() === 'success') {
                 Alert.alert('Success', 'Manual attendance request submitted.');
                 setManualModalVisible(false);
-                setManualForm({ ...manualForm, reason: '' });
+                setManualForm({
+                    date: new Date().toISOString().split('T')[0],
+                    checkInTime: '09:00',
+                    checkOutTime: '18:00',
+                    reason: '',
+                    photoUrl: '',
+                    managerId: ''
+                });
                 loadData();
             } else {
                 Alert.alert('Failed', response.message || 'Request failed.');
@@ -244,16 +293,16 @@ const AttendanceScreen = () => {
 
     const renderHistoryItem = ({ item }: { item: AttendanceLog }) => (
         <View style={styles.historyItem}>
-            <View style={[styles.historyIcon, { backgroundColor: item.type === 'check_in' || item.type === 'check-in' ? '#e7f9ee' : '#feeeee' }]}>
+            <View style={[styles.historyIcon, { backgroundColor: item.type === 'check-in' ? '#e7f9ee' : '#feeeee' }]}>
                 <Ionicons
-                    name={item.type === 'check_in' || item.type === 'check-in' ? 'arrow-down-circle' : 'arrow-up-circle'}
+                    name={item.type === 'check-in' ? 'arrow-down-circle' : 'arrow-up-circle'}
                     size={24}
-                    color={item.type === 'check_in' || item.type === 'check-in' ? theme.colors.success : theme.colors.error}
+                    color={item.type === 'check-in' ? theme.colors.success : theme.colors.error}
                 />
             </View>
             <View style={styles.historyInfo}>
                 <Text style={styles.historyType}>
-                    {item.type === 'check_in' || item.type === 'check-in' ? 'Clocked In' : 'Clocked Out'}
+                    {item.type === 'check-in' ? 'Clocked In' : 'Clocked Out'}
                 </Text>
                 <Text style={styles.historyTime}>
                     {new Date(item.timestamp).toLocaleString()}
@@ -275,7 +324,7 @@ const AttendanceScreen = () => {
         );
     }
 
-    const isClockedIn = status?.type === 'check_in' || status?.type === 'check-in';
+    const isClockedIn = status?.type === 'check-in';
 
     const renderUserPortal = () => (
         <FlatList
@@ -445,6 +494,27 @@ const AttendanceScreen = () => {
                                 onChangeText={(text) => setManualForm({ ...manualForm, date: text })}
                             />
 
+                            <View style={styles.row}>
+                                <View style={{ flex: 1, marginRight: 8 }}>
+                                    <Text style={styles.label}>Check-in Time</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        value={manualForm.checkInTime}
+                                        placeholder="HH:MM"
+                                        onChangeText={(text) => setManualForm({ ...manualForm, checkInTime: text })}
+                                    />
+                                </View>
+                                <View style={{ flex: 1, marginLeft: 8 }}>
+                                    <Text style={styles.label}>Check-out Time</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        value={manualForm.checkOutTime}
+                                        placeholder="HH:MM"
+                                        onChangeText={(text) => setManualForm({ ...manualForm, checkOutTime: text })}
+                                    />
+                                </View>
+                            </View>
+
                             <Text style={styles.label}>Reason</Text>
                             <TextInput
                                 style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
@@ -453,6 +523,22 @@ const AttendanceScreen = () => {
                                 placeholder="e.g., Forgot to clock in, Device issue, etc."
                                 value={manualForm.reason}
                                 onChangeText={(text) => setManualForm({ ...manualForm, reason: text })}
+                            />
+
+                            <Text style={styles.label}>Select Manager *</Text>
+                            <Dropdown
+                                style={styles.dropdown}
+                                placeholderStyle={styles.placeholderStyle}
+                                selectedTextStyle={styles.selectedTextStyle}
+                                data={managers}
+                                labelField="label"
+                                valueField="value"
+                                placeholder="Select a manager"
+                                value={manualForm.managerId}
+                                onChange={(item) => setManualForm({ ...manualForm, managerId: item.value })}
+                                renderLeftIcon={() => (
+                                    <Ionicons style={{ marginRight: 8 }} color="#666" name="person-outline" size={20} />
+                                )}
                             />
 
                             <TouchableOpacity
@@ -759,8 +845,12 @@ const styles = StyleSheet.create({
     },
     adminHubSubtitle: {
         fontSize: 14,
-        color: theme.colors.gray600,
-        marginBottom: 32,
+        color: theme.colors.gray500,
+        marginBottom: 24,
+    },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     adminCard: {
         backgroundColor: theme.colors.white,

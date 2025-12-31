@@ -52,11 +52,31 @@ export const attendanceService = {
     },
 
     // Manual Attendance Requests
-    requestManualAttendance: async (data: { date: string; reason: string; photoUrl?: string; company?: string }) => {
+    requestManualAttendance: async (data: {
+        date: string;
+        reason: string;
+        checkInTime?: string;
+        checkOutTime?: string;
+        photoUrl?: string;
+        userId: string;
+        company: string;
+        managerId: string;
+    }) => {
         return apiService.post('/attendance/manual-request', data);
     },
-    getManualAttendanceRequests: async (params?: { status?: string }) => {
-        const query = params?.status ? `?status=${params.status}` : '';
+    getManagers: async () => {
+        return apiService.get<any>('/auth/roles/getManagers');
+    },
+    getManualAttendanceRequests: async (params?: { status?: string; fromDate?: string; toDate?: string; user?: string }) => {
+        let query = '';
+        if (params) {
+            const parts = [];
+            if (params.status) parts.push(`status=${params.status}`);
+            if (params.fromDate) parts.push(`fromDate=${params.fromDate}`);
+            if (params.toDate) parts.push(`toDate=${params.toDate}`);
+            if (params.user) parts.push(`user=${params.user}`);
+            if (parts.length > 0) query = `?${parts.join('&')}`;
+        }
         return apiService.get<any>(`/attendance/manual-requests${query}`);
     },
     getManualAttendanceRequestById: async (id: string) => {

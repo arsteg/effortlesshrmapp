@@ -9,12 +9,15 @@ import {
     ActivityIndicator,
     Image,
     SafeAreaView,
-    RefreshControl
+    RefreshControl,
+    TextInput
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppSelector } from '../../store/hooks';
 import { theme } from '../../theme';
 import { attendanceService } from '../../services/attendanceService';
+import { userService } from '../../services/userService';
+import { Dropdown } from 'react-native-element-dropdown';
 
 import { useNavigation } from '@react-navigation/native';
 
@@ -22,15 +25,41 @@ const ManualAttendanceScreen = () => {
     const navigation = useNavigation<any>();
     const isAdminPortal = useAppSelector((state) => state.auth.isAdminPortal);
     const [requests, setRequests] = useState<any[]>([]);
+    const [subordinates, setSubordinates] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [filter, setFilter] = useState<'pending' | 'all'>('pending');
+    const [fromDate, setFromDate] = useState(() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+    });
+    const [toDate, setToDate] = useState(() => {
+        const d = new Date();
+        return d.toISOString().split('T')[0];
+    });
+    const [selectedUser, setSelectedUser] = useState<string | null>(null);
+    const user = useAppSelector((state) => state.auth.user);
+
+    const loadSubordinates = useCallback(async () => {
+        if (!user?.id) return;
+        try {
+            const response = await userService.getSubordinates(user.id);
+            if (response.status?.toLowerCase() === 'success') {
+                setSubordinates(response.data || []);
+            }
+        } catch (error) {
+            console.error('Failed to load subordinates:', error);
+        }
+    }, [user?.id]);
 
     const loadRequests = useCallback(async () => {
         try {
             setLoading(true);
             const response = await attendanceService.getManualAttendanceRequests({
-                status: filter === 'pending' ? 'pending' : undefined
+                status: filter === 'pending' ? 'pending' : undefined,
+                fromDate: fromDate || undefined,
+                toDate: toDate || undefined,
+                user: selectedUser || undefined
             });
             if (response.status?.toLowerCase() === 'success') {
                 setRequests(response.data.requests || []);
@@ -41,7 +70,13 @@ const ManualAttendanceScreen = () => {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [filter]);
+    }, [filter, fromDate, toDate, selectedUser]);
+
+    useEffect(() => {
+        if (isAdminPortal) {
+            loadSubordinates();
+        }
+    }, [isAdminPortal, loadSubordinates]);
 
     useEffect(() => {
         loadRequests();
@@ -98,8 +133,10 @@ const ManualAttendanceScreen = () => {
 
                 <Text style={styles.reasonText}>Reason: {item.reason}</Text>
 
-                {item.photo && (
-                    <Image source={{ uri: item.photo }} style={styles.requestImage} resizeMode="cover" />
+                <Text style={styles.reasonText}>Reason: {item.reason}</Text>
+
+                {item.photoUrl && (
+                    <Image source={{ uri: item.photoUrl }} style={styles.requestImage} resizeMode="cover" />
                 )}
 
                 {isAdminPortal && item.status === 'pending' && (
@@ -149,6 +186,65 @@ const ManualAttendanceScreen = () => {
                 </TouchableOpacity>
             </View>
 
+            {isAdminPortal && (
+                <View style={styles.adminFilterBox}>
+                    <View style={styles.row}>
+                        <View style={{ flex: 1, marginRight: 8 }}>
+                            <Text style={styles.filterLabel}>From Date</Text>
+                            <TextInput
+                                style={styles.filterInput}
+                                value={fromDate}
+                                placeholder="YYYY-MM-DD"
+                                placeholderTextColor="#999"
+                                onChangeText={setFromDate}
+                            />
+                        </View>
+                        <View style={{ flex: 1, marginLeft: 8 }}>
+                            <Text style={styles.filterLabel}>To Date</Text>
+                            <TextInput
+                                style={styles.filterInput}
+                                value={toDate}
+                                placeholder="YYYY-MM-DD"
+                                placeholderTextColor="#999"
+                                onChangeText={setToDate}
+                            />
+                        </View>
+                    </View>
+
+                    <Text style={[styles.filterLabel, { marginTop: 12 }]}>Subordinate</Text>
+                    <Dropdown
+                        style={styles.dropdown}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        data={subordinates}
+                        labelField="firstName"
+                        valueField="_id"
+                        placeholder="All Subordinates"
+                        value={selectedUser}
+                        onChange={(item) => setSelectedUser(item._id)}
+                        renderLeftIcon={() => (
+                            <Ionicons style={{ marginRight: 8 }} color="#666" name="person-outline" size={20} />
+                        )}
+                    />
+
+                    {(fromDate !== `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01` ||
+                        toDate !== new Date().toISOString().split('T')[0] ||
+                        selectedUser) && (
+                            <TouchableOpacity
+                                style={styles.clearFilters}
+                                onPress={() => {
+                                    const d = new Date();
+                                    setFromDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`);
+                                    setToDate(d.toISOString().split('T')[0]);
+                                    setSelectedUser(null);
+                                }}
+                            >
+                                <Text style={styles.clearFiltersText}>Clear Filters</Text>
+                            </TouchableOpacity>
+                        )}
+                </View>
+            )}
+
             {loading && !refreshing ? (
                 <ActivityIndicator size="large" color={theme.colors.primary} style={styles.loader} />
             ) : (
@@ -197,7 +293,16 @@ const styles = StyleSheet.create({
     rejectText: { color: theme.colors.error, fontWeight: 'bold' },
     approveText: { color: '#fff', fontWeight: 'bold' },
     emptyContainer: { alignItems: 'center', marginTop: 100 },
-    emptyText: { marginTop: 10, color: theme.colors.gray500, fontSize: 16 }
+    emptyText: { marginTop: 10, color: theme.colors.gray500, fontSize: 16 },
+    adminFilterBox: { padding: 15, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: theme.colors.gray100 },
+    row: { flexDirection: 'row', alignItems: 'center' },
+    filterLabel: { fontSize: 12, fontWeight: 'bold', color: theme.colors.gray600, marginBottom: 4 },
+    filterInput: { height: 40, borderBottomWidth: 1, borderBottomColor: theme.colors.gray300, fontSize: 14, color: theme.colors.gray900 },
+    dropdown: { height: 40, borderBottomWidth: 1, borderBottomColor: theme.colors.gray300 },
+    placeholderStyle: { fontSize: 14, color: '#999' },
+    selectedTextStyle: { fontSize: 14, color: theme.colors.gray900 },
+    clearFilters: { marginTop: 10, alignSelf: 'flex-end' },
+    clearFiltersText: { color: theme.colors.primary, fontSize: 12, fontWeight: 'bold' }
 });
 
 export default ManualAttendanceScreen;
