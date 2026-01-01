@@ -134,7 +134,7 @@ const AttendanceSettingsScreen = () => {
             setLoading(true);
             const response: any = await attendanceService.getRulesByOffice(officeId);
             if (response.status?.toLowerCase() === 'success') {
-                setCurrentRules(response.data.rules);
+                setCurrentRules({ ...response.data.rules, officeId });
                 setRulesModalVisible(true);
             }
         } catch (error) {
@@ -145,11 +145,16 @@ const AttendanceSettingsScreen = () => {
     };
 
     const handleSaveRules = async () => {
-        if (!currentRules) return;
+        if (!currentRules || !currentRules.officeId) return;
 
         try {
             setActionLoading(true);
-            const response: any = await attendanceService.updateRules(currentRules);
+            // Ensure officeId is included in the payload
+            const payload = {
+                ...currentRules,
+                officeId: currentRules.officeId
+            };
+            const response: any = await attendanceService.updateRules(payload);
             if (response.status?.toLowerCase() === 'success') {
                 Alert.alert('Success', 'Rules updated successfully');
                 setRulesModalVisible(false);
