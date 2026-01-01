@@ -111,4 +111,10 @@ export const attendanceService = {
     updateRules: async (data: AttendanceRuleData) => {
         return apiService.put('/attendance/rules', data);
     },
+
+    // Reports
+    getAttendanceReport: async (data: { officeId?: string; fromDate?: string; toDate?: string; userId?: string; company?: string }) => {
+        return apiService.post<any>('/attendance/reports', data);
+    }
 };
+

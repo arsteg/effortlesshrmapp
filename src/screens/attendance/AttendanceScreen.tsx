@@ -12,8 +12,10 @@ import {
     RefreshControl,
     Modal,
     TextInput,
-    ScrollView
+    ScrollView,
+    Platform
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAppSelector } from '../../store/hooks';
@@ -77,6 +79,14 @@ const AttendanceScreen = () => {
         photoUrl: '',
         managerId: ''
     });
+
+    // User Report State
+    const [userReportFromDate, setUserReportFromDate] = useState(new Date());
+    const [userReportToDate, setUserReportToDate] = useState(new Date());
+    const [userReportData, setUserReportData] = useState<any[]>([]);
+    const [reportLoading, setReportLoading] = useState(false);
+    const [showReportFromPicker, setShowReportFromPicker] = useState(false);
+    const [showReportToPicker, setShowReportToPicker] = useState(false);
 
     const loadData = useCallback(async () => {
         try {
@@ -152,6 +162,29 @@ const AttendanceScreen = () => {
         loadData();
     };
 
+    const handleFetchUserReport = async () => {
+        setReportLoading(true);
+        try {
+            const companyId = user?.company?.id || user?.company || (user as any)?.companyId;
+            const response: any = await attendanceService.getAttendanceReport({
+                userId: user?.id,
+                company: companyId,
+                fromDate: userReportFromDate.toISOString().split('T')[0],
+                toDate: userReportToDate.toISOString().split('T')[0]
+            });
+            if (response.status?.toLowerCase() === 'success') {
+                setUserReportData(response.data?.report || []);
+            } else {
+                setUserReportData([]);
+            }
+        } catch (error) {
+            console.error('Failed to fetch user report', error);
+            Alert.alert('Error', 'Failed to fetch report');
+        } finally {
+            setReportLoading(false);
+        }
+    };
+
     const handleCheckIn = async () => {
         if (!selectedOffice) {
             Alert.alert('Office Required', 'Please select an office location.');
@@ -202,8 +235,7 @@ const AttendanceScreen = () => {
                 longitude: loc.coords.longitude,
                 selfieUrl: img,
                 deviceId: 'Mobile-App',
-                company: companyId,
-                user: userId
+                company: companyId
             });
 
             if (response.status?.toLowerCase() === 'success') {
@@ -235,8 +267,7 @@ const AttendanceScreen = () => {
                 officeId: selectedOffice?._id,
                 latitude: loc.coords.latitude,
                 longitude: loc.coords.longitude,
-                company: companyId,
-                user: userId
+                company: companyId
             });
 
             if (response.status?.toLowerCase() === 'success') {
@@ -435,6 +466,93 @@ const AttendanceScreen = () => {
                     </View>
 
                     <Text style={styles.sectionTitle}>Recent Activity</Text>
+
+                    {/* User Attendance Report Section */}
+                    <View style={styles.reportSection}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                            <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>My Attendance Report</Text>
+                            <TouchableOpacity onPress={handleFetchUserReport}>
+                                <Ionicons name="refresh" size={20} color={theme.colors.primary} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.card}>
+                            <View style={styles.dateRow}>
+                                <TouchableOpacity
+                                    style={styles.dateButton}
+                                    onPress={() => setShowReportFromPicker(true)}
+                                >
+                                    <Text style={styles.dateText}>From: {userReportFromDate.toLocaleDateString()}</Text>
+                                    <Ionicons name="calendar-outline" size={16} color={theme.colors.primary} />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.dateButton}
+                                    onPress={() => setShowReportToPicker(true)}
+                                >
+                                    <Text style={styles.dateText}>To: {userReportToDate.toLocaleDateString()}</Text>
+                                    <Ionicons name="calendar-outline" size={16} color={theme.colors.primary} />
+                                </TouchableOpacity>
+                            </View>
+
+                            {(showReportFromPicker || showReportToPicker) && (
+                                <DateTimePicker
+                                    value={showReportFromPicker ? userReportFromDate : userReportToDate}
+                                    mode="date"
+                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                    onChange={(event, selectedDate) => {
+                                        if (Platform.OS === 'android') {
+                                            setShowReportFromPicker(false);
+                                            setShowReportToPicker(false);
+                                        }
+                                        if (selectedDate) {
+                                            if (showReportFromPicker) {
+                                                setUserReportFromDate(selectedDate);
+                                                if (Platform.OS === 'ios') setShowReportFromPicker(false);
+                                            } else {
+                                                setUserReportToDate(selectedDate);
+                                                if (Platform.OS === 'ios') setShowReportToPicker(false);
+                                            }
+                                        }
+                                    }}
+                                />
+                            )}
+
+                            <TouchableOpacity
+                                style={[styles.secondaryButton, { width: '100%', marginTop: 10, backgroundColor: theme.colors.primary }]}
+                                onPress={handleFetchUserReport}
+                            >
+                                <Text style={[styles.secondaryButtonText, { color: '#fff' }]}>Get Report</Text>
+                            </TouchableOpacity>
+
+                            {reportLoading ? (
+                                <ActivityIndicator style={{ marginTop: 10 }} color={theme.colors.primary} />
+                            ) : (
+                                userReportData.length > 0 && (
+                                    <View style={{ marginTop: 15 }}>
+                                        <View style={styles.tableHeader}>
+                                            <Text style={[styles.tableHeadText, { flex: 1 }]}>Date</Text>
+                                            <Text style={[styles.tableHeadText, { flex: 1 }]}>In</Text>
+                                            <Text style={[styles.tableHeadText, { flex: 1 }]}>Out</Text>
+                                            <Text style={[styles.tableHeadText, { flex: 1, textAlign: 'right' }]}>Total</Text>
+                                        </View>
+                                        {userReportData.map((item, index) => (
+                                            <View key={index} style={styles.tableRow}>
+                                                <Text style={[styles.tableCell, { flex: 1 }]}>{item.date}</Text>
+                                                <Text style={[styles.tableCell, { flex: 1 }]}>
+                                                    {item.inTime ? new Date(item.inTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--'}
+                                                </Text>
+                                                <Text style={[styles.tableCell, { flex: 1 }]}>
+                                                    {item.outTime ? new Date(item.outTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--'}
+                                                </Text>
+                                                <Text style={[styles.tableCell, { flex: 1, textAlign: 'right', fontWeight: 'bold' }]}>
+                                                    {item.totalTimeMs ? Math.floor(item.totalTimeMs / (1000 * 60 * 60)) + 'h ' + Math.floor((item.totalTimeMs % (1000 * 60 * 60)) / (1000 * 60)) + 'm' : '-'}
+                                                </Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                )
+                            )}
+                        </View>
+                    </View>
                 </View>
             }
             ListEmptyComponent={
@@ -479,6 +597,20 @@ const AttendanceScreen = () => {
                     <View style={styles.adminCardContent}>
                         <Text style={styles.adminCardTitle}>Attendance Requests</Text>
                         <Text style={styles.adminCardDesc}>Review and approve manual attendance</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={24} color={theme.colors.gray400} />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.adminCard}
+                    onPress={() => navigation.navigate('Attendance Report')}
+                >
+                    <View style={[styles.adminCardIcon, { backgroundColor: '#f0fdf4' }]}>
+                        <Ionicons name="bar-chart" size={32} color={theme.colors.success} />
+                    </View>
+                    <View style={styles.adminCardContent}>
+                        <Text style={styles.adminCardTitle}>Attendance Report</Text>
+                        <Text style={styles.adminCardDesc}>View detailed attendance reports</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={24} color={theme.colors.gray400} />
                 </TouchableOpacity>
@@ -888,10 +1020,47 @@ const styles = StyleSheet.create({
         color: theme.colors.gray900,
         marginBottom: 4,
     },
-    adminCardDesc: {
-        fontSize: 12,
-        color: theme.colors.gray500,
+    adminCardDesc: { fontSize: 13, color: theme.colors.gray500, marginTop: 4 },
+    reportSection: {
+        marginBottom: 20
     },
+    card: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 15,
+        ...theme.shadows.small
+    },
+    dateRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10
+    },
+    dateButton: {
+        flex: 0.48,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: theme.colors.gray200,
+        borderRadius: 8,
+        padding: 10
+    },
+    dateText: { fontSize: 12, color: theme.colors.gray800 },
+    tableHeader: {
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.gray200,
+        paddingBottom: 8,
+        marginBottom: 8
+    },
+    tableHeadText: { fontSize: 12, fontWeight: 'bold', color: theme.colors.gray600 },
+    tableRow: {
+        flexDirection: 'row',
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.gray50,
+    },
+    tableCell: { fontSize: 12, color: theme.colors.gray800 }
 });
 
 export default AttendanceScreen;

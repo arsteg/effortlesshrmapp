@@ -30,6 +30,7 @@ import ReportsScreen from '../screens/reports/ReportsScreen';
 import LeaveApplicationScreen from '../screens/leaves/LeaveApplicationScreen';
 import AttendanceSettingsScreen from '../screens/attendance/AttendanceSettingsScreen';
 import ManualAttendanceScreen from '../screens/attendance/ManualAttendanceScreen';
+import AttendanceReportScreen from '../screens/attendance/AttendanceReportScreen';
 
 // Import all screens
 
@@ -318,6 +319,14 @@ const MainNavigator = () => {
                 options={{
                     drawerItemStyle: { display: 'none' },
                     title: 'Attendance Requests'
+                }}
+            />
+            <Drawer.Screen
+                name="Attendance Report"
+                component={AttendanceReportScreen}
+                options={{
+                    drawerItemStyle: { display: 'none' },
+                    title: 'Attendance Report'
                 }}
             />
         </Drawer.Navigator>
