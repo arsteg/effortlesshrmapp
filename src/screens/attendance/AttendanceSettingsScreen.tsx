@@ -18,14 +18,12 @@ import { attendanceService, OfficeData, AttendanceRuleData } from '../../service
 import { theme } from '../../theme';
 import { useLocation } from '../../hooks/useLocation';
 import { KeyboardAvoidingView, Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 
 interface Office extends OfficeData {
     _id: string;
 }
 
 const AttendanceSettingsScreen = () => {
-    const navigation = useNavigation<any>();
     const { getCurrentLocation } = useLocation();
     const [offices, setOffices] = useState<Office[]>([]);
     const [loading, setLoading] = useState(true);
@@ -134,7 +132,7 @@ const AttendanceSettingsScreen = () => {
             setLoading(true);
             const response: any = await attendanceService.getRulesByOffice(officeId);
             if (response.status?.toLowerCase() === 'success') {
-                setCurrentRules({ ...response.data.rules, officeId });
+                setCurrentRules(response.data.rules);
                 setRulesModalVisible(true);
             }
         } catch (error) {
@@ -145,16 +143,11 @@ const AttendanceSettingsScreen = () => {
     };
 
     const handleSaveRules = async () => {
-        if (!currentRules || !currentRules.officeId) return;
+        if (!currentRules) return;
 
         try {
             setActionLoading(true);
-            // Ensure officeId is included in the payload
-            const payload = {
-                ...currentRules,
-                officeId: currentRules.officeId
-            };
-            const response: any = await attendanceService.updateRules(payload);
+            const response: any = await attendanceService.updateRules(currentRules);
             if (response.status?.toLowerCase() === 'success') {
                 Alert.alert('Success', 'Rules updated successfully');
                 setRulesModalVisible(false);
@@ -171,7 +164,7 @@ const AttendanceSettingsScreen = () => {
             <View style={styles.officeInfo}>
                 <Text style={styles.officeName}>{item.name}</Text>
                 <Text style={styles.officeCoords}>
-                    {item?.latitude?.toFixed(6)}, {item?.longitude?.toFixed(6)}
+                    {item.location?.coordinates[0].toFixed(6)}, {item.location?.coordinates[1]?.toFixed(6)}
                 </Text>
                 <Text style={styles.officeDetails}>
                     Radius: {item.geofence_radius}m
@@ -206,17 +199,9 @@ const AttendanceSettingsScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('Attendance')}
-                        style={{ marginRight: 15 }}
-                    >
-                        <Ionicons name="arrow-back" size={24} color={theme.colors.gray900} />
-                    </TouchableOpacity>
-                    <View>
-                        <Text style={styles.title}>Office Management</Text>
-                        <Text style={styles.subtitle}>{offices.length} offices configured</Text>
-                    </View>
+                <View>
+                    <Text style={styles.title}>Office Management</Text>
+                    <Text style={styles.subtitle}>{offices.length} offices configured</Text>
                 </View>
                 <TouchableOpacity
                     style={styles.addButton}
