@@ -438,22 +438,37 @@ const AttendanceScreen = () => {
                         )}
                     </View>
 
-                    <View style={styles.secondaryActions}>
-                        <Button
-                            title="Manual Request"
+                    <Text style={styles.sectionTitle}>Requests</Text>
+                    <View style={styles.requestCard}>
+                        <TouchableOpacity
+                            style={styles.requestItem}
                             onPress={() => setManualModalVisible(true)}
-                            variant="outline"
-                            icon={<Ionicons name="document-text-outline" size={20} color={theme.colors.gray700} />}
-                            style={styles.actionButtonSecondary}
-                        />
+                        >
+                            <View style={styles.requestIconContainer}>
+                                <Ionicons name="document-text" size={24} color={theme.colors.primary} />
+                            </View>
+                            <View style={styles.requestTextContainer}>
+                                <Text style={styles.requestItemText}>New Manual Request</Text>
+                                <Text style={styles.requestItemSubtext}>Submit attendance correction</Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={20} color={theme.colors.gray400} />
+                        </TouchableOpacity>
 
-                        <Button
-                            title="View Requests"
+                        <View style={styles.divider} />
+
+                        <TouchableOpacity
+                            style={styles.requestItem}
                             onPress={() => navigation.navigate('Attendance Requests')}
-                            variant="outline"
-                            icon={<Ionicons name="list-outline" size={20} color={theme.colors.gray700} />}
-                            style={styles.actionButtonSecondary}
-                        />
+                        >
+                            <View style={[styles.requestIconContainer, { backgroundColor: '#F0FDF4' }]}>
+                                <Ionicons name="list" size={24} color={theme.colors.success} />
+                            </View>
+                            <View style={styles.requestTextContainer}>
+                                <Text style={styles.requestItemText}>View Request History</Text>
+                                <Text style={styles.requestItemSubtext}>Check status of approvals</Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={20} color={theme.colors.gray400} />
+                        </TouchableOpacity>
                     </View>
 
                     <Text style={styles.sectionTitle}>Recent Activity</Text>
@@ -710,267 +725,463 @@ const AttendanceScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: theme.colors.gray50,
+        backgroundColor: '#F8F9FA', // Lighter background for cleanliness
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#F8F9FA',
     },
     header: {
-        padding: 20,
+        paddingHorizontal: 20,
+        paddingTop: 10,
+        paddingBottom: 20,
     },
     statusCard: {
         backgroundColor: theme.colors.white,
-        padding: 20,
-        borderRadius: 16,
+        padding: 24,
+        borderRadius: 24, // Softer curves
         flexDirection: 'row',
         alignItems: 'center',
-        ...theme.shadows.medium,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+        elevation: 4,
         marginBottom: 24,
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.03)',
     },
     statusIndicator: {
-        width: 12,
-        height: 50,
-        borderRadius: 6,
+        width: 6,
+        height: 60,
+        borderRadius: 10,
         marginRight: 20,
     },
     statusLabel: {
-        fontSize: 14,
-        color: theme.colors.gray600,
-        marginBottom: 4,
+        fontSize: 13,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        color: theme.colors.gray500,
+        fontWeight: '600',
+        marginBottom: 6,
     },
     statusValue: {
-        fontSize: 20,
-        fontWeight: 'bold',
+        fontSize: 26, // Larger hero text
+        fontWeight: '800', // Stronger weight
         color: theme.colors.gray900,
+        letterSpacing: -0.5,
     },
     statusTime: {
-        fontSize: 12,
+        fontSize: 13,
         color: theme.colors.gray500,
-        marginTop: 4,
+        marginTop: 6,
+        fontWeight: '500',
     },
     sectionTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: theme.colors.gray800,
-        marginBottom: 12,
+        fontSize: 18,
+        fontWeight: '700',
+        color: theme.colors.gray900,
+        marginBottom: 16,
         marginTop: 8,
+        letterSpacing: -0.3,
     },
     dropdown: {
-        height: 55,
-        backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 12,
-        ...theme.shadows.small,
-        marginBottom: 12,
+        height: 56,
+        backgroundColor: theme.colors.white,
+        borderRadius: 16,
+        paddingHorizontal: 16,
+        borderWidth: 1,
+        borderColor: '#EAEAEA',
+        marginBottom: 16,
     },
     icon: {
-        marginRight: 8,
+        marginRight: 10,
     },
     placeholderStyle: {
-        fontSize: 16,
+        fontSize: 15,
         color: theme.colors.gray500,
+        fontWeight: '500',
     },
     selectedTextStyle: {
-        fontSize: 16,
+        fontSize: 15,
         color: theme.colors.gray900,
+        fontWeight: '600',
     },
     geofenceInfo: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 16,
-        backgroundColor: theme.colors.secondary,
-        padding: 10,
-        borderRadius: 8,
+        marginBottom: 24,
+        backgroundColor: 'rgba(52, 168, 83, 0.1)', // Subtle green tint
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        borderRadius: 12,
+        alignSelf: 'flex-start',
     },
     distanceText: {
         fontSize: 13,
-        color: theme.colors.primaryDark,
-        marginLeft: 6,
+        color: theme.colors.success,
+        marginLeft: 8,
+        fontWeight: '600',
     },
     bold: {
-        fontWeight: 'bold',
+        fontWeight: '800',
     },
     actionContainer: {
-        marginBottom: 24,
+        marginBottom: 32,
+        alignItems: 'center', // Center hero button
     },
     actionButtonMain: {
-        height: 52,
-        borderRadius: 12,
+        height: 64, // Taller button
+        borderRadius: 32, // Pill shape
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        ...theme.shadows.medium,
+        width: '100%',
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.2,
+        shadowRadius: 16,
+        elevation: 8,
     },
     button: {
-        height: 52,
-        borderRadius: 12,
+        height: 64, // Taller button
+        borderRadius: 32, // Pill shape
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        ...theme.shadows.medium,
+        width: '100%',
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.2,
+        shadowRadius: 16,
+        elevation: 8,
     },
     checkInButton: {
         backgroundColor: theme.colors.primary,
     },
     checkOutButton: {
         backgroundColor: theme.colors.error,
+        shadowColor: theme.colors.error,
     },
     disabledButton: {
         opacity: 0.6,
     },
     buttonText: {
         color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontSize: 18,
+        fontWeight: '700',
+        letterSpacing: 0.3,
     },
-    historyItem: {
+    requestCard: {
         backgroundColor: theme.colors.white,
-        padding: 16,
-        marginHorizontal: 20,
-        marginBottom: 12,
-        borderRadius: 12,
+        borderRadius: 24,
+        padding: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+        elevation: 3,
+        marginBottom: 32,
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.02)',
+    },
+    requestItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        ...theme.shadows.small,
+        padding: 16,
+        borderRadius: 16,
     },
-    historyIcon: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
+    requestIconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 16,
+        backgroundColor: '#EEF2FF',
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
+    },
+    requestTextContainer: {
+        flex: 1,
+    },
+    requestItemText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: theme.colors.gray900,
+        marginBottom: 2,
+    },
+    requestItemSubtext: {
+        fontSize: 13,
+        color: theme.colors.gray500,
+        fontWeight: '500',
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#F3F4F6',
+        marginLeft: 80, // Align with text
+        marginRight: 20,
+    },
+    historyItem: {
+        backgroundColor: theme.colors.white,
+        padding: 20,
+        marginHorizontal: 20,
+        marginBottom: 16,
+        borderRadius: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.02)',
+    },
+    historyIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 18,
     },
     historyInfo: {
         flex: 1,
     },
     historyType: {
-        fontSize: 15,
-        fontWeight: '600',
+        fontSize: 16,
+        fontWeight: '700',
         color: theme.colors.gray900,
+        marginBottom: 4,
     },
     historyTime: {
-        fontSize: 12,
+        fontSize: 13,
         color: theme.colors.gray500,
-        marginTop: 2,
+        fontWeight: '500',
     },
     historyStatus: {
         alignItems: 'flex-end',
+        justifyContent: 'center',
+        backgroundColor: '#F3F4F6',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 10,
     },
     statusBadge: {
         fontSize: 12,
-        fontWeight: 'bold',
+        fontWeight: '700',
     },
     listContent: {
-        paddingBottom: 40,
+        paddingBottom: 60,
     },
     emptyContainer: {
         padding: 40,
         alignItems: 'center',
     },
     emptyText: {
-        color: theme.colors.gray500,
-    },
-    secondaryActions: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 24,
-        paddingHorizontal: 0,
-    },
-    actionButtonSecondary: {
-        flex: 0.48,
-        height: 48,
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    secondaryButton: {
-        flex: 0.48,
-        height: 48,
-        borderRadius: 10,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        ...theme.shadows.small,
-    },
-    secondaryButtonText: {
-        marginLeft: 8,
-        fontWeight: 'bold',
-        fontSize: 14,
-        color: theme.colors.gray700,
+        color: theme.colors.gray400,
+        fontSize: 15,
+        fontWeight: '500',
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'rgba(0,0,0,0.6)', // Darker overlay
         justifyContent: 'center',
         padding: 20,
+        backdropFilter: 'blur(10px)', // If supported
     },
     modalContent: {
         backgroundColor: '#fff',
-        borderRadius: 16,
-        padding: 20,
-        maxHeight: '80%',
+        borderRadius: 24,
+        padding: 24,
+        maxHeight: '85%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 20 },
+        shadowOpacity: 0.2,
+        shadowRadius: 30,
+        elevation: 10,
     },
     modalTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 20,
+        fontSize: 20,
+        fontWeight: '800',
+        marginBottom: 24,
         textAlign: 'center',
+        color: theme.colors.gray900,
     },
     label: {
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: '700',
         color: theme.colors.gray700,
-        marginBottom: 8,
+        marginBottom: 10,
     },
     input: {
         borderWidth: 1,
-        borderColor: theme.colors.gray200,
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 16,
-        fontSize: 16,
+        borderColor: '#EAEAEA',
+        borderRadius: 14,
+        padding: 16,
+        marginBottom: 20,
+        fontSize: 15,
+        color: theme.colors.gray900,
+        backgroundColor: '#F9FAFB',
     },
     photoButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 15,
-        backgroundColor: theme.colors.secondary,
-        borderRadius: 8,
-        marginBottom: 20,
+        padding: 16,
+        backgroundColor: '#F0F9FF',
+        borderRadius: 14,
+        marginBottom: 24,
+        borderWidth: 1,
+        borderColor: '#BAE6FD',
     },
     photoButtonText: {
         marginLeft: 10,
-        color: theme.colors.primaryDark,
-        fontWeight: '600',
+        color: theme.colors.primary,
+        fontWeight: '700',
+        fontSize: 15,
     },
     modalFooter: {
         flexDirection: 'row',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
         marginTop: 10,
+        gap: 16,
     },
     cancelButton: {
-        padding: 12,
-        marginRight: 10,
+        flex: 1,
+        padding: 16,
+        backgroundColor: '#F3F4F6',
+        borderRadius: 14,
+        alignItems: 'center',
     },
     cancelButtonText: {
         color: theme.colors.gray600,
-        fontWeight: '600',
+        fontWeight: '700',
+        fontSize: 15,
     },
     saveButton: {
+        flex: 1,
         backgroundColor: theme.colors.primary,
-        padding: 12,
-        borderRadius: 8,
-        minWidth: 100,
+        padding: 16,
+        borderRadius: 14,
         alignItems: 'center',
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
     },
     saveButtonText: {
         color: '#fff',
-        fontWeight: 'bold',
+        fontWeight: '700',
+        fontSize: 15,
     },
+    adminHubTitle: {
+        fontSize: 28,
+        fontWeight: '800',
+        color: theme.colors.gray900,
+        marginBottom: 8,
+        letterSpacing: -0.5,
+    },
+    adminHubSubtitle: {
+        fontSize: 15,
+        color: theme.colors.gray500,
+        marginBottom: 32,
+        lineHeight: 22,
+    },
+    adminCard: {
+        backgroundColor: theme.colors.white,
+        borderRadius: 24,
+        padding: 24,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+        elevation: 4,
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.03)',
+    },
+    adminCardIcon: {
+        width: 64,
+        height: 64,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 20,
+    },
+    adminCardTitle: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: theme.colors.gray900,
+        marginBottom: 6,
+    },
+    adminCardDesc: {
+        fontSize: 14,
+        color: theme.colors.gray500,
+        lineHeight: 20,
+    },
+    reportSection: {
+        marginBottom: 30,
+    },
+    card: {
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+        elevation: 3,
+        borderWidth: 1,
+        borderColor: '#F3F4F6',
+    },
+    dateRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+        gap: 12,
+    },
+    dateButton: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#F9FAFB',
+        borderRadius: 12,
+        padding: 14,
+    },
+    dateText: { fontSize: 13, color: theme.colors.gray700, fontWeight: '600' },
+    secondaryButton: {
+        flex: 1,
+        height: 52,
+        borderRadius: 14,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: theme.colors.primary,
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+    },
+    tableHeader: {
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E7EB',
+        paddingBottom: 12,
+        marginBottom: 12,
+    },
+    tableHeadText: { fontSize: 12, fontWeight: '700', color: theme.colors.gray400, textTransform: 'uppercase', letterSpacing: 0.5 },
+    tableRow: {
+        flexDirection: 'row',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
+    },
+    tableCell: { fontSize: 13, color: theme.colors.gray700, fontWeight: '500' },
     settingsLink: {
         height: 50,
         borderRadius: 10,
@@ -978,7 +1189,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 24,
-        ...theme.shadows.small,
     },
     settingsLinkText: {
         marginLeft: 10,
@@ -986,88 +1196,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: theme.colors.primaryDark,
     },
-    adminHubTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: theme.colors.gray900,
-        marginBottom: 8,
-    },
-    adminHubSubtitle: {
-        fontSize: 14,
-        color: theme.colors.gray500,
-        marginBottom: 24,
-    },
     row: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    adminCard: {
-        backgroundColor: theme.colors.white,
-        borderRadius: 16,
-        padding: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 16,
-        ...theme.shadows.medium,
-    },
-    adminCardIcon: {
-        width: 60,
-        height: 60,
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 16,
-    },
     adminCardContent: {
-        flex: 1,
-    },
-    adminCardTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: theme.colors.gray900,
-        marginBottom: 4,
-    },
-    adminCardDesc: { fontSize: 13, color: theme.colors.gray500, marginTop: 4 },
-    reportSection: {
-        marginBottom: 20
-    },
-    card: {
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 15,
-        ...theme.shadows.small
-    },
-    dateRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 10
-    },
-    dateButton: {
-        flex: 0.48,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: theme.colors.gray200,
-        borderRadius: 8,
-        padding: 10
-    },
-    dateText: { fontSize: 12, color: theme.colors.gray800 },
-    tableHeader: {
-        flexDirection: 'row',
-        borderBottomWidth: 1,
-        borderBottomColor: theme.colors.gray200,
-        paddingBottom: 8,
-        marginBottom: 8
-    },
-    tableHeadText: { fontSize: 12, fontWeight: 'bold', color: theme.colors.gray600 },
-    tableRow: {
-        flexDirection: 'row',
-        paddingVertical: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.colors.gray50,
-    },
-    tableCell: { fontSize: 12, color: theme.colors.gray800 }
+        flex: 1
+    }
 });
 
 export default AttendanceScreen;

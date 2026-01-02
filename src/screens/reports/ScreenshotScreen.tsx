@@ -686,7 +686,7 @@ const styles = StyleSheet.create({
     },
     header: {
         backgroundColor: theme.colors.white,
-        padding: theme.spacing.md,
+        padding: theme.spacing.sm, // Reduced from md
         borderBottomWidth: 1,
         borderBottomColor: theme.colors.gray200,
     },
@@ -694,29 +694,29 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: theme.spacing.sm,
+        marginBottom: 4, // Reduced from theme.spacing.sm
     },
     title: {
-        fontSize: theme.typography.fontSize.xl,
+        fontSize: theme.typography.fontSize.lg, // Reduced from xl
         fontWeight: theme.typography.fontWeight.bold,
         color: theme.colors.textPrimary,
     },
     headerActions: {
         flexDirection: 'row',
-        gap: theme.spacing.sm,
+        gap: theme.spacing.xs, // Reduced from sm
     },
     iconButton: {
-        padding: theme.spacing.xs,
+        padding: 4, // Reduced from theme.spacing.xs
     },
     dateNavigation: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginTop: theme.spacing.sm,
-        marginBottom: theme.spacing.sm,
+        marginTop: 4, // Reduced from theme.spacing.sm
+        marginBottom: 4, // Reduced from theme.spacing.sm
     },
     navButton: {
-        padding: theme.spacing.xs,
+        padding: 4, // Reduced from theme.spacing.xs
     },
     navButtonDisabled: {
         opacity: 0.5,
@@ -724,36 +724,37 @@ const styles = StyleSheet.create({
     dateButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: theme.spacing.xs,
-        padding: theme.spacing.sm,
+        gap: 4, // Reduced from theme.spacing.xs
+        padding: 6, // Reduced from theme.spacing.sm
         borderWidth: 1,
         borderColor: theme.colors.gray300,
         borderRadius: theme.borderRadius.md,
         backgroundColor: theme.colors.white,
         flex: 1,
-        marginHorizontal: theme.spacing.sm,
+        marginHorizontal: 8, // Reduced from theme.spacing.sm
     },
     dateText: {
         fontSize: theme.typography.fontSize.sm,
         color: theme.colors.textPrimary,
     },
     totalsContainer: {
-        marginTop: theme.spacing.sm,
-        marginBottom: theme.spacing.sm,
+        marginTop: 4, // Reduced from theme.spacing.sm
+        marginBottom: 4, // Reduced from theme.spacing.sm
+        maxHeight: 70, // Added max height constraint
     },
     totalCard: {
-        marginRight: theme.spacing.sm,
-        padding: theme.spacing.md,
-        minWidth: 100,
+        marginRight: 8, // Reduced from theme.spacing.sm
+        padding: 8, // Reduced from theme.spacing.md
+        minWidth: 90, // Reduced from 100
         alignItems: 'center',
     },
     totalLabel: {
-        fontSize: theme.typography.fontSize.xs,
+        fontSize: 10, // Reduced from theme.typography.fontSize.xs
         color: theme.colors.textSecondary,
-        marginBottom: theme.spacing.xs,
+        marginBottom: 2, // Reduced from theme.spacing.xs
     },
     totalValue: {
-        fontSize: theme.typography.fontSize.lg,
+        fontSize: theme.typography.fontSize.md, // Reduced from lg
         fontWeight: theme.typography.fontWeight.bold,
         color: theme.colors.primary,
     },
@@ -761,20 +762,20 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: theme.spacing.sm,
+        marginTop: 4, // Reduced from theme.spacing.sm
     },
     statsText: {
-        fontSize: theme.typography.fontSize.sm,
+        fontSize: 11, // Reduced from theme.typography.fontSize.sm
         color: theme.colors.textSecondary,
     },
     listContent: {
-        padding: theme.spacing.sm,
+        padding: 4, // Reduced from theme.spacing.sm
     },
     gridItem: {
         flex: 1,
-        margin: theme.spacing.xs,
+        margin: 2, // Reduced from theme.spacing.xs
         aspectRatio: 1,
-        borderRadius: theme.borderRadius.md,
+        borderRadius: theme.borderRadius.sm, // Reduced from md
         overflow: 'hidden',
         backgroundColor: theme.colors.gray200,
     },
@@ -790,9 +791,9 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.gray100,
     },
     manualTimeText: {
-        fontSize: theme.typography.fontSize.xs,
+        fontSize: 10, // Reduced from xs
         color: theme.colors.textSecondary,
-        marginTop: theme.spacing.xs,
+        marginTop: 2,
     },
     gridItemOverlay: {
         position: 'absolute',

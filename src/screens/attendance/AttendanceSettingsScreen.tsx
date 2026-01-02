@@ -207,7 +207,7 @@ const AttendanceSettingsScreen = () => {
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Attendance' as never)} style={{ marginRight: 12 }}>
                         <Ionicons name="arrow-back" size={24} color={theme.colors.gray900} />
                     </TouchableOpacity>
                     <View>
