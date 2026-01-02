@@ -45,8 +45,8 @@ export const CustomDrawerContent = (props: any) => {
                         </Text>
                     </View>
                     <View style={styles.userInfo}>
-                        <Text style={styles.userName}>{user?.firstName} {user?.lastName}</Text>
-                        <Text style={styles.userEmail}>{user?.email}</Text>
+                        <Text style={styles.userName} numberOfLines={1}>{user?.firstName} {user?.lastName}</Text>
+                        <Text style={styles.userEmail} numberOfLines={1}>{user?.email}</Text>
                         <View style={styles.badgeContainer}>
                             <Text style={styles.portalBadge}>
                                 {isAdminPortal ? 'Admin Portal' : 'User Portal'}
@@ -65,7 +65,7 @@ export const CustomDrawerContent = (props: any) => {
             <View style={styles.bottomSection}>
                 {isUserAdmin && (
                     <Button
-                        title={`Switch to ${isAdminPortal ? 'User' : 'Admin'} View`}
+                        title={`Switch to ${isAdminPortal ? 'User' : 'Admin'}`}
                         onPress={handleSwitchPortal}
                         variant="ghost"
                         icon={<Ionicons name="swap-horizontal-outline" size={20} color={theme.colors.gray800} />}
@@ -89,23 +89,25 @@ export const CustomDrawerContent = (props: any) => {
 
 const styles = StyleSheet.create({
     userHeader: {
-        padding: theme.spacing.lg,
+        padding: theme.spacing.sm,         // Reduced to small padding
+        paddingTop: 30,                    // Minimized top padding (enough for status bar area)
+        paddingBottom: theme.spacing.sm,
         backgroundColor: theme.colors.primary,
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: theme.spacing.xs,
+        marginBottom: 0,
     },
     avatarContainer: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: 46,                         // Slightly smaller avatar
+        height: 46,
+        borderRadius: 23,
         backgroundColor: theme.colors.white,
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: theme.spacing.md,
+        marginRight: 8,                    // Reduced margin between avatar and text
     },
     avatarText: {
-        fontSize: 24,
+        fontSize: 18,
         fontWeight: 'bold',
         color: theme.colors.primary,
     },
@@ -114,24 +116,24 @@ const styles = StyleSheet.create({
     },
     userName: {
         color: theme.colors.white,
-        fontSize: theme.typography.fontSize.lg,
+        fontSize: theme.typography.fontSize.md, // Reduced from lg
         fontWeight: 'bold',
         marginBottom: 2,
     },
     userEmail: {
         color: theme.colors.white,
-        fontSize: theme.typography.fontSize.xs,
+        fontSize: 11,                      // Reduced from xs (12)
         opacity: 0.9,
-        marginBottom: 8,
+        marginBottom: 4,                   // Reduced from 8
     },
     badgeContainer: {
         alignSelf: 'flex-start',
     },
     portalBadge: {
         backgroundColor: 'rgba(255,255,255,0.25)',
-        paddingHorizontal: 10,
+        paddingHorizontal: 8,              // Reduced from 10
         paddingVertical: 2,
-        borderRadius: theme.borderRadius.full,
+        borderRadius: theme.borderRadius.round,
         color: theme.colors.white,
         fontSize: 10,
         fontWeight: 'bold',
@@ -140,10 +142,10 @@ const styles = StyleSheet.create({
     drawerItemsContainer: {
         flex: 1,
         backgroundColor: theme.colors.white,
-        paddingTop: 10,
+        paddingTop: 0,                     // Removed top padding (was 10)
     },
     bottomSection: {
-        padding: 20,
+        padding: theme.spacing.sm,         // Reduced form 20 (~theme.spacing.lg) to sm (10)
         backgroundColor: theme.colors.white,
         borderTopWidth: 1,
         borderTopColor: theme.colors.gray200,
@@ -151,5 +153,7 @@ const styles = StyleSheet.create({
     actionButton: {
         justifyContent: 'flex-start',
         paddingHorizontal: 0,
+        height: 40,                        // Explicit smaller height
+        minHeight: 0,                      // Override any minHeight defaults
     },
 });

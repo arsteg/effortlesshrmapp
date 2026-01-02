@@ -436,13 +436,14 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.backgroundSecondary,
     },
     scrollContent: {
-        padding: theme.spacing.md,
+        padding: theme.spacing.sm, // Reduced from md
+        paddingBottom: theme.spacing.xl,
     },
     greetingSection: {
-        marginBottom: theme.spacing.lg,
+        marginBottom: theme.spacing.md, // Reduced from lg
     },
     greetingText: {
-        fontSize: theme.typography.fontSize.xxl,
+        fontSize: theme.typography.fontSize.xl, // Reduced from xxl
         fontWeight: theme.typography.fontWeight.bold,
         color: theme.colors.textPrimary,
     },
@@ -452,56 +453,56 @@ const styles = StyleSheet.create({
     welcomeText: {
         fontSize: theme.typography.fontSize.md,
         color: theme.colors.textSecondary,
-        marginTop: theme.spacing.xs,
+        marginTop: 2, // Reduced from theme.spacing.xs
     },
     dateCard: {
-        marginBottom: theme.spacing.md,
+        marginBottom: theme.spacing.sm, // Reduced from md
     },
     dateLabel: {
-        fontSize: theme.typography.fontSize.sm,
+        fontSize: theme.typography.fontSize.xs, // Reduced from sm
         color: theme.colors.textSecondary,
-        marginBottom: theme.spacing.xs,
+        marginBottom: 4, // Reduced from theme.spacing.xs
     },
     dateButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: theme.spacing.md,
+        padding: theme.spacing.sm, // Reduced from md
         backgroundColor: theme.colors.background,
         borderRadius: theme.borderRadius.md,
     },
     dateText: {
-        fontSize: theme.typography.fontSize.md,
+        fontSize: theme.typography.fontSize.sm, // Reduced from md
         fontWeight: theme.typography.fontWeight.medium,
         color: theme.colors.textPrimary,
         marginLeft: theme.spacing.sm,
     },
     timeSpentCard: {
-        marginBottom: theme.spacing.md,
+        marginBottom: theme.spacing.sm, // Reduced from md
     },
     timeSpentHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: theme.spacing.xs,
+        marginBottom: 4, // Reduced from theme.spacing.xs
     },
     cardTitle: {
-        fontSize: theme.typography.fontSize.lg,
+        fontSize: theme.typography.fontSize.md, // Reduced from lg
         fontWeight: theme.typography.fontWeight.bold,
         color: theme.colors.textPrimary,
         marginBottom: 0,
     },
     radioGroup: {
         flexDirection: 'row',
-        backgroundColor: theme.colors.backgroundSecondary, // Softer background
-        borderRadius: theme.borderRadius.full, // Pill shape container
-        padding: 4,
-        marginBottom: theme.spacing.md,
+        backgroundColor: theme.colors.backgroundSecondary,
+        borderRadius: theme.borderRadius.round, // Pill shape container
+        padding: 3, // Reduced from 4
+        marginBottom: theme.spacing.sm, // Reduced from md
     },
     radioButton: {
         flex: 1,
-        paddingVertical: 8,
+        paddingVertical: 6, // Reduced from 8
         alignItems: 'center',
-        borderRadius: theme.borderRadius.full, // Pill shape buttons
+        borderRadius: theme.borderRadius.round,
     },
     radioButtonSelected: {
         backgroundColor: theme.colors.white,
@@ -510,12 +511,12 @@ const styles = StyleSheet.create({
             width: 0,
             height: 1,
         },
-        shadowOpacity: 0.20,
-        shadowRadius: 1.41,
-        elevation: 2,
+        shadowOpacity: 0.15, // Reduced opacity
+        shadowRadius: 1,
+        elevation: 1,
     },
     radioButtonText: {
-        fontSize: theme.typography.fontSize.sm,
+        fontSize: theme.typography.fontSize.xs, // Reduced from sm
         color: theme.colors.textSecondary,
         fontWeight: theme.typography.fontWeight.medium,
     },
@@ -525,128 +526,129 @@ const styles = StyleSheet.create({
     },
     heroContent: {
         alignItems: 'center',
-        marginVertical: theme.spacing.md,
+        marginVertical: theme.spacing.sm, // Reduced from md
     },
     heroValue: {
-        fontSize: 42,
+        fontSize: 32, // Reduced from 42
         fontWeight: 'bold',
         color: theme.colors.primary,
-        letterSpacing: -1,
-        marginBottom: theme.spacing.xs,
+        letterSpacing: -0.5,
+        marginBottom: 2, // Reduced from theme.spacing.xs
     },
     trendBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
+        paddingHorizontal: 8, // Reduced from 12
+        paddingVertical: 4, // Reduced from 6
+        borderRadius: 16, // Reduced radius
     },
     trendText: {
-        fontSize: theme.typography.fontSize.sm,
+        fontSize: 10, // Explicit small size
         fontWeight: 'bold',
     },
     comparisonFooter: {
         textAlign: 'center',
         color: theme.colors.textSecondary,
-        fontSize: theme.typography.fontSize.sm,
-        marginTop: theme.spacing.xs,
+        fontSize: 11, // Explicit small size
+        marginTop: 4, // Reduced spacing
     },
     tableCard: {
-        marginBottom: theme.spacing.md,
+        marginBottom: theme.spacing.sm, // Reduced from md
     },
     tableScrollView: {
-        maxHeight: 300,
+        maxHeight: 250, // Reduced height
     },
     projectSection: {
-        marginBottom: theme.spacing.md,
+        marginBottom: theme.spacing.sm, // Reduced from md
     },
     projectName: {
-        fontSize: theme.typography.fontSize.md,
+        fontSize: theme.typography.fontSize.sm, // Reduced from md
         fontWeight: theme.typography.fontWeight.bold,
         color: theme.colors.textPrimary,
-        marginBottom: theme.spacing.xs,
+        marginBottom: 4, // Reduced
         backgroundColor: theme.colors.gray100,
-        padding: theme.spacing.sm,
+        padding: 6, // Reduced from sm
         borderRadius: theme.borderRadius.sm,
     },
     taskRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingVertical: theme.spacing.sm,
-        paddingHorizontal: theme.spacing.md,
+        paddingVertical: 6, // Reduced from sm
+        paddingHorizontal: theme.spacing.sm, // Reduced from md
         borderBottomWidth: 1,
         borderBottomColor: theme.colors.gray200,
     },
     taskName: {
         flex: 1,
-        fontSize: theme.typography.fontSize.sm,
+        fontSize: theme.typography.fontSize.xs, // Reduced from sm
         color: theme.colors.textPrimary,
     },
     taskTime: {
-        fontSize: theme.typography.fontSize.sm,
+        fontSize: theme.typography.fontSize.xs, // Reduced from sm
         fontWeight: theme.typography.fontWeight.medium,
         color: theme.colors.primary,
     },
     chartsRow: {
         flexDirection: 'row',
         gap: theme.spacing.sm,
-        marginBottom: theme.spacing.md,
+        marginBottom: theme.spacing.sm, // Reduced from md
     },
     chartCard: {
         flex: 1,
         alignItems: 'center',
+        padding: 8, // Add distinct padding if Card doesn't handle it well for small sizes
     },
     chartLegend: {
         width: '100%',
-        marginTop: theme.spacing.sm,
+        marginTop: theme.spacing.xs,
     },
     legendItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: theme.spacing.xs,
+        marginVertical: 2, // Reduced from xs
     },
     legendDot: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        marginRight: theme.spacing.xs,
+        width: 8, // Reduced from 12
+        height: 8, // Reduced from 12
+        borderRadius: 4,
+        marginRight: 4, // Reduced from xs
     },
     legendText: {
         flex: 1,
-        fontSize: theme.typography.fontSize.sm,
+        fontSize: 10, // Explicit small size
         color: theme.colors.textPrimary,
     },
     legendValue: {
-        fontSize: theme.typography.fontSize.sm,
+        fontSize: 10, // Explicit small size
         fontWeight: theme.typography.fontWeight.bold,
         color: theme.colors.textPrimary,
     },
     progressCard: {
-        marginBottom: theme.spacing.md,
+        marginBottom: theme.spacing.sm, // Reduced from md
     },
     progressProjectSection: {
-        marginBottom: theme.spacing.md,
+        marginBottom: theme.spacing.sm, // Reduced from md
     },
     progressTaskRow: {
-        marginVertical: theme.spacing.sm,
+        marginVertical: 4, // Reduced from sm
     },
     progressTaskHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: theme.spacing.xs,
+        marginBottom: 2, // Reduced from xs
     },
     progressTaskName: {
         flex: 1,
-        fontSize: theme.typography.fontSize.sm,
+        fontSize: theme.typography.fontSize.xs, // Reduced from sm
         color: theme.colors.textPrimary,
     },
     progressTaskTime: {
-        fontSize: theme.typography.fontSize.sm,
+        fontSize: theme.typography.fontSize.xs, // Reduced from sm
         fontWeight: theme.typography.fontWeight.bold,
         color: theme.colors.primary,
     },
     progressBarContainer: {
-        height: 8,
+        height: 6, // Reduced from 8
         backgroundColor: theme.colors.gray200,
         borderRadius: theme.borderRadius.sm,
         overflow: 'hidden',
@@ -659,11 +661,11 @@ const styles = StyleSheet.create({
     emptyState: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: theme.spacing.xl,
+        paddingVertical: theme.spacing.lg, // Reduced from xl
     },
     emptyStateText: {
-        fontSize: theme.typography.fontSize.md,
+        fontSize: theme.typography.fontSize.sm, // Reduced from md
         color: theme.colors.textSecondary,
-        marginTop: theme.spacing.sm,
+        marginTop: theme.spacing.xs, // Reduced from sm
     },
 });
