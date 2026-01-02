@@ -18,6 +18,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../../store/hooks';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useLocation } from '../../hooks/useLocation';
@@ -56,6 +57,7 @@ interface AttendanceLog {
 }
 
 const AttendanceScreen = () => {
+    const { t } = useTranslation();
     const { location, loading: locationLoading, getCurrentLocation } = useLocation();
     const { takeSelfie } = useCamera();
 
@@ -119,12 +121,12 @@ const AttendanceScreen = () => {
             }
         } catch (error) {
             console.error('Error loading attendance data:', error);
-            Alert.alert('Error', 'Failed to load attendance data.');
+            Alert.alert(t('common.error'), t('attendance.load_error') || 'Failed to load attendance data.');
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, []);
+    }, [t, user]);
 
     useEffect(() => {
         loadData();
@@ -183,7 +185,7 @@ const AttendanceScreen = () => {
             }
         } catch (error) {
             console.error('Failed to fetch user report', error);
-            Alert.alert('Error', 'Failed to fetch report');
+            Alert.alert(t('common.error'), t('attendance.report_error') || 'Failed to fetch report');
         } finally {
             setReportLoading(false);
         }
@@ -191,7 +193,7 @@ const AttendanceScreen = () => {
 
     const handleCheckIn = async () => {
         if (!selectedOffice) {
-            Alert.alert('Office Required', 'Please select an office location.');
+            Alert.alert(t('attendance.office_required') || 'Office Required', t('attendance.select_office_desc') || 'Please select an office location.');
             return;
         }
 
@@ -215,8 +217,8 @@ const AttendanceScreen = () => {
 
             if (dist > allowedRadius) {
                 Alert.alert(
-                    'Outside Geofence',
-                    `You are ${Math.round(dist)}m away from ${selectedOffice.name}. The allowed radius is ${allowedRadius}m.`
+                    t('attendance.outside_geofence'),
+                    `${t('attendance.distance')}: ${Math.round(dist)}m. ${t('attendance.target')}: ${allowedRadius}m.`
                 );
                 setActionLoading(false);
                 return;
@@ -225,7 +227,7 @@ const AttendanceScreen = () => {
             // Selfie mandatory for check-in
             const img = await takeSelfie();
             if (!img) {
-                Alert.alert('Selfie Required', 'Verification depends on a selfie capture.');
+                Alert.alert(t('attendance.selfie_required'), t('attendance.verification_selfie'));
                 setActionLoading(false);
                 return;
             }
@@ -243,13 +245,13 @@ const AttendanceScreen = () => {
             });
 
             if (response.status?.toLowerCase() === 'success') {
-                Alert.alert('Success', 'Clocked in successfully.');
+                Alert.alert(t('common.success'), t('attendance.clock_in_success'));
                 loadData();
             } else {
-                Alert.alert('Failed', response.message || 'Check-in failed.');
+                Alert.alert(t('common.error'), response.message || t('attendance.clock_in_failed') || 'Check-in failed.');
             }
         } catch (error) {
-            Alert.alert('Error', 'An unexpected error occurred during check-in.');
+            Alert.alert(t('common.error'), t('common.unexpected_error') || 'An unexpected error occurred.');
         } finally {
             setActionLoading(false);
         }
@@ -275,13 +277,13 @@ const AttendanceScreen = () => {
             });
 
             if (response.status?.toLowerCase() === 'success') {
-                Alert.alert('Success', 'Clocked out successfully.');
+                Alert.alert(t('common.success'), t('attendance.clock_out_success'));
                 loadData();
             } else {
-                Alert.alert('Failed', response.message || 'Check-out failed.');
+                Alert.alert(t('common.error'), response.message || t('attendance.clock_out_failed') || 'Check-out failed.');
             }
         } catch (error) {
-            Alert.alert('Error', 'An unexpected error occurred during check-out.');
+            Alert.alert(t('common.error'), t('common.unexpected_error') || 'An unexpected error occurred.');
         } finally {
             setActionLoading(false);
         }
@@ -289,17 +291,17 @@ const AttendanceScreen = () => {
 
     const handleManualRequest = async () => {
         if (!manualForm.reason) {
-            Alert.alert('Error', 'Please provide a reason for the manual request.');
+            Alert.alert(t('common.error'), t('attendance.reason_required') || 'Please provide a reason.');
             return;
         }
 
         if (!manualForm.photoUrl) {
-            Alert.alert('Photo Required', 'Please attach a photo for verification.');
+            Alert.alert(t('attendance.photo_required') || 'Photo Required', t('attendance.photo_desc') || 'Please attach a photo.');
             return;
         }
 
         if (!manualForm.managerId) {
-            Alert.alert('Manager Required', 'Please select a manager to review your request.');
+            Alert.alert(t('attendance.manager_required') || 'Manager Required', t('attendance.select_manager') || 'Please select a manager.');
             return;
         }
 
@@ -315,7 +317,7 @@ const AttendanceScreen = () => {
                 managerId: manualForm.managerId
             });
             if (response.status?.toLowerCase() === 'success') {
-                Alert.alert('Success', 'Manual attendance request submitted.');
+                Alert.alert(t('common.success'), t('attendance.request_submitted'));
                 setManualModalVisible(false);
                 setManualForm({
                     date: new Date().toISOString().split('T')[0],
@@ -327,10 +329,10 @@ const AttendanceScreen = () => {
                 });
                 loadData();
             } else {
-                Alert.alert('Failed', response.message || 'Request failed.');
+                Alert.alert(t('common.error'), response.message || t('attendance.request_failed') || 'Request failed.');
             }
         } catch (error) {
-            Alert.alert('Error', 'An unexpected error occurred.');
+            Alert.alert(t('common.error'), t('common.unexpected_error') || 'An unexpected error occurred.');
         } finally {
             setActionLoading(false);
         }
@@ -347,7 +349,7 @@ const AttendanceScreen = () => {
             </View>
             <View style={styles.historyInfo}>
                 <Text style={styles.historyType}>
-                    {item.type === 'check-in' ? 'Clocked In' : 'Clocked Out'}
+                    {item.type === 'check-in' ? t('attendance.clocked_in') : t('attendance.clocked_out')}
                 </Text>
                 <Text style={styles.historyTime}>
                     {new Date(item.timestamp).toLocaleString()}
@@ -355,7 +357,7 @@ const AttendanceScreen = () => {
             </View>
             <View style={styles.historyStatus}>
                 <Text style={[styles.statusBadge, { color: item.anomaly ? theme.colors.error : theme.colors.success }]}>
-                    {item.anomaly ? 'Anomaly' : 'Verified'}
+                    {item.anomaly ? t('dashboard.status_anomaly') : t('dashboard.status_verified')}
                 </Text>
             </View>
         </View>
@@ -384,15 +386,15 @@ const AttendanceScreen = () => {
                     <Card style={styles.statusCard}>
                         <View style={[styles.statusIndicator, { backgroundColor: isClockedIn ? theme.colors.success : theme.colors.error }]} />
                         <View>
-                            <Text style={styles.statusLabel}>Current Status</Text>
-                            <Text style={styles.statusValue}>{isClockedIn ? 'Clocked In' : 'Clocked Out'}</Text>
+                            <Text style={styles.statusLabel}>{t('attendance.current_status')}</Text>
+                            <Text style={styles.statusValue}>{isClockedIn ? t('attendance.clocked_in') : t('attendance.clocked_out')}</Text>
                             {status && (
-                                <Text style={styles.statusTime}>Since {new Date(status.timestamp).toLocaleTimeString()}</Text>
+                                <Text style={styles.statusTime}>{t('attendance.since')} {new Date(status.timestamp).toLocaleTimeString()}</Text>
                             )}
                         </View>
                     </Card>
 
-                    <Text style={styles.sectionTitle}>Select Office</Text>
+                    <Text style={styles.sectionTitle}>{t('attendance.select_office')}</Text>
                     <Dropdown
                         style={styles.dropdown}
                         placeholderStyle={styles.placeholderStyle}
@@ -400,7 +402,7 @@ const AttendanceScreen = () => {
                         data={offices}
                         labelField="name"
                         valueField="_id"
-                        placeholder="Select Office"
+                        placeholder={t('attendance.select_office')}
                         value={selectedOffice?._id}
                         onChange={(item) => setSelectedOffice(item)}
                         renderLeftIcon={() => (
@@ -412,7 +414,7 @@ const AttendanceScreen = () => {
                         <View style={styles.geofenceInfo}>
                             <Ionicons name="location-outline" size={16} color={theme.colors.primary} />
                             <Text style={styles.distanceText}>
-                                Distance: <Text style={styles.bold}>{Math.round(distance)}m</Text> (Target: {selectedOffice.radius}m)
+                                {t('attendance.distance')}: <Text style={styles.bold}>{Math.round(distance)}m</Text> ({t('attendance.target')}: {selectedOffice.radius}m)
                             </Text>
                         </View>
                     )}
@@ -420,7 +422,7 @@ const AttendanceScreen = () => {
                     <View style={styles.actionContainer}>
                         {!isClockedIn ? (
                             <Button
-                                title="Clock In"
+                                title={t('attendance.clock_in')}
                                 onPress={handleCheckIn}
                                 icon={<Ionicons name="log-in-outline" size={20} color="#fff" />}
                                 loading={actionLoading}
@@ -428,7 +430,7 @@ const AttendanceScreen = () => {
                             />
                         ) : (
                             <Button
-                                title="Clock Out"
+                                title={t('attendance.clock_out')}
                                 onPress={handleCheckOut}
                                 variant="secondary"
                                 icon={<Ionicons name="log-out-outline" size={20} color={theme.colors.white} />}
@@ -438,7 +440,7 @@ const AttendanceScreen = () => {
                         )}
                     </View>
 
-                    <Text style={styles.sectionTitle}>Requests</Text>
+                    <Text style={styles.sectionTitle}>{t('attendance.requests')}</Text>
                     <View style={styles.requestCard}>
                         <TouchableOpacity
                             style={styles.requestItem}
@@ -448,8 +450,8 @@ const AttendanceScreen = () => {
                                 <Ionicons name="document-text" size={24} color={theme.colors.primary} />
                             </View>
                             <View style={styles.requestTextContainer}>
-                                <Text style={styles.requestItemText}>New Manual Request</Text>
-                                <Text style={styles.requestItemSubtext}>Submit attendance correction</Text>
+                                <Text style={styles.requestItemText}>{t('attendance.new_manual_request')}</Text>
+                                <Text style={styles.requestItemSubtext}>{t('attendance.submit_correction')}</Text>
                             </View>
                             <Ionicons name="chevron-forward" size={20} color={theme.colors.gray400} />
                         </TouchableOpacity>
@@ -464,19 +466,19 @@ const AttendanceScreen = () => {
                                 <Ionicons name="list" size={24} color={theme.colors.success} />
                             </View>
                             <View style={styles.requestTextContainer}>
-                                <Text style={styles.requestItemText}>View Request History</Text>
-                                <Text style={styles.requestItemSubtext}>Check status of approvals</Text>
+                                <Text style={styles.requestItemText}>{t('attendance.view_request_history')}</Text>
+                                <Text style={styles.requestItemSubtext}>{t('attendance.check_approval_status')}</Text>
                             </View>
                             <Ionicons name="chevron-forward" size={20} color={theme.colors.gray400} />
                         </TouchableOpacity>
                     </View>
 
-                    <Text style={styles.sectionTitle}>Recent Activity</Text>
+                    <Text style={styles.sectionTitle}>{t('attendance.recent_activity')}</Text>
 
                     {/* User Attendance Report Section */}
                     <View style={styles.reportSection}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                            <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>My Attendance Report</Text>
+                            <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>{t('attendance.my_attendance_report')}</Text>
                             <TouchableOpacity onPress={handleFetchUserReport}>
                                 <Ionicons name="refresh" size={20} color={theme.colors.primary} />
                             </TouchableOpacity>
@@ -487,14 +489,14 @@ const AttendanceScreen = () => {
                                     style={styles.dateButton}
                                     onPress={() => setShowReportFromPicker(true)}
                                 >
-                                    <Text style={styles.dateText}>From: {userReportFromDate.toLocaleDateString()}</Text>
+                                    <Text style={styles.dateText}>{t('attendance.from')}: {userReportFromDate.toLocaleDateString()}</Text>
                                     <Ionicons name="calendar-outline" size={16} color={theme.colors.primary} />
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={styles.dateButton}
                                     onPress={() => setShowReportToPicker(true)}
                                 >
-                                    <Text style={styles.dateText}>To: {userReportToDate.toLocaleDateString()}</Text>
+                                    <Text style={styles.dateText}>{t('attendance.to')}: {userReportToDate.toLocaleDateString()}</Text>
                                     <Ionicons name="calendar-outline" size={16} color={theme.colors.primary} />
                                 </TouchableOpacity>
                             </View>
@@ -526,7 +528,7 @@ const AttendanceScreen = () => {
                                 style={[styles.secondaryButton, { width: '100%', marginTop: 10, backgroundColor: theme.colors.primary }]}
                                 onPress={handleFetchUserReport}
                             >
-                                <Text style={[styles.secondaryButtonText, { color: '#fff' }]}>Get Report</Text>
+                                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>{t('attendance.get_report')}</Text>
                             </TouchableOpacity>
 
                             {reportLoading ? (
@@ -535,10 +537,10 @@ const AttendanceScreen = () => {
                                 userReportData.length > 0 && (
                                     <View style={{ marginTop: 15 }}>
                                         <View style={styles.tableHeader}>
-                                            <Text style={[styles.tableHeadText, { flex: 1 }]}>Date</Text>
-                                            <Text style={[styles.tableHeadText, { flex: 1 }]}>In</Text>
-                                            <Text style={[styles.tableHeadText, { flex: 1 }]}>Out</Text>
-                                            <Text style={[styles.tableHeadText, { flex: 1, textAlign: 'right' }]}>Total</Text>
+                                            <Text style={[styles.tableHeadText, { flex: 1 }]}>{t('attendance.date')}</Text>
+                                            <Text style={[styles.tableHeadText, { flex: 1 }]}>{t('attendance.in')}</Text>
+                                            <Text style={[styles.tableHeadText, { flex: 1 }]}>{t('attendance.out')}</Text>
+                                            <Text style={[styles.tableHeadText, { flex: 1, textAlign: 'right' }]}>{t('attendance.total')}</Text>
                                         </View>
                                         {userReportData.map((item, index) => (
                                             <View key={index} style={styles.tableRow}>
@@ -563,7 +565,7 @@ const AttendanceScreen = () => {
             }
             ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>No attendance records found.</Text>
+                    <Text style={styles.emptyText}>{t('attendance.no_records')}</Text>
                 </View>
             }
             contentContainerStyle={styles.listContent}
@@ -576,8 +578,8 @@ const AttendanceScreen = () => {
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
         >
             <View style={styles.header}>
-                <Text style={styles.adminHubTitle}>Attendance Management</Text>
-                <Text style={styles.adminHubSubtitle}>Configure offices and manage employee requests</Text>
+                <Text style={styles.adminHubTitle}>{t('attendance.title')}</Text>
+                <Text style={styles.adminHubSubtitle}>{t('attendance.subtitle')}</Text>
 
                 <TouchableOpacity
                     style={styles.adminCard}
@@ -587,8 +589,8 @@ const AttendanceScreen = () => {
                         <Ionicons name="business" size={32} color={theme.colors.primary} />
                     </View>
                     <View style={styles.adminCardContent}>
-                        <Text style={styles.adminCardTitle}>Office Management</Text>
-                        <Text style={styles.adminCardDesc}>Add/Edit offices and set geofence rules</Text>
+                        <Text style={styles.adminCardTitle}>{t('attendance.office_management')}</Text>
+                        <Text style={styles.adminCardDesc}>{t('attendance.office_management_desc')}</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={24} color={theme.colors.gray400} />
                 </TouchableOpacity>
@@ -601,8 +603,8 @@ const AttendanceScreen = () => {
                         <Ionicons name="document-text" size={32} color={theme.colors.error} />
                     </View>
                     <View style={styles.adminCardContent}>
-                        <Text style={styles.adminCardTitle}>Attendance Requests</Text>
-                        <Text style={styles.adminCardDesc}>Review and approve manual attendance</Text>
+                        <Text style={styles.adminCardTitle}>{t('attendance.attendance_requests')}</Text>
+                        <Text style={styles.adminCardDesc}>{t('attendance.attendance_requests_desc')}</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={24} color={theme.colors.gray400} />
                 </TouchableOpacity>
@@ -615,8 +617,8 @@ const AttendanceScreen = () => {
                         <Ionicons name="bar-chart" size={32} color={theme.colors.success} />
                     </View>
                     <View style={styles.adminCardContent}>
-                        <Text style={styles.adminCardTitle}>Attendance Report</Text>
-                        <Text style={styles.adminCardDesc}>View detailed attendance reports</Text>
+                        <Text style={styles.adminCardTitle}>{t('attendance.attendance_report')}</Text>
+                        <Text style={styles.adminCardDesc}>{t('attendance.attendance_report_desc')}</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={24} color={theme.colors.gray400} />
                 </TouchableOpacity>
@@ -632,9 +634,9 @@ const AttendanceScreen = () => {
             <Modal visible={manualModalVisible} animationType="slide" transparent>
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Manual Attendance Request</Text>
+                        <Text style={styles.modalTitle}>{t('attendance.manual_request_title')}</Text>
                         <ScrollView>
-                            <Text style={styles.label}>Date</Text>
+                            <Text style={styles.label}>{t('attendance.date')}</Text>
                             <TextInput
                                 style={styles.input}
                                 value={manualForm.date}
@@ -645,7 +647,7 @@ const AttendanceScreen = () => {
                             <View style={styles.row}>
                                 <View style={{ flex: 1, marginRight: 8 }}>
                                     <Input
-                                        label="Check-in Time"
+                                        label={t('attendance.check_in_time')}
                                         value={manualForm.checkInTime}
                                         placeholder="HH:MM"
                                         onChangeText={(text) => setManualForm({ ...manualForm, checkInTime: text })}
@@ -653,7 +655,7 @@ const AttendanceScreen = () => {
                                 </View>
                                 <View style={{ flex: 1, marginLeft: 8 }}>
                                     <Input
-                                        label="Check-out Time"
+                                        label={t('attendance.check_out_time')}
                                         value={manualForm.checkOutTime}
                                         placeholder="HH:MM"
                                         onChangeText={(text) => setManualForm({ ...manualForm, checkOutTime: text })}
@@ -662,16 +664,16 @@ const AttendanceScreen = () => {
                             </View>
 
                             <Input
-                                label="Reason"
+                                label={t('attendance.reason')}
                                 style={{ height: 100, textAlignVertical: 'top' }}
                                 multiline
                                 numberOfLines={4}
-                                placeholder="e.g., Forgot to clock in..."
+                                placeholder={t('attendance.reason_placeholder')}
                                 value={manualForm.reason}
                                 onChangeText={(text) => setManualForm({ ...manualForm, reason: text })}
                             />
 
-                            <Text style={styles.label}>Select Manager *</Text>
+                            <Text style={styles.label}>{t('attendance.select_manager')}</Text>
                             <Dropdown
                                 style={styles.dropdown}
                                 placeholderStyle={styles.placeholderStyle}
@@ -679,7 +681,7 @@ const AttendanceScreen = () => {
                                 data={managers}
                                 labelField="label"
                                 valueField="value"
-                                placeholder="Select a manager"
+                                placeholder={t('attendance.select_manager')}
                                 value={manualForm.managerId}
                                 onChange={(item) => setManualForm({ ...manualForm, managerId: item.value })}
                                 renderLeftIcon={() => (
@@ -696,24 +698,24 @@ const AttendanceScreen = () => {
                             >
                                 <Ionicons name="camera" size={24} color={theme.colors.primary} />
                                 <Text style={styles.photoButtonText}>
-                                    {manualForm.photoUrl ? 'Photo Attached' : 'Attach Photo'}
+                                    {manualForm.photoUrl ? t('attendance.photo_attached') : t('attendance.attach_photo')}
                                 </Text>
                             </TouchableOpacity>
                         </ScrollView>
 
                         <View style={styles.modalFooter}>
-                            <Button
-                                title="Cancel"
+                            <TouchableOpacity
+                                style={styles.cancelButton}
                                 onPress={() => setManualModalVisible(false)}
-                                variant="ghost"
-                                style={{ flex: 1, marginRight: 8 }}
-                            />
-                            <Button
-                                title="Submit"
+                            >
+                                <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.saveButton}
                                 onPress={handleManualRequest}
-                                loading={actionLoading}
-                                style={{ flex: 1, marginLeft: 8 }}
-                            />
+                            >
+                                <Text style={styles.saveButtonText}>{t('common.submit')}</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>
@@ -989,7 +991,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.6)', // Darker overlay
         justifyContent: 'center',
         padding: 20,
-        backdropFilter: 'blur(10px)', // If supported
     },
     modalContent: {
         backgroundColor: '#fff',

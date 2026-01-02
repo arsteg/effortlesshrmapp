@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { PieChart } from 'react-native-chart-kit';
+import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { fetchTeamMembers } from '../../store/slices/dashboardSlice';
 import { Card } from '../../components/common/Card';
@@ -33,6 +34,7 @@ import {
 const screenWidth = Dimensions.get('window').width;
 
 export const AdminDashboardScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const dispatch = useAppDispatch();
     const { user } = useAppSelector((state) => state.auth);
     const { teamMembers, paymentInfo } = useAppSelector((state) => state.dashboard);
@@ -198,7 +200,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
     };
 
     if (loading && !refreshing) {
-        return <Loading message="Loading dashboard..." />;
+        return <Loading message={t('common.loading')} />;
     }
 
     const timeData = getTimeSpentData();
@@ -215,9 +217,9 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                 {/* Greeting Section */}
                 <View style={styles.greetingSection}>
                     <Text style={styles.greetingText}>
-                        Hi, <Text style={styles.userName}>{user?.firstName} {user?.lastName}</Text>!
+                        {t('dashboard.welcome')}, <Text style={styles.userName}>{user?.firstName} {user?.lastName}</Text>!
                     </Text>
-                    <Text style={styles.welcomeText}>Welcome to Effortless HRM</Text>
+                    <Text style={styles.welcomeText}>Effortless HRM</Text>
                 </View>
 
                 {/* Member Selector & Date Picker */}
@@ -225,11 +227,11 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                 {teamMembers.length > 0 && (
                     <Card style={styles.memberCard}>
                         <Text style={styles.controlLabel}>
-                            Viewing Data For:{' '}
+                            {t('dashboard.viewing_data_for')}:{' '}
                             <Text style={styles.selectedMemberText}>
                                 {selectedMember?.firstName
                                     ? `${selectedMember.firstName} ${selectedMember.lastName || ''}`.trim()
-                                    : selectedMember?.FullName || 'Select a member'}
+                                    : selectedMember?.FullName || t('dashboard.select_member')}
                             </Text>
                         </Text>
 
@@ -249,8 +251,8 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                             maxHeight={300}
                             labelField="label"
                             valueField="value"
-                            placeholder={!isFocus ? 'Select member' : '...'}
-                            searchPlaceholder="Search..."
+                            placeholder={!isFocus ? t('dashboard.select_member') : '...'}
+                            searchPlaceholder={t('dashboard.search_placeholder')}
                             value={selectedMember?.id}
                             onFocus={() => setIsFocus(true)}
                             onBlur={() => setIsFocus(false)}
@@ -265,7 +267,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
 
                 {/* Date Picker */}
                 <Card style={styles.dateCard}>
-                    <Text style={styles.controlLabel}>Select Date</Text>
+                    <Text style={styles.controlLabel}>{t('attendance.date')}</Text>
                     <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
                         <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
                         <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
@@ -285,9 +287,9 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                 {/* Subscription Info - Placeholder */}
                 {paymentInfo && (
                     <Card style={styles.subscriptionCard}>
-                        <Text style={styles.cardTitle}>Subscription Info</Text>
+                        <Text style={styles.cardTitle}>{t('dashboard.subscription_info')}</Text>
                         <Text style={styles.placeholderText}>
-                            💳 Subscription details (Phase 3)
+                            💳 {t('dashboard.subscription_desc')} (Phase 3)
                         </Text>
                     </Card>
                 )}
@@ -295,7 +297,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                 {/* Time Spent Card */}
                 <Card style={styles.timeSpentCard}>
                     <View style={styles.timeSpentHeader}>
-                        <Text style={styles.cardTitle}>Time Spent</Text>
+                        <Text style={styles.cardTitle}>{t('dashboard.time_spent')}</Text>
                     </View>
                     <View style={styles.radioGroup}>
                         {['Daily', 'Weekly', 'Monthly'].map((period) => (
@@ -311,7 +313,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                                     styles.radioButtonText,
                                     selectedTimeSpent === period && styles.radioButtonTextSelected
                                 ]}>
-                                    {period}
+                                    {period === 'Daily' ? t('dashboard.daily') : period === 'Weekly' ? t('dashboard.weekly') : t('dashboard.monthly')}
                                 </Text>
                             </TouchableOpacity>
                         ))}
@@ -347,7 +349,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
 
                 {/* Project-wise Time Spent Table */}
                 <Card style={styles.tableCard}>
-                    <Text style={styles.cardTitle}>Project-wise Time Spent on All Tasks</Text>
+                    <Text style={styles.cardTitle}>{t('dashboard.project_all_tasks')}</Text>
                     {projectTasks.length > 0 ? (
                         <ScrollView style={styles.tableScrollView} nestedScrollEnabled>
                             {projectTasks.map((project, projectIndex) => (
@@ -365,7 +367,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                     ) : (
                         <View style={styles.emptyState}>
                             <Ionicons name="folder-open-outline" size={48} color={theme.colors.gray400} />
-                            <Text style={styles.emptyStateText}>No project data available</Text>
+                            <Text style={styles.emptyStateText}>{t('dashboard.no_data')}</Text>
                         </View>
                     )}
                 </Card>
@@ -374,7 +376,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                 <View style={styles.chartsRow}>
                     {/* Productivity Chart */}
                     <Card style={styles.chartCard}>
-                        <Text style={styles.cardTitle}>Productivity</Text>
+                        <Text style={styles.cardTitle}>{t('dashboard.productivity')}</Text>
                         {productivityData.length > 0 ? (
                             <>
                                 <PieChart
@@ -414,7 +416,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                         ) : (
                             <View style={styles.emptyState}>
                                 <Ionicons name="pie-chart-outline" size={48} color={theme.colors.gray400} />
-                                <Text style={styles.emptyStateText}>No data</Text>
+                                <Text style={styles.emptyStateText}>{t('dashboard.no_data')}</Text>
                             </View>
                         )}
                     </Card>

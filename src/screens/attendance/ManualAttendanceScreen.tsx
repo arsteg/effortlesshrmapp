@@ -12,6 +12,7 @@ import {
     RefreshControl,
     TextInput
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppSelector } from '../../store/hooks';
 import { theme } from '../../theme';
@@ -22,6 +23,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { useNavigation } from '@react-navigation/native';
 
 const ManualAttendanceScreen = () => {
+    const { t } = useTranslation();
     const navigation = useNavigation<any>();
     const isAdminPortal = useAppSelector((state) => state.auth.isAdminPortal);
     const [requests, setRequests] = useState<any[]>([]);
@@ -65,7 +67,7 @@ const ManualAttendanceScreen = () => {
                 setRequests(response.data.requests || []);
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to load manual attendance requests');
+            Alert.alert(t('common.error'), t('attendance.failed_load_requests'));
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -86,22 +88,22 @@ const ManualAttendanceScreen = () => {
         try {
             const response: any = await attendanceService.approveManualAttendance({ requestId, status });
             if (response.status?.toLowerCase() === 'success') {
-                Alert.alert('Success', `Request ${status} successfully`);
+                Alert.alert(t('common.success'), t('attendance.request_updated'));
                 loadRequests();
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to update request');
+            Alert.alert(t('common.error'), t('attendance.failed_update_request') || 'Failed to update request');
         }
     };
 
     const confirmAction = (requestId: string, status: 'approved' | 'rejected') => {
         Alert.alert(
-            `Confirm ${status}`,
-            `Are you sure you want to ${status} this request?`,
+            status === 'approved' ? t('attendance.confirm_approve') : t('attendance.confirm_reject'),
+            status === 'approved' ? t('attendance.approve_confirm_msg') : t('attendance.reject_confirm_msg'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('common.cancel'), style: 'cancel' },
                 {
-                    text: status === 'approved' ? 'Approve' : 'Reject',
+                    text: status === 'approved' ? t('attendance.approved') : t('attendance.rejected'),
                     style: status === 'rejected' ? 'destructive' : 'default',
                     onPress: () => handleAction(requestId, status)
                 }
@@ -126,14 +128,14 @@ const ManualAttendanceScreen = () => {
                         <Text style={[styles.statusText, {
                             color: item.status === 'approved' ? 'green' : item.status === 'rejected' ? 'red' : 'orange'
                         }]}>
-                            {item.status}
+                            {item.status === 'approved' ? t('attendance.approved') : item.status === 'rejected' ? t('attendance.rejected') : t('attendance.pending')}
                         </Text>
                     </View>
                 </View>
 
-                <Text style={styles.reasonText}>Reason: {item.reason}</Text>
+                <Text style={styles.reasonText}>{t('attendance.reason')}: {item.reason}</Text>
 
-                <Text style={styles.reasonText}>Reason: {item.reason}</Text>
+
 
                 {item.photoUrl && (
                     <Image source={{ uri: item.photoUrl }} style={styles.requestImage} resizeMode="cover" />
@@ -145,13 +147,13 @@ const ManualAttendanceScreen = () => {
                             style={[styles.btn, styles.rejectBtn]}
                             onPress={() => confirmAction(item._id, 'rejected')}
                         >
-                            <Text style={styles.rejectText}>Reject</Text>
+                            <Text style={styles.rejectText}>{t('attendance.rejected')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.btn, styles.approveBtn]}
                             onPress={() => confirmAction(item._id, 'approved')}
                         >
-                            <Text style={styles.approveText}>Approve</Text>
+                            <Text style={styles.approveText}>{t('attendance.approved')}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -168,7 +170,7 @@ const ManualAttendanceScreen = () => {
                 >
                     <Ionicons name="arrow-back" size={24} color={theme.colors.gray900} />
                 </TouchableOpacity>
-                <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.gray900 }}>Attendance Requests</Text>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.gray900 }}>{t('attendance.attendance_requests')}</Text>
             </View>
 
             <View style={styles.filterRow}>
@@ -176,13 +178,13 @@ const ManualAttendanceScreen = () => {
                     style={[styles.filterBtn, filter === 'pending' && styles.activeFilter]}
                     onPress={() => setFilter('pending')}
                 >
-                    <Text style={[styles.filterText, filter === 'pending' && styles.activeFilterText]}>Pending</Text>
+                    <Text style={[styles.filterText, filter === 'pending' && styles.activeFilterText]}>{t('attendance.pending')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.filterBtn, filter === 'all' && styles.activeFilter]}
                     onPress={() => setFilter('all')}
                 >
-                    <Text style={[styles.filterText, filter === 'all' && styles.activeFilterText]}>All Requests</Text>
+                    <Text style={[styles.filterText, filter === 'all' && styles.activeFilterText]}>{t('attendance.all_requests')}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -190,7 +192,7 @@ const ManualAttendanceScreen = () => {
                 <View style={styles.adminFilterBox}>
                     <View style={styles.row}>
                         <View style={{ flex: 1, marginRight: 8 }}>
-                            <Text style={styles.filterLabel}>From Date</Text>
+                            <Text style={styles.filterLabel}>{t('attendance.from')}</Text>
                             <TextInput
                                 style={styles.filterInput}
                                 value={fromDate}
@@ -200,7 +202,7 @@ const ManualAttendanceScreen = () => {
                             />
                         </View>
                         <View style={{ flex: 1, marginLeft: 8 }}>
-                            <Text style={styles.filterLabel}>To Date</Text>
+                            <Text style={styles.filterLabel}>{t('attendance.to')}</Text>
                             <TextInput
                                 style={styles.filterInput}
                                 value={toDate}
@@ -211,7 +213,7 @@ const ManualAttendanceScreen = () => {
                         </View>
                     </View>
 
-                    <Text style={[styles.filterLabel, { marginTop: 12 }]}>Subordinate</Text>
+                    <Text style={[styles.filterLabel, { marginTop: 12 }]}>{t('attendance.subordinate')}</Text>
                     <Dropdown
                         style={styles.dropdown}
                         placeholderStyle={styles.placeholderStyle}
@@ -219,7 +221,7 @@ const ManualAttendanceScreen = () => {
                         data={subordinates}
                         labelField="firstName"
                         valueField="_id"
-                        placeholder="All Subordinates"
+                        placeholder={t('attendance.all_subordinates')}
                         value={selectedUser}
                         onChange={(item) => setSelectedUser(item._id)}
                         renderLeftIcon={() => (
@@ -239,7 +241,7 @@ const ManualAttendanceScreen = () => {
                                     setSelectedUser(null);
                                 }}
                             >
-                                <Text style={styles.clearFiltersText}>Clear Filters</Text>
+                                <Text style={styles.clearFiltersText}>{t('attendance.clear_filters')}</Text>
                             </TouchableOpacity>
                         )}
                 </View>
@@ -259,7 +261,7 @@ const ManualAttendanceScreen = () => {
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
                             <Ionicons name="document-text-outline" size={48} color={theme.colors.gray300} />
-                            <Text style={styles.emptyText}>No requests found.</Text>
+                            <Text style={styles.emptyText}>{t('attendance.no_records')}</Text>
                         </View>
                     }
                 />

@@ -12,6 +12,7 @@ import {
     Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { Dropdown } from 'react-native-element-dropdown';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -19,6 +20,7 @@ import { attendanceService } from '../../services/attendanceService';
 import { theme } from '../../theme';
 
 const AttendanceReportScreen = () => {
+    const { t } = useTranslation();
     const navigation = useNavigation<any>();
     const [loading, setLoading] = useState(false);
     const [reportData, setReportData] = useState<any[]>([]);
@@ -52,7 +54,7 @@ const AttendanceReportScreen = () => {
 
     const fetchReport = async () => {
         if (!selectedOffice) {
-            Alert.alert('Error', 'Please select an office');
+            Alert.alert(t('common.error'), t('attendance.please_select_office'));
             return;
         }
 
@@ -71,7 +73,7 @@ const AttendanceReportScreen = () => {
             }
         } catch (error) {
             console.error('Failed to fetch report', error);
-            Alert.alert('Error', 'Failed to generate report');
+            Alert.alert(t('common.error'), t('attendance.failed_generate_report'));
         } finally {
             setLoading(false);
         }
@@ -96,11 +98,11 @@ const AttendanceReportScreen = () => {
                 <Text style={styles.dateText}>{item.date}</Text>
             </View>
             <View style={styles.cellTime}>
-                <Text style={styles.timeLabel}>In</Text>
+                <Text style={styles.timeLabel}>{t('attendance.in')}</Text>
                 <Text style={styles.timeValue}>{formatTime(item.inTime)}</Text>
             </View>
             <View style={styles.cellTime}>
-                <Text style={styles.timeLabel}>Out</Text>
+                <Text style={styles.timeLabel}>{t('attendance.out')}</Text>
                 <Text style={styles.timeValue}>{formatTime(item.outTime)}</Text>
             </View>
             <View style={styles.cellTotal}>
@@ -115,14 +117,14 @@ const AttendanceReportScreen = () => {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={theme.colors.gray900} />
                 </TouchableOpacity>
-                <Text style={styles.title}>Attendance Report</Text>
+                <Text style={styles.title}>{t('attendance.attendance_report')}</Text>
                 <TouchableOpacity onPress={fetchReport} style={styles.refreshButton}>
                     <Ionicons name="refresh" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
             </View>
 
             <View style={styles.filterContainer}>
-                <Text style={styles.label}>Select Office</Text>
+                <Text style={styles.label}>{t('attendance.select_office')}</Text>
                 <Dropdown
                     style={styles.dropdown}
                     placeholderStyle={styles.placeholderStyle}
@@ -130,14 +132,14 @@ const AttendanceReportScreen = () => {
                     data={offices}
                     labelField="name"
                     valueField="_id"
-                    placeholder="Select Office"
+                    placeholder={t('attendance.select_office')}
                     value={selectedOffice}
                     onChange={(item) => setSelectedOffice(item._id)}
                 />
 
                 <View style={styles.dateRow}>
                     <View style={styles.dateInput}>
-                        <Text style={styles.label}>From Date</Text>
+                        <Text style={styles.label}>{t('attendance.from')}</Text>
                         <TouchableOpacity
                             style={styles.dateButton}
                             onPress={() => setShowFromPicker(true)}
@@ -147,7 +149,7 @@ const AttendanceReportScreen = () => {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.dateInput}>
-                        <Text style={styles.label}>To Date</Text>
+                        <Text style={styles.label}>{t('attendance.to')}</Text>
                         <TouchableOpacity
                             style={styles.dateButton}
                             onPress={() => setShowToPicker(true)}
@@ -182,15 +184,15 @@ const AttendanceReportScreen = () => {
                 )}
 
                 <TouchableOpacity style={styles.searchButton} onPress={fetchReport}>
-                    <Text style={styles.searchButtonText}>Generate Report</Text>
+                    <Text style={styles.searchButtonText}>{t('attendance.generate_report')}</Text>
                 </TouchableOpacity>
             </View>
 
             <View style={styles.listHeader}>
-                <Text style={[styles.headerCell, { flex: 2 }]}>Employee</Text>
-                <Text style={[styles.headerCell, { flex: 1, textAlign: 'center' }]}>In</Text>
-                <Text style={[styles.headerCell, { flex: 1, textAlign: 'center' }]}>Out</Text>
-                <Text style={[styles.headerCell, { flex: 1, textAlign: 'right' }]}>Total</Text>
+                <Text style={[styles.headerCell, { flex: 2 }]}>{t('attendance.employee')}</Text>
+                <Text style={[styles.headerCell, { flex: 1, textAlign: 'center' }]}>{t('attendance.in')}</Text>
+                <Text style={[styles.headerCell, { flex: 1, textAlign: 'center' }]}>{t('attendance.out')}</Text>
+                <Text style={[styles.headerCell, { flex: 1, textAlign: 'right' }]}>{t('attendance.total')}</Text>
             </View>
 
             {loading ? (
@@ -205,7 +207,7 @@ const AttendanceReportScreen = () => {
                     contentContainerStyle={styles.listContent}
                     ListEmptyComponent={
                         <View style={styles.centerContainer}>
-                            <Text style={styles.emptyText}>No records found for the selected criteria.</Text>
+                            <Text style={styles.emptyText}>{t('attendance.no_records_criteria')}</Text>
                         </View>
                     }
                 />

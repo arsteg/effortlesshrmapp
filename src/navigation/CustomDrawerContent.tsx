@@ -7,9 +7,14 @@ import { togglePortalMode, logout, switchPortalMode } from '../store/slices/auth
 import { theme } from '../theme';
 import { Button } from '../components/common/Button';
 
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/common/LanguageSelector';
+
 export const CustomDrawerContent = (props: any) => {
+    const { t, i18n } = useTranslation();
     const dispatch = useAppDispatch();
     const { user, isAdminPortal } = useAppSelector((state) => state.auth);
+    const [langSelectorVisible, setLangSelectorVisible] = React.useState(false);
 
     const handleLogout = () => {
         dispatch(logout());
@@ -49,7 +54,7 @@ export const CustomDrawerContent = (props: any) => {
                         <Text style={styles.userEmail} numberOfLines={1}>{user?.email}</Text>
                         <View style={styles.badgeContainer}>
                             <Text style={styles.portalBadge}>
-                                {isAdminPortal ? 'Admin Portal' : 'User Portal'}
+                                {isAdminPortal ? t('navigation.admin_portal') : t('navigation.user_portal')}
                             </Text>
                         </View>
                     </View>
@@ -63,9 +68,18 @@ export const CustomDrawerContent = (props: any) => {
 
             {/* Bottom Actions Area */}
             <View style={styles.bottomSection}>
+                <Button
+                    title={i18n.language === 'hi' ? 'हिन्दी (Hindi)' : 'English'}
+                    onPress={() => setLangSelectorVisible(true)}
+                    variant="ghost"
+                    icon={<Ionicons name="language-outline" size={20} color={theme.colors.primary} />}
+                    style={styles.actionButton}
+                    textStyle={{ color: theme.colors.primary }}
+                />
+
                 {isUserAdmin && (
                     <Button
-                        title={`Switch to ${isAdminPortal ? 'User' : 'Admin'}`}
+                        title={isAdminPortal ? t('navigation.switch_to_user') : t('navigation.switch_to_admin')}
                         onPress={handleSwitchPortal}
                         variant="ghost"
                         icon={<Ionicons name="swap-horizontal-outline" size={20} color={theme.colors.gray800} />}
@@ -75,7 +89,7 @@ export const CustomDrawerContent = (props: any) => {
                 )}
 
                 <Button
-                    title="Sign Out"
+                    title={t('navigation.logout')}
                     onPress={handleLogout}
                     variant="ghost"
                     icon={<Ionicons name="log-out-outline" size={20} color={theme.colors.error} />}
@@ -83,6 +97,11 @@ export const CustomDrawerContent = (props: any) => {
                     textStyle={{ color: theme.colors.error }}
                 />
             </View>
+
+            <LanguageSelector
+                visible={langSelectorVisible}
+                onClose={() => setLangSelectorVisible(false)}
+            />
         </View>
     );
 };

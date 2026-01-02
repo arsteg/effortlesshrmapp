@@ -8,6 +8,7 @@ import {
     TextStyle,
     Animated,
     View,
+    StyleProp,
 } from 'react-native';
 import { theme } from '../../theme';
 
@@ -17,8 +18,8 @@ interface ButtonProps {
     variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
     loading?: boolean;
     disabled?: boolean;
-    style?: ViewStyle;
-    textStyle?: TextStyle;
+    style?: StyleProp<ViewStyle>;
+    textStyle?: StyleProp<TextStyle>;
     icon?: React.ReactNode;
 }
 

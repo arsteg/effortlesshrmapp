@@ -1,6 +1,7 @@
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { CustomDrawerContent } from './CustomDrawerContent';
 import { useAppSelector } from '../store/hooks';
 import { theme } from '../theme';
@@ -37,6 +38,7 @@ import AttendanceReportScreen from '../screens/attendance/AttendanceReportScreen
 const Drawer = createDrawerNavigator();
 
 const MainNavigator = () => {
+    const { t } = useTranslation();
     const isAdminPortal = useAppSelector((state) => state.auth.isAdminPortal);
 
     // Select dashboard component based on role
@@ -57,6 +59,7 @@ const MainNavigator = () => {
                 name="Dashboard"
                 component={DashboardComponent}
                 options={{
+                    title: t('navigation.dashboard'),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="grid-outline" size={size} color={color} />
                     ),
@@ -67,6 +70,7 @@ const MainNavigator = () => {
                 name="Screenshots"
                 component={ScreenshotScreen}
                 options={{
+                    title: t('navigation.screenshots'),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="camera-outline" size={size} color={color} />
                     ),
@@ -81,6 +85,7 @@ const MainNavigator = () => {
                         name="Tasks"
                         component={TaskScreen}
                         options={{
+                            title: t('navigation.tasks'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="checkbox-outline" size={size} color={color} />
                             ),
@@ -90,6 +95,7 @@ const MainNavigator = () => {
                         name="Reports"
                         component={ReportsScreen}
                         options={{
+                            title: t('navigation.reports'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="bar-chart-outline" size={size} color={color} />
                             ),
@@ -99,6 +105,7 @@ const MainNavigator = () => {
                         name="Leaves"
                         component={LeaveApplicationScreen}
                         options={{
+                            title: t('navigation.leaves'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="calendar-outline" size={size} color={color} />
                             ),
@@ -108,6 +115,7 @@ const MainNavigator = () => {
                         name="Payslips"
                         component={PayslipScreen}
                         options={{
+                            title: t('navigation.payslips') || 'Payslips',
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="document-text-outline" size={size} color={color} />
                             ),
@@ -117,6 +125,7 @@ const MainNavigator = () => {
                         name="Attendance"
                         component={AttendanceScreen}
                         options={{
+                            title: t('navigation.attendance'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="time-outline" size={size} color={color} />
                             ),
@@ -126,6 +135,7 @@ const MainNavigator = () => {
                         name="Manual Time"
                         component={ManualTimeScreen}
                         options={{
+                            title: t('navigation.manual_time'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="watch-outline" size={size} color={color} />
                             ),
@@ -141,6 +151,7 @@ const MainNavigator = () => {
                         name="Manage Employees"
                         component={EmployeesScreen}
                         options={{
+                            title: t('navigation.manage_employees'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="people-outline" size={size} color={color} />
                             ),
@@ -153,13 +164,14 @@ const MainNavigator = () => {
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="list-outline" size={size} color={color} />
                             ),
-                            title: 'Tasks',
+                            title: t('navigation.tasks'),
                         }}
                     />
                     <Drawer.Screen
                         name="Team Members"
                         component={TeamMembersScreen}
                         options={{
+                            title: t('navigation.team_members'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="person-add-outline" size={size} color={color} />
                             ),
@@ -169,6 +181,7 @@ const MainNavigator = () => {
                         name="Leave Application"
                         component={LeaveApplicationScreen}
                         options={{
+                            title: t('navigation.leave_application'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="document-text-outline" size={size} color={color} />
                             ),
@@ -181,7 +194,7 @@ const MainNavigator = () => {
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="bar-chart-outline" size={size} color={color} />
                             ),
-                            title: 'Reports',
+                            title: t('navigation.reports'),
                         }}
                     />
                     <Drawer.Screen
@@ -191,13 +204,14 @@ const MainNavigator = () => {
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="pulse-outline" size={size} color={color} />
                             ),
-                            title: 'RealTime',
+                            title: t('navigation.real_time'),
                         }}
                     />
                     <Drawer.Screen
                         name="Attendance"
                         component={AttendanceScreen}
                         options={{
+                            title: t('navigation.attendance'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="time-outline" size={size} color={color} />
                             ),
@@ -207,6 +221,7 @@ const MainNavigator = () => {
                         name="Manual Time"
                         component={ManualTimeScreen}
                         options={{
+                            title: t('navigation.manual_time'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="watch-outline" size={size} color={color} />
                             ),
@@ -216,6 +231,7 @@ const MainNavigator = () => {
                         name="Payslips"
                         component={PayslipScreen}
                         options={{
+                            title: t('navigation.payslips'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="document-text-outline" size={size} color={color} />
                             ),
@@ -225,6 +241,7 @@ const MainNavigator = () => {
                         name="Approvals"
                         component={ApprovalScreen}
                         options={{
+                            title: t('navigation.approvals'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="checkmark-done-outline" size={size} color={color} />
                             ),
@@ -238,6 +255,7 @@ const MainNavigator = () => {
                 name="Settings"
                 component={SettingsScreen}
                 options={{
+                    title: t('navigation.settings'),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="settings-outline" size={size} color={color} />
                     ),
@@ -247,6 +265,7 @@ const MainNavigator = () => {
                 name="Help"
                 component={HelpScreen}
                 options={{
+                    title: t('navigation.help'),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="help-circle-outline" size={size} color={color} />
                     ),
@@ -258,6 +277,7 @@ const MainNavigator = () => {
                 name="Profile"
                 component={ProfileScreen}
                 options={{
+                    title: t('navigation.profile'),
                     drawerItemStyle: { display: 'none' },
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="person-outline" size={size} color={color} />
@@ -272,7 +292,7 @@ const MainNavigator = () => {
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="lock-closed-outline" size={size} color={color} />
                     ),
-                    title: 'Change Password',
+                    title: t('profile.change_password') || 'Change Password',
                 }}
             />
             <Drawer.Screen
@@ -280,14 +300,15 @@ const MainNavigator = () => {
                 component={LiveScreen}
                 options={{
                     drawerItemStyle: { display: 'none' },
-                    title: 'Live Monitoring'
+                    title: t('navigation.live_monitoring')
                 }}
             />
             <Drawer.Screen
                 name="ApplyLeave"
                 component={ApplyLeaveScreen}
                 options={{
-                    drawerLabel: 'Apply Leave',
+                    drawerLabel: t('navigation.leaves'),
+                    title: t('navigation.leaves'),
                     drawerItemStyle: { display: 'none' },
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="add-circle-outline" size={size} color={color} />
@@ -298,7 +319,8 @@ const MainNavigator = () => {
                 name="AddExpense"
                 component={AddExpenseScreen}
                 options={{
-                    drawerLabel: 'Add Expense',
+                    drawerLabel: t('navigation.expenses') || 'Expenses',
+                    title: t('navigation.expenses') || 'Expenses',
                     drawerItemStyle: { display: 'none' },
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="add-circle-outline" size={size} color={color} />
@@ -310,7 +332,7 @@ const MainNavigator = () => {
                 component={AttendanceSettingsScreen}
                 options={{
                     drawerItemStyle: { display: 'none' },
-                    title: 'Office Management',
+                    title: t('attendance.office_management'),
                     headerShown: false
                 }}
             />
@@ -319,7 +341,7 @@ const MainNavigator = () => {
                 component={ManualAttendanceScreen}
                 options={{
                     drawerItemStyle: { display: 'none' },
-                    title: 'Attendance Requests'
+                    title: t('attendance.attendance_requests')
                 }}
             />
             <Drawer.Screen
@@ -327,7 +349,7 @@ const MainNavigator = () => {
                 component={AttendanceReportScreen}
                 options={{
                     drawerItemStyle: { display: 'none' },
-                    title: 'Attendance Report',
+                    title: t('attendance.attendance_report'),
                     headerShown: false
                 }}
             />

@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { PieChart } from 'react-native-chart-kit';
+import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../../store/hooks';
 import { Card } from '../../components/common/Card';
 import { Loading } from '../../components/common/Loading';
@@ -29,6 +30,7 @@ import {
 const screenWidth = Dimensions.get('window').width;
 
 export const UserDashboardScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const { user } = useAppSelector((state) => state.auth);
 
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -184,14 +186,14 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                 {/* Greeting Section */}
                 <View style={styles.greetingSection}>
                     <Text style={styles.greetingText}>
-                        Hi, <Text style={styles.userName}>{user?.firstName} {user?.lastName}</Text>!
+                        {t('dashboard.welcome')}, <Text style={styles.userName}>{user?.firstName} {user?.lastName}</Text>!
                     </Text>
-                    <Text style={styles.welcomeText}>Welcome to Effortless HRM</Text>
+                    <Text style={styles.welcomeText}>Effortless HRM</Text>
                 </View>
 
                 {/* Date Picker */}
                 <Card style={styles.dateCard}>
-                    <Text style={styles.dateLabel}>Select Date</Text>
+                    <Text style={styles.dateLabel}>{t('attendance.date')}</Text>
                     <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
                         <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
                         <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
@@ -210,7 +212,7 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                 {/* Time Spent Card */}
                 <Card style={styles.timeSpentCard}>
                     <View style={styles.timeSpentHeader}>
-                        <Text style={styles.cardTitle}>Time Spent</Text>
+                        <Text style={styles.cardTitle}>{t('dashboard.time_spent')}</Text>
                     </View>
                     <View style={styles.radioGroup}>
                         {['Daily', 'Weekly', 'Monthly'].map((period) => (
@@ -226,7 +228,7 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                                     styles.radioButtonText,
                                     selectedTimeSpent === period && styles.radioButtonTextSelected
                                 ]}>
-                                    {period}
+                                    {period === 'Daily' ? t('dashboard.daily') : period === 'Weekly' ? t('dashboard.weekly') : t('dashboard.monthly')}
                                 </Text>
                             </TouchableOpacity>
                         ))}
@@ -280,7 +282,7 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                     ) : (
                         <View style={styles.emptyState}>
                             <Ionicons name="folder-open-outline" size={48} color={theme.colors.gray400} />
-                            <Text style={styles.emptyStateText}>No project data available</Text>
+                            <Text style={styles.emptyStateText}>{t('dashboard.no_data')}</Text>
                         </View>
                     )}
                 </Card>
@@ -289,7 +291,7 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                 <View style={styles.chartsRow}>
                     {/* Productivity Chart */}
                     <Card style={styles.chartCard}>
-                        <Text style={styles.cardTitle}>Productivity</Text>
+                        <Text style={styles.cardTitle}>{t('dashboard.productivity')}</Text>
                         {productivityData.length > 0 ? (
                             <>
                                 <PieChart
@@ -330,14 +332,14 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                         ) : (
                             <View style={styles.emptyState}>
                                 <Ionicons name="pie-chart-outline" size={48} color={theme.colors.gray400} />
-                                <Text style={styles.emptyStateText}>No data</Text>
+                                <Text style={styles.emptyStateText}>{t('dashboard.no_data')}</Text>
                             </View>
                         )}
                     </Card>
 
                     {/* Task Summary Chart */}
                     <Card style={styles.chartCard}>
-                        <Text style={styles.cardTitle}>Task Summary</Text>
+                        <Text style={styles.cardTitle}>{t('dashboard.task_summary')}</Text>
                         {taskSummary.length > 0 ? (
                             <>
                                 <PieChart
@@ -378,7 +380,7 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                         ) : (
                             <View style={styles.emptyState}>
                                 <Ionicons name="checkbox-outline" size={48} color={theme.colors.gray400} />
-                                <Text style={styles.emptyStateText}>No data</Text>
+                                <Text style={styles.emptyStateText}>{t('dashboard.no_data')}</Text>
                             </View>
                         )}
                     </Card>
@@ -386,7 +388,7 @@ export const UserDashboardScreen = ({ navigation }: any) => {
 
                 {/* Project-wise Time on Each Task (Progress Bars) */}
                 <Card style={styles.progressCard}>
-                    <Text style={styles.cardTitle}>Project-wise Time on Each Task</Text>
+                    <Text style={styles.cardTitle}>{t('dashboard.project_hours')}</Text>
                     {dayWorkStatus.length > 0 ? (
                         dayWorkStatus.map((project, projectIndex) => (
                             <View key={projectIndex} style={styles.progressProjectSection}>
@@ -421,7 +423,7 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                     ) : (
                         <View style={styles.emptyState}>
                             <Ionicons name="bar-chart-outline" size={48} color={theme.colors.gray400} />
-                            <Text style={styles.emptyStateText}>No progress data available</Text>
+                            <Text style={styles.emptyStateText}>{t('dashboard.no_activity')}</Text>
                         </View>
                     )}
                 </Card>

@@ -14,6 +14,7 @@ import {
     ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { attendanceService, OfficeData, AttendanceRuleData } from '../../services/attendanceService';
 import { theme } from '../../theme';
 import { useLocation } from '../../hooks/useLocation';
@@ -29,6 +30,7 @@ interface Office extends OfficeData {
 }
 
 const AttendanceSettingsScreen = () => {
+    const { t } = useTranslation();
     const navigation = useNavigation();
     const { getCurrentLocation } = useLocation();
 
@@ -54,7 +56,7 @@ const AttendanceSettingsScreen = () => {
                 setOffices(response.data.offices || []);
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to fetch offices');
+            Alert.alert(t('common.error'), t('attendance.failed_load_requests'));
         } finally {
             setLoading(false);
         }
@@ -76,7 +78,7 @@ const AttendanceSettingsScreen = () => {
                 }));
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to get current location');
+            Alert.alert(t('common.error'), t('attendance.failed_get_location') || 'Failed to get current location');
         } finally {
             setActionLoading(false);
         }
@@ -84,7 +86,7 @@ const AttendanceSettingsScreen = () => {
 
     const handleSaveOffice = async () => {
         if (!officeForm.name || officeForm.latitude === 0 || officeForm.longitude === 0) {
-            Alert.alert('Error', 'Please fill all fields with valid coordinates');
+            Alert.alert(t('common.error'), t('attendance.please_fill_all_fields') || 'Please fill all fields with valid coordinates');
             return;
         }
 
@@ -98,12 +100,12 @@ const AttendanceSettingsScreen = () => {
             }
 
             if (response.status?.toLowerCase() === 'success') {
-                Alert.alert('Success', `Office ${editingOffice ? 'updated' : 'created'} successfully`);
+                Alert.alert(t('common.success'), t('attendance.office_saved'));
                 setModalVisible(false);
                 fetchOffices();
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to save office');
+            Alert.alert(t('common.error'), t('attendance.failed_save_office') || 'Failed to save office');
         } finally {
             setActionLoading(false);
         }
@@ -111,22 +113,22 @@ const AttendanceSettingsScreen = () => {
 
     const handleDeleteOffice = (id: string) => {
         Alert.alert(
-            'Confirm Delete',
-            'Are you sure you want to delete this office and its rules?',
+            t('attendance.confirm_delete'),
+            t('attendance.delete_office_confirm'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('common.cancel'), style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: t('common.delete') || 'Delete',
                     style: 'destructive',
                     onPress: async () => {
                         try {
                             const response: any = await attendanceService.deleteOffice(id);
                             if (response.status?.toLowerCase() === 'success' || response.status === undefined) {
-                                Alert.alert('Success', 'Office deleted');
+                                Alert.alert(t('common.success'), t('attendance.office_deleted'));
                                 fetchOffices();
                             }
                         } catch (error) {
-                            Alert.alert('Error', 'Failed to delete office');
+                            Alert.alert(t('common.error'), t('attendance.failed_delete_office') || 'Failed to delete office');
                         }
                     }
                 }
@@ -143,7 +145,7 @@ const AttendanceSettingsScreen = () => {
                 setRulesModalVisible(true);
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to fetch rules');
+            Alert.alert(t('common.error'), t('attendance.failed_fetch_rules') || 'Failed to fetch rules');
         } finally {
             setLoading(false);
         }
@@ -156,11 +158,11 @@ const AttendanceSettingsScreen = () => {
             setActionLoading(true);
             const response: any = await attendanceService.updateRules(currentRules);
             if (response.status?.toLowerCase() === 'success') {
-                Alert.alert('Success', 'Rules updated successfully');
+                Alert.alert(t('common.success'), t('attendance.rules_updated') || 'Rules updated successfully');
                 setRulesModalVisible(false);
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to update rules');
+            Alert.alert(t('common.error'), t('attendance.failed_update_rules') || 'Failed to update rules');
         } finally {
             setActionLoading(false);
         }
@@ -174,7 +176,7 @@ const AttendanceSettingsScreen = () => {
                     {item.location?.coordinates[0].toFixed(6)}, {item.location?.coordinates[1]?.toFixed(6)}
                 </Text>
                 <Text style={styles.officeDetails}>
-                    Radius: {item.geofence_radius}m
+                    {t('attendance.distance')}: {item.geofence_radius}m
                 </Text>
             </View>
             <View style={styles.officeActions}>
@@ -211,8 +213,8 @@ const AttendanceSettingsScreen = () => {
                         <Ionicons name="arrow-back" size={24} color={theme.colors.gray900} />
                     </TouchableOpacity>
                     <View>
-                        <Text style={styles.title}>Office Management</Text>
-                        <Text style={styles.subtitle}>{offices.length} offices configured</Text>
+                        <Text style={styles.title}>{t('attendance.office_management')}</Text>
+                        <Text style={styles.subtitle}>{offices.length} {t('attendance.offices_configured')}</Text>
                     </View>
                 </View>
                 <TouchableOpacity
@@ -238,8 +240,8 @@ const AttendanceSettingsScreen = () => {
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
                             <Ionicons name="business-outline" size={64} color={theme.colors.gray300} />
-                            <Text style={styles.emptyText}>No offices configured yet.</Text>
-                            <Text style={styles.emptySubtext}>Tap the + button to add your first office.</Text>
+                            <Text style={styles.emptyText}>{t('attendance.no_offices')}</Text>
+                            <Text style={styles.emptySubtext}>{t('attendance.add_first_office')}</Text>
                         </View>
                     }
                 />
@@ -253,32 +255,32 @@ const AttendanceSettingsScreen = () => {
                 >
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>{editingOffice ? 'Edit' : 'Add'} Office</Text>
+                            <Text style={styles.modalTitle}>{editingOffice ? t('attendance.edit_office') : t('attendance.add_office')}</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
                                 <Ionicons name="close" size={24} color={theme.colors.gray600} />
                             </TouchableOpacity>
                         </View>
 
                         <ScrollView showsVerticalScrollIndicator={false}>
-                            <Text style={styles.inputLabel}>Office Name</Text>
+                            <Text style={styles.inputLabel}>{t('attendance.office_name')}</Text>
                             <TextInput
                                 style={styles.input}
-                                placeholder="e.g., Main Headquarters"
+                                placeholder={t('attendance.office_name_placeholder')}
                                 value={officeForm.name}
                                 onChangeText={(text) => setOfficeForm({ ...officeForm, name: text })}
                             />
 
                             <View style={styles.coordHeader}>
-                                <Text style={styles.inputLabel}>Location Coordinates</Text>
+                                <Text style={styles.inputLabel}>{t('attendance.location_coordinates')}</Text>
                                 <TouchableOpacity style={styles.getLocationBtn} onPress={handleGetLocation}>
                                     <Ionicons name="locate" size={16} color={theme.colors.primary} />
-                                    <Text style={styles.getLocationText}>Get Current</Text>
+                                    <Text style={styles.getLocationText}>{t('attendance.get_current')}</Text>
                                 </TouchableOpacity>
                             </View>
 
                             <View style={styles.row}>
                                 <View style={{ flex: 1, marginRight: 10 }}>
-                                    <Text style={styles.subLabel}>Latitude</Text>
+                                    <Text style={styles.subLabel}>{t('attendance.latitude')}</Text>
                                     <TextInput
                                         style={styles.input}
                                         placeholder="0.0000"
@@ -288,7 +290,7 @@ const AttendanceSettingsScreen = () => {
                                     />
                                 </View>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={styles.subLabel}>Longitude</Text>
+                                    <Text style={styles.subLabel}>{t('attendance.longitude')}</Text>
                                     <TextInput
                                         style={styles.input}
                                         placeholder="0.0000"
@@ -299,7 +301,7 @@ const AttendanceSettingsScreen = () => {
                                 </View>
                             </View>
 
-                            <Text style={styles.inputLabel}>Geofence Radius (meters)</Text>
+                            <Text style={styles.inputLabel}>{t('attendance.geofence_radius')}</Text>
                             <TextInput
                                 style={styles.input}
                                 placeholder="100"
@@ -317,7 +319,7 @@ const AttendanceSettingsScreen = () => {
                                     {actionLoading ? (
                                         <ActivityIndicator color="#fff" />
                                     ) : (
-                                        <Text style={styles.saveButtonText}>Save Office</Text>
+                                        <Text style={styles.saveButtonText}>{t('attendance.save_office')}</Text>
                                     )}
                                 </TouchableOpacity>
                             </View>
@@ -330,24 +332,24 @@ const AttendanceSettingsScreen = () => {
             <Modal visible={rulesModalVisible} animationType="slide" transparent>
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Office Attendance Rules</Text>
+                        <Text style={styles.modalTitle}>{t('attendance.office_rules')}</Text>
                         {currentRules && (
                             <ScrollView>
                                 <View style={styles.ruleItem}>
-                                    <Text>Selfie Required</Text>
+                                    <Text>{t('attendance.selfie_required')}</Text>
                                     <Switch
                                         value={currentRules.selfie_required}
                                         onValueChange={(val) => setCurrentRules({ ...currentRules, selfie_required: val })}
                                     />
                                 </View>
                                 <View style={styles.ruleItem}>
-                                    <Text>Face Recognition</Text>
+                                    <Text>{t('attendance.face_recognition')}</Text>
                                     <Switch
                                         value={currentRules.face_recognition_enabled}
                                         onValueChange={(val) => setCurrentRules({ ...currentRules, face_recognition_enabled: val })}
                                     />
                                 </View>
-                                <Text style={styles.label}>Face Match Threshold (%)</Text>
+                                <Text style={styles.label}>{t('attendance.face_match_threshold')}</Text>
                                 <TextInput
                                     style={styles.input}
                                     keyboardType="numeric"
@@ -358,10 +360,10 @@ const AttendanceSettingsScreen = () => {
                         )}
                         <View style={styles.modalFooter}>
                             <TouchableOpacity style={styles.cancelButton} onPress={() => setRulesModalVisible(false)}>
-                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                                <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.saveButton} onPress={handleSaveRules}>
-                                <Text style={styles.saveButtonText}>Apply</Text>
+                                <Text style={styles.saveButtonText}>{t('common.save')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
