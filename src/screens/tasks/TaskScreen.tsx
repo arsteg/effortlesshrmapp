@@ -206,7 +206,7 @@ export const TaskScreen = () => {
     };
 
     const renderItem = ({ item }: { item: any }) => (
-        <View style={styles.card}>
+        <Card style={styles.card}>
             <View style={styles.header}>
                 <View style={styles.titleContainer}>
                     <Text style={styles.title} numberOfLines={1}>{item.taskName}</Text>
@@ -251,7 +251,7 @@ export const TaskScreen = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-        </View>
+        </Card>
     );
 
     const getPriorityColor = (priority: string) => {
@@ -364,11 +364,11 @@ const styles = StyleSheet.create({
         paddingBottom: 80,
     },
     card: {
-        backgroundColor: theme.colors.white,
-        borderRadius: theme.borderRadius.md,
-        padding: theme.spacing.md,
+        // backgroundColor: theme.colors.white, // Handled by Card component
+        // borderRadius: theme.borderRadius.md,
+        // padding: theme.spacing.md,
         marginBottom: theme.spacing.md,
-        ...theme.shadows.small,
+        // ...theme.shadows.small,
     },
     header: {
         flexDirection: 'row',
@@ -482,10 +482,9 @@ const styles = StyleSheet.create({
     },
     dropdown: {
         height: 40,
-        borderColor: theme.colors.gray300,
-        borderWidth: 1,
-        borderRadius: theme.borderRadius.sm,
-        paddingHorizontal: 8,
+        backgroundColor: theme.colors.background,
+        borderRadius: theme.borderRadius.md,
+        paddingHorizontal: 12,
     },
     placeholderStyle: {
         fontSize: 14,

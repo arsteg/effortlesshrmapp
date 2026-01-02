@@ -26,6 +26,10 @@ import { attendanceService } from '../../services/attendanceService';
 import { theme } from '../../theme';
 import { calculateDistance } from '../../utils/distance';
 import { authService } from '../../services/authService';
+import { Card } from '../../components/common/Card';
+import { Button } from '../../components/common/Button';
+import { Input } from '../../components/common/Input';
+import { Loading } from '../../components/common/Loading';
 
 interface Office {
     _id: string;
@@ -377,7 +381,7 @@ const AttendanceScreen = () => {
             }
             ListHeaderComponent={
                 <View style={styles.header}>
-                    <View style={styles.statusCard}>
+                    <Card style={styles.statusCard}>
                         <View style={[styles.statusIndicator, { backgroundColor: isClockedIn ? theme.colors.success : theme.colors.error }]} />
                         <View>
                             <Text style={styles.statusLabel}>Current Status</Text>
@@ -386,7 +390,7 @@ const AttendanceScreen = () => {
                                 <Text style={styles.statusTime}>Since {new Date(status.timestamp).toLocaleTimeString()}</Text>
                             )}
                         </View>
-                    </View>
+                    </Card>
 
                     <Text style={styles.sectionTitle}>Select Office</Text>
                     <Dropdown
@@ -415,54 +419,41 @@ const AttendanceScreen = () => {
 
                     <View style={styles.actionContainer}>
                         {!isClockedIn ? (
-                            <TouchableOpacity
-                                style={[styles.button, styles.checkInButton, actionLoading && styles.disabledButton]}
+                            <Button
+                                title="Clock In"
                                 onPress={handleCheckIn}
-                                disabled={actionLoading}
-                            >
-                                {actionLoading ? (
-                                    <ActivityIndicator color="#fff" />
-                                ) : (
-                                    <>
-                                        <Ionicons name="log-in-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
-                                        <Text style={styles.buttonText}>Clock In</Text>
-                                    </>
-                                )}
-                            </TouchableOpacity>
+                                icon={<Ionicons name="log-in-outline" size={20} color="#fff" />}
+                                loading={actionLoading}
+                                style={styles.actionButtonMain}
+                            />
                         ) : (
-                            <TouchableOpacity
-                                style={[styles.button, styles.checkOutButton, actionLoading && styles.disabledButton]}
+                            <Button
+                                title="Clock Out"
                                 onPress={handleCheckOut}
-                                disabled={actionLoading}
-                            >
-                                {actionLoading ? (
-                                    <ActivityIndicator color="#fff" />
-                                ) : (
-                                    <>
-                                        <Ionicons name="log-out-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
-                                        <Text style={styles.buttonText}>Clock Out</Text>
-                                    </>
-                                )}
-                            </TouchableOpacity>
+                                variant="secondary"
+                                icon={<Ionicons name="log-out-outline" size={20} color={theme.colors.white} />}
+                                loading={actionLoading}
+                                style={[styles.actionButtonMain, { backgroundColor: theme.colors.error }]}
+                            />
                         )}
                     </View>
 
                     <View style={styles.secondaryActions}>
-                        <TouchableOpacity
-                            style={[styles.secondaryButton, { backgroundColor: theme.colors.gray100 }]}
+                        <Button
+                            title="Manual Request"
                             onPress={() => setManualModalVisible(true)}
-                        >
-                            <Ionicons name="document-text-outline" size={20} color={theme.colors.gray700} />
-                            <Text style={styles.secondaryButtonText}>Manual Request</Text>
-                        </TouchableOpacity>
+                            variant="outline"
+                            icon={<Ionicons name="document-text-outline" size={20} color={theme.colors.gray700} />}
+                            style={styles.actionButtonSecondary}
+                        />
 
-                        <TouchableOpacity
-                            style={[styles.secondaryButton, { backgroundColor: theme.colors.gray100 }]}
+                        <Button
+                            title="View Requests"
                             onPress={() => navigation.navigate('Attendance Requests')}
-                        >
-                            <Ionicons name="list-outline" size={20} color={theme.colors.gray700} />
-                            <Text style={styles.secondaryButtonText}>View Requests</Text>
-                        </TouchableOpacity>
+                            variant="outline"
+                            icon={<Ionicons name="list-outline" size={20} color={theme.colors.gray700} />}
+                            style={styles.actionButtonSecondary}
+                        />
                     </View>
 
                     <Text style={styles.sectionTitle}>Recent Activity</Text>
@@ -638,18 +629,16 @@ const AttendanceScreen = () => {
 
                             <View style={styles.row}>
                                 <View style={{ flex: 1, marginRight: 8 }}>
-                                    <Text style={styles.label}>Check-in Time</Text>
-                                    <TextInput
-                                        style={styles.input}
+                                    <Input
+                                        label="Check-in Time"
                                         value={manualForm.checkInTime}
                                         placeholder="HH:MM"
                                         onChangeText={(text) => setManualForm({ ...manualForm, checkInTime: text })}
                                     />
                                 </View>
                                 <View style={{ flex: 1, marginLeft: 8 }}>
-                                    <Text style={styles.label}>Check-out Time</Text>
-                                    <TextInput
-                                        style={styles.input}
+                                    <Input
+                                        label="Check-out Time"
                                         value={manualForm.checkOutTime}
                                         placeholder="HH:MM"
                                         onChangeText={(text) => setManualForm({ ...manualForm, checkOutTime: text })}
@@ -657,12 +646,12 @@ const AttendanceScreen = () => {
                                 </View>
                             </View>
 
-                            <Text style={styles.label}>Reason</Text>
-                            <TextInput
-                                style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
+                            <Input
+                                label="Reason"
+                                style={{ height: 100, textAlignVertical: 'top' }}
                                 multiline
                                 numberOfLines={4}
-                                placeholder="e.g., Forgot to clock in, Device issue, etc."
+                                placeholder="e.g., Forgot to clock in..."
                                 value={manualForm.reason}
                                 onChangeText={(text) => setManualForm({ ...manualForm, reason: text })}
                             />
@@ -698,16 +687,18 @@ const AttendanceScreen = () => {
                         </ScrollView>
 
                         <View style={styles.modalFooter}>
-                            <TouchableOpacity style={styles.cancelButton} onPress={() => setManualModalVisible(false)}>
-                                <Text style={styles.cancelButtonText}>Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.saveButton, actionLoading && { opacity: 0.7 }]}
+                            <Button
+                                title="Cancel"
+                                onPress={() => setManualModalVisible(false)}
+                                variant="ghost"
+                                style={{ flex: 1, marginRight: 8 }}
+                            />
+                            <Button
+                                title="Submit"
                                 onPress={handleManualRequest}
-                                disabled={actionLoading}
-                            >
-                                {actionLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveButtonText}>Submit</Text>}
-                            </TouchableOpacity>
+                                loading={actionLoading}
+                                style={{ flex: 1, marginLeft: 8 }}
+                            />
                         </View>
                     </View>
                 </View>
@@ -788,7 +779,7 @@ const styles = StyleSheet.create({
     geofenceInfo: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 24,
+        marginBottom: 16,
         backgroundColor: theme.colors.secondary,
         padding: 10,
         borderRadius: 8,
@@ -802,10 +793,18 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     actionContainer: {
-        marginBottom: 32,
+        marginBottom: 24,
+    },
+    actionButtonMain: {
+        height: 52,
+        borderRadius: 12,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...theme.shadows.medium,
     },
     button: {
-        height: 60,
+        height: 52,
         borderRadius: 12,
         flexDirection: 'row',
         justifyContent: 'center',
@@ -823,7 +822,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
     },
     historyItem: {
@@ -878,10 +877,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 24,
+        paddingHorizontal: 0,
+    },
+    actionButtonSecondary: {
+        flex: 0.48,
+        height: 48,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     secondaryButton: {
         flex: 0.48,
-        height: 50,
+        height: 48,
         borderRadius: 10,
         flexDirection: 'row',
         alignItems: 'center',

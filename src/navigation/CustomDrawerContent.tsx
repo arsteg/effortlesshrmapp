@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { togglePortalMode, logout, switchPortalMode } from '../store/slices/authSlice';
 import { theme } from '../theme';
+import { Button } from '../components/common/Button';
 
 export const CustomDrawerContent = (props: any) => {
     const dispatch = useAppDispatch();
@@ -43,11 +44,15 @@ export const CustomDrawerContent = (props: any) => {
                             {getInitials(user?.firstName, user?.lastName)}
                         </Text>
                     </View>
-                    <Text style={styles.userName}>{user?.firstName} {user?.lastName}</Text>
-                    <Text style={styles.userEmail}>{user?.email}</Text>
-                    <Text style={styles.portalBadge}>
-                        {isAdminPortal ? 'Admin Portal' : 'User Portal'}
-                    </Text>
+                    <View style={styles.userInfo}>
+                        <Text style={styles.userName}>{user?.firstName} {user?.lastName}</Text>
+                        <Text style={styles.userEmail}>{user?.email}</Text>
+                        <View style={styles.badgeContainer}>
+                            <Text style={styles.portalBadge}>
+                                {isAdminPortal ? 'Admin Portal' : 'User Portal'}
+                            </Text>
+                        </View>
+                    </View>
                 </View>
 
                 {/* Drawer Items */}
@@ -59,32 +64,24 @@ export const CustomDrawerContent = (props: any) => {
             {/* Bottom Actions Area */}
             <View style={styles.bottomSection}>
                 {isUserAdmin && (
-                    <TouchableOpacity onPress={handleSwitchPortal} style={styles.actionButton}>
-                        <View style={styles.actionContent}>
-                            <Ionicons
-                                name="swap-horizontal-outline"
-                                size={22}
-                                color={theme.colors.gray800}
-                            />
-                            <Text style={styles.actionText}>
-                                Switch to {isAdminPortal ? 'User' : 'Admin'} View
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
+                    <Button
+                        title={`Switch to ${isAdminPortal ? 'User' : 'Admin'} View`}
+                        onPress={handleSwitchPortal}
+                        variant="ghost"
+                        icon={<Ionicons name="swap-horizontal-outline" size={20} color={theme.colors.gray800} />}
+                        style={styles.actionButton}
+                        textStyle={{ color: theme.colors.gray800 }}
+                    />
                 )}
 
-                <TouchableOpacity onPress={handleLogout} style={styles.actionButton}>
-                    <View style={styles.actionContent}>
-                        <Ionicons
-                            name="log-out-outline"
-                            size={22}
-                            color={theme.colors.error}
-                        />
-                        <Text style={[styles.actionText, { color: theme.colors.error }]}>
-                            Sign Out
-                        </Text>
-                    </View>
-                </TouchableOpacity>
+                <Button
+                    title="Sign Out"
+                    onPress={handleLogout}
+                    variant="ghost"
+                    icon={<Ionicons name="log-out-outline" size={20} color={theme.colors.error} />}
+                    style={styles.actionButton}
+                    textStyle={{ color: theme.colors.error }}
+                />
             </View>
         </View>
     );
@@ -92,46 +89,53 @@ export const CustomDrawerContent = (props: any) => {
 
 const styles = StyleSheet.create({
     userHeader: {
-        padding: 20,
+        padding: theme.spacing.lg,
         backgroundColor: theme.colors.primary,
+        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 10,
+        marginBottom: theme.spacing.xs,
     },
     avatarContainer: {
-        width: 70,
-        height: 70,
-        borderRadius: 35,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
         backgroundColor: theme.colors.white,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 10,
+        marginRight: theme.spacing.md,
     },
     avatarText: {
-        fontSize: 28,
+        fontSize: 24,
         fontWeight: 'bold',
         color: theme.colors.primary,
     },
+    userInfo: {
+        flex: 1,
+    },
     userName: {
         color: theme.colors.white,
-        fontSize: 18,
+        fontSize: theme.typography.fontSize.lg,
         fontWeight: 'bold',
-        marginBottom: 4,
+        marginBottom: 2,
     },
     userEmail: {
         color: theme.colors.white,
-        fontSize: 14,
-        opacity: 0.8,
+        fontSize: theme.typography.fontSize.xs,
+        opacity: 0.9,
         marginBottom: 8,
     },
+    badgeContainer: {
+        alignSelf: 'flex-start',
+    },
     portalBadge: {
-        backgroundColor: 'rgba(255,255,255,0.2)',
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 12,
-        overflow: 'hidden',
+        backgroundColor: 'rgba(255,255,255,0.25)',
+        paddingHorizontal: 10,
+        paddingVertical: 2,
+        borderRadius: theme.borderRadius.full,
         color: theme.colors.white,
-        fontSize: 12,
-        fontWeight: '600',
+        fontSize: 10,
+        fontWeight: 'bold',
+        overflow: 'hidden',
     },
     drawerItemsContainer: {
         flex: 1,
@@ -145,16 +149,7 @@ const styles = StyleSheet.create({
         borderTopColor: theme.colors.gray200,
     },
     actionButton: {
-        paddingVertical: 12,
-    },
-    actionContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    actionText: {
-        fontSize: 15,
-        marginLeft: 15,
-        fontWeight: '500',
-        color: theme.colors.gray800,
+        justifyContent: 'flex-start',
+        paddingHorizontal: 0,
     },
 });

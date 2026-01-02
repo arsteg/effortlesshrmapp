@@ -195,6 +195,7 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                     <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
                         <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
                         <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
+                        <Ionicons name="chevron-down-outline" size={16} color={theme.colors.gray500} style={{ marginLeft: 'auto' }} />
                     </TouchableOpacity>
                     {showDatePicker && (
                         <DateTimePicker
@@ -304,7 +305,8 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                                     width={screenWidth / 2 - 40}
                                     height={180}
                                     chartConfig={{
-                                        color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                        color: (opacity = 1) => theme.colors.textPrimary,
+                                        labelColor: (opacity = 1) => theme.colors.textSecondary,
                                     }}
                                     accessor="population"
                                     backgroundColor="transparent"
@@ -352,7 +354,8 @@ export const UserDashboardScreen = ({ navigation }: any) => {
                                     width={screenWidth / 2 - 40}
                                     height={180}
                                     chartConfig={{
-                                        color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                        color: (opacity = 1) => theme.colors.textPrimary,
+                                        labelColor: (opacity = 1) => theme.colors.textSecondary,
                                     }}
                                     accessor="population"
                                     backgroundColor="transparent"
@@ -462,11 +465,9 @@ const styles = StyleSheet.create({
     dateButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: theme.spacing.sm,
-        backgroundColor: theme.colors.backgroundSecondary,
+        padding: theme.spacing.md,
+        backgroundColor: theme.colors.background,
         borderRadius: theme.borderRadius.md,
-        borderWidth: 1,
-        borderColor: theme.colors.gray300,
     },
     dateText: {
         fontSize: theme.typography.fontSize.md,
@@ -491,8 +492,8 @@ const styles = StyleSheet.create({
     },
     radioGroup: {
         flexDirection: 'row',
-        backgroundColor: theme.colors.gray100,
-        borderRadius: theme.borderRadius.md,
+        backgroundColor: theme.colors.backgroundSecondary, // Softer background
+        borderRadius: theme.borderRadius.full, // Pill shape container
         padding: 4,
         marginBottom: theme.spacing.md,
     },
@@ -500,7 +501,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 8,
         alignItems: 'center',
-        borderRadius: theme.borderRadius.sm,
+        borderRadius: theme.borderRadius.full, // Pill shape buttons
     },
     radioButtonSelected: {
         backgroundColor: theme.colors.white,

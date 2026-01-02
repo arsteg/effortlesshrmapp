@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -7,6 +7,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     Alert,
+    Animated,
 } from 'react-native';
 import { StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +21,26 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // Animations
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(30)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                friction: 8,
+                tension: 40,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    }, []);
 
     const handleSubmit = async () => {
         setError('');
@@ -38,9 +59,9 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
         try {
             await authService.forgotPassword({ email });
             Alert.alert(
-                'Success',
-                'Password reset instructions have been sent to your email',
-                [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
+                'Check Your Email',
+                'We have sent password reset instructions to your email address.',
+                [{ text: 'Return to Login', onPress: () => navigation.navigate('Login') }]
             );
         } catch (err: any) {
             setError(err.message || 'Failed to send reset email');
@@ -54,43 +75,60 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-           <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
+            <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
             >
-                <View style={styles.header}>
-                    <Text style={styles.headerText}>Forgot Password</Text>
-                    <Text style={styles.headerSubtext}>
-                        Enter your email to receive password reset instructions
-                    </Text>
-                </View>
+                <Animated.View
+                    style={[
+                        styles.content,
+                        {
+                            opacity: fadeAnim,
+                            transform: [{ translateY: slideAnim }],
+                        },
+                    ]}
+                >
+                    <View style={styles.header}>
+                        <View style={styles.iconContainer}>
+                            <Ionicons name="lock-open-outline" size={40} color={theme.colors.primary} />
+                        </View>
+                        <Text style={styles.headerText}>Forgot Password?</Text>
+                        <Text style={styles.headerSubtext}>
+                            Don't worry! It happens. Please enter the email associated with your account.
+                        </Text>
+                    </View>
 
-                <View style={styles.formContainer}>
-                    <Input
-                        label="Email Address"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        error={error}
-                        icon={<Ionicons name="mail-outline" size={20} color={theme.colors.gray500} />}
-                    />
+                    <View style={styles.formContainer}>
+                        <Input
+                            label="Email Address"
+                            placeholder="name@company.com"
+                            value={email}
+                            onChangeText={(text) => {
+                                setEmail(text);
+                                if (error) setError('');
+                            }}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            error={error}
+                            icon={<Ionicons name="mail-outline" size={20} color={theme.colors.gray500} />}
+                        />
 
-                    <Button
-                        title="Send Reset Link"
-                        onPress={handleSubmit}
-                        loading={loading}
-                    />
+                        <Button
+                            title="Send Instructions"
+                            onPress={handleSubmit}
+                            loading={loading}
+                            style={styles.submitButton}
+                        />
 
-                    <Button
-                        title="Back to Login"
-                        onPress={() => navigation.navigate('Login')}
-                        variant="outline"
-                        style={styles.backButton}
-                    />
-                </View>
+                        <Button
+                            title="Back to Sign In"
+                            onPress={() => navigation.navigate('Login')}
+                            variant="ghost"
+                        />
+                    </View>
+                </Animated.View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
@@ -103,34 +141,45 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         flexGrow: 1,
+        justifyContent: 'center',
+        padding: theme.spacing.lg,
+    },
+    content: {
+        width: '100%',
+        maxWidth: 400,
+        alignSelf: 'center',
     },
     header: {
-        backgroundColor: theme.colors.primary,
-        paddingVertical: theme.spacing.xxl,
-        paddingHorizontal: theme.spacing.lg,
-        minHeight: 150,
+        alignItems: 'center',
+        marginBottom: theme.spacing.xl,
+    },
+    iconContainer: {
+        width: 70,
+        height: 70,
+        borderRadius: 20,
+        backgroundColor: theme.colors.secondary,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: theme.spacing.lg,
     },
     headerText: {
-        fontSize: theme.typography.fontSize.hero,
+        fontSize: theme.typography.fontSize.header,
         fontWeight: theme.typography.fontWeight.bold,
-        color: theme.colors.white,
+        color: theme.colors.textPrimary,
         marginBottom: theme.spacing.sm,
     },
     headerSubtext: {
         fontSize: theme.typography.fontSize.md,
-        color: theme.colors.white,
-        opacity: 0.9,
+        color: theme.colors.textSecondary,
+        textAlign: 'center',
+        lineHeight: theme.typography.lineHeight.normal * theme.typography.fontSize.md,
+        paddingHorizontal: theme.spacing.md,
     },
     formContainer: {
-        flex: 1,
-        backgroundColor: theme.colors.white,
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        marginTop: -30,
-        paddingTop: theme.spacing.xl,
-        paddingHorizontal: theme.spacing.lg,
+        marginTop: theme.spacing.sm,
     },
-    backButton: {
-        marginTop: theme.spacing.md,
+    submitButton: {
+        marginBottom: theme.spacing.md,
+        marginTop: theme.spacing.sm,
     },
 });

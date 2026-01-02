@@ -18,13 +18,20 @@ import { attendanceService, OfficeData, AttendanceRuleData } from '../../service
 import { theme } from '../../theme';
 import { useLocation } from '../../hooks/useLocation';
 import { KeyboardAvoidingView, Platform } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 interface Office extends OfficeData {
     _id: string;
+    location?: {
+        type: string;
+        coordinates: number[];
+    };
 }
 
 const AttendanceSettingsScreen = () => {
+    const navigation = useNavigation();
     const { getCurrentLocation } = useLocation();
+
     const [offices, setOffices] = useState<Office[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
@@ -199,9 +206,14 @@ const AttendanceSettingsScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <View>
-                    <Text style={styles.title}>Office Management</Text>
-                    <Text style={styles.subtitle}>{offices.length} offices configured</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
+                        <Ionicons name="arrow-back" size={24} color={theme.colors.gray900} />
+                    </TouchableOpacity>
+                    <View>
+                        <Text style={styles.title}>Office Management</Text>
+                        <Text style={styles.subtitle}>{offices.length} offices configured</Text>
+                    </View>
                 </View>
                 <TouchableOpacity
                     style={styles.addButton}

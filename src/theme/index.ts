@@ -1,108 +1,120 @@
 export const colors = {
-    primary: '#0cd3d0',
-    secondary: '#e7fbfa',
-
+    // Brand Colors - Vibrant Teal & Deep Blue
+    primary: '#0CD3D0',   // Vibrant Teal
+    secondary: '#E7FBFA', // Soft Teal Bg
+    accent: '#2D3436',    // Dark Charcoal for strong accents
+    
     // Extended palette
-    primaryDark: '#0ab3b0',
-    primaryLight: '#5ee3e1',
+    primaryDark: '#09B0AE',
+    primaryLight: '#5EE3E1',
+    primarySoft: 'rgba(12, 211, 208, 0.15)', // For soft backgrounds
 
     // Semantic colors
-    success: '#08AD08',
-    warning: '#FFBE5B',
-    error: '#FF4444',
-    info: '#7aa3e5',
+    success: '#00B894', // Mint Green
+    warning: '#FDCB6E', // Sun Yellow
+    error: '#FF7675',   // Soft Red
+    info: '#74B9FF',    // Sky Blue
 
     // Chart colors
-    productive: '#a8385d',
-    nonProductive: '#a27ea8',
-    neutral: '#7aa3e5',
-    closed: '#00fa9a',
+    productive: '#6C5CE7',    // Purple
+    nonProductive: '#FAB1A0', // Peach
+    neutral: '#DFE6E9',       // Light Gray
+    closed: '#55EFC4',        // Mint
 
     // Neutrals
     white: '#FFFFFF',
-    black: '#000000',
-    gray50: '#FAFAFA',
-    gray100: '#F5F5F5',
-    gray200: '#EEEEEE',
-    gray300: '#E0E0E0',
-    gray400: '#BDBDBD',
-    gray500: '#9E9E9E',
-    gray600: '#757575',
-    gray700: '#616161',
-    gray800: '#424242',
-    gray900: '#212121',
+    black: '#1E272E', // Soft Black
+    gray50: '#FAFBFC',
+    gray100: '#F1F3F6', // Light grayish blue
+    gray200: '#DFE4EA',
+    gray300: '#CED6E0',
+    gray400: '#A4B0BE',
+    gray500: '#747D8C', // Muted text
+    gray600: '#57606F',
+    gray700: '#2F3542',
+    gray800: '#1E272E',
+    gray900: '#000000',
 
     // Background
     background: '#FFFFFF',
-    backgroundSecondary: '#F5F5F5',
+    backgroundSecondary: '#F8F9FA', // Very subtle gray for page backgrounds
+    surface: '#FFFFFF',
 
     // Text
-    textPrimary: '#212121',
-    textSecondary: '#757575',
-    textDisabled: '#BDBDBD',
+    textPrimary: '#2D3436',   // Strong Dark Gray (Better than pure black)
+    textSecondary: '#636E72', // Medium Gray
+    textDisabled: '#B2BEC3',
 
     // Border
-    border: '#E0E0E0',
-    borderLight: '#F5F5F5',
+    border: '#DFE6E9',
+    borderLight: '#F1F3F6',
 };
 
 export const spacing = {
-    xs: 4,
-    sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
-    xxl: 48,
+    xs: 6,
+    sm: 10,
+    md: 18,
+    lg: 26,
+    xl: 36,
+    xxl: 52,
 };
 
 export const borderRadius = {
-    sm: 4,
-    md: 8,
-    lg: 12,
-    xl: 16,
+    sm: 8,
+    md: 14,
+    lg: 20,
+    xl: 28,
     round: 999,
 };
 
 export const shadows = {
     small: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
+        shadowColor: '#2D3436',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 3,
     },
     medium: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
-        elevation: 4,
+        shadowColor: '#2D3436',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 10,
+        elevation: 6,
     },
     large: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 8,
+        shadowColor: '#2D3436',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.15,
+        shadowRadius: 24,
+        elevation: 12,
     },
+    input: {
+        shadowColor: '#0CD3D0',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        elevation: 2,
+    }
 };
 
 export const typography = {
+    // If you add a custom font later, update 'System' to the font name like 'Inter-Regular'
     fontFamily: {
-        regular: 'System',
+        regular: 'System', 
         medium: 'System',
         bold: 'System',
     },
     fontSize: {
-        xs: 10,
-        sm: 12,
-        md: 14,
-        lg: 16,
-        xl: 18,
-        xxl: 20,
-        title: 24,
-        header: 28,
-        hero: 32,
+        xs: 12,
+        sm: 13,
+        md: 15, // Slightly larger base size for readability
+        lg: 17,
+        xl: 20,
+        xxl: 24,
+        title: 28,
+        header: 32,
+        hero: 40,
     },
     fontWeight: {
         regular: '400' as const,
@@ -111,9 +123,9 @@ export const typography = {
         bold: '700' as const,
     },
     lineHeight: {
-        tight: 1.2,
-        normal: 1.5,
-        relaxed: 1.7,
+        tight: 1.25,
+        normal: 1.6,
+        relaxed: 1.75,
     },
 };
 

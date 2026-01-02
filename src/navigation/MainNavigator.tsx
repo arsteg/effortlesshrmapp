@@ -310,7 +310,8 @@ const MainNavigator = () => {
                 component={AttendanceSettingsScreen}
                 options={{
                     drawerItemStyle: { display: 'none' },
-                    title: 'Office Management'
+                    title: 'Office Management',
+                    headerShown: false
                 }}
             />
             <Drawer.Screen
@@ -326,7 +327,8 @@ const MainNavigator = () => {
                 component={AttendanceReportScreen}
                 options={{
                     drawerItemStyle: { display: 'none' },
-                    title: 'Attendance Report'
+                    title: 'Attendance Report',
+                    headerShown: false
                 }}
             />
         </Drawer.Navigator>

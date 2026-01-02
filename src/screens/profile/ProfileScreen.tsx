@@ -17,6 +17,7 @@ import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { updateUser } from '../../store/slices/authSlice';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
+import { Input } from '../../components/common/Input';
 import { Loading } from '../../components/common/Loading';
 import { theme } from '../../theme';
 import { profileService } from '../../services/profileService';
@@ -133,13 +134,15 @@ export const ProfileScreen = ({ navigation }: any) => {
                 {/* Profile Picture Section */}
                 <Card style={styles.profileCard}>
                     <View style={styles.profileImageContainer}>
-                        {profileImage ? (
-                            <Image source={{ uri: profileImage }} style={styles.profileImage} />
-                        ) : (
-                            <View style={styles.profileImagePlaceholder}>
-                                <Text style={styles.initialsText}>{getInitials()}</Text>
-                            </View>
-                        )}
+                        <View style={styles.profileImageShadow}>
+                            {profileImage ? (
+                                <Image source={{ uri: profileImage }} style={styles.profileImage} />
+                            ) : (
+                                <View style={styles.profileImagePlaceholder}>
+                                    <Text style={styles.initialsText}>{getInitials()}</Text>
+                                </View>
+                            )}
+                        </View>
                         {isEditing && (
                             <TouchableOpacity style={styles.editImageButton} onPress={handlePickImage}>
                                 <Ionicons name="camera" size={20} color={theme.colors.white} />
@@ -162,52 +165,44 @@ export const ProfileScreen = ({ navigation }: any) => {
                         )}
                     </View>
 
-                    <View style={styles.formGroup}>
-                        <Text style={styles.label}>First Name</Text>
-                        <TextInput
-                            style={[styles.input, !isEditing && styles.inputDisabled]}
-                            value={firstName}
-                            onChangeText={setFirstName}
-                            editable={isEditing}
-                            placeholder="Enter first name"
-                        />
-                    </View>
+                    <Input
+                        label="First Name"
+                        value={firstName}
+                        onChangeText={setFirstName}
+                        editable={isEditing}
+                        placeholder="Enter first name"
+                        icon={<Ionicons name="person-outline" size={20} color={theme.colors.gray500} />}
+                    />
 
-                    <View style={styles.formGroup}>
-                        <Text style={styles.label}>Last Name</Text>
-                        <TextInput
-                            style={[styles.input, !isEditing && styles.inputDisabled]}
-                            value={lastName}
-                            onChangeText={setLastName}
-                            editable={isEditing}
-                            placeholder="Enter last name"
-                        />
-                    </View>
+                    <Input
+                        label="Last Name"
+                        value={lastName}
+                        onChangeText={setLastName}
+                        editable={isEditing}
+                        placeholder="Enter last name"
+                        icon={<Ionicons name="person-outline" size={20} color={theme.colors.gray500} />}
+                    />
 
-                    <View style={styles.formGroup}>
-                        <Text style={styles.label}>Email</Text>
-                        <TextInput
-                            style={[styles.input, !isEditing && styles.inputDisabled]}
-                            value={email}
-                            onChangeText={setEmail}
-                            editable={isEditing}
-                            placeholder="Enter email"
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                        />
-                    </View>
+                    <Input
+                        label="Email"
+                        value={email}
+                        onChangeText={setEmail}
+                        editable={isEditing}
+                        placeholder="Enter email"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        icon={<Ionicons name="mail-outline" size={20} color={theme.colors.gray500} />}
+                    />
 
-                    <View style={styles.formGroup}>
-                        <Text style={styles.label}>Phone</Text>
-                        <TextInput
-                            style={[styles.input, !isEditing && styles.inputDisabled]}
-                            value={phone}
-                            onChangeText={setPhone}
-                            editable={isEditing}
-                            placeholder="Enter phone number"
-                            keyboardType="phone-pad"
-                        />
-                    </View>
+                    <Input
+                        label="Phone"
+                        value={phone}
+                        onChangeText={setPhone}
+                        editable={isEditing}
+                        placeholder="Enter phone number"
+                        keyboardType="phone-pad"
+                        icon={<Ionicons name="call-outline" size={20} color={theme.colors.gray500} />}
+                    />
 
                     {isEditing && (
                         <View style={styles.buttonRow}>
@@ -278,12 +273,20 @@ const styles = StyleSheet.create({
         position: 'relative',
         marginBottom: theme.spacing.md,
     },
+    profileImageShadow: {
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 8,
+        borderRadius: 60,
+    },
     profileImage: {
         width: 120,
         height: 120,
         borderRadius: 60,
-        borderWidth: 3,
-        borderColor: theme.colors.primary,
+        borderWidth: 4,
+        borderColor: theme.colors.white,
     },
     profileImagePlaceholder: {
         width: 120,
@@ -292,8 +295,8 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 3,
-        borderColor: theme.colors.primaryDark,
+        borderWidth: 4,
+        borderColor: theme.colors.white,
     },
     initialsText: {
         fontSize: 40,

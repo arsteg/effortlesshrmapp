@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { logout } from '../../store/slices/authSlice';
 import { Card } from '../../components/common/Card';
+import { Button } from '../../components/common/Button';
 import { theme } from '../../theme';
 
 export const SettingsScreen = ({ navigation }: any) => {
@@ -164,10 +165,17 @@ export const SettingsScreen = ({ navigation }: any) => {
                 ))}
 
                 {/* Logout Button */}
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Ionicons name="log-out-outline" size={24} color={theme.colors.error} />
-                    <Text style={styles.logoutText}>Logout</Text>
-                </TouchableOpacity>
+                {/* Logout Button */}
+                <View style={styles.logoutContainer}>
+                    <Button
+                        title="Logout"
+                        onPress={handleLogout}
+                        variant="outline"
+                        style={{ borderColor: theme.colors.error }}
+                        textStyle={{ color: theme.colors.error }}
+                        icon={<Ionicons name="log-out-outline" size={20} color={theme.colors.error} />}
+                    />
+                </View>
             </ScrollView>
         </View>
     );
@@ -223,22 +231,8 @@ const styles = StyleSheet.create({
         color: theme.colors.textSecondary,
         marginRight: theme.spacing.xs,
     },
-    logoutButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: theme.spacing.sm,
-        padding: theme.spacing.md,
+    logoutContainer: {
         marginTop: theme.spacing.xl,
         marginBottom: theme.spacing.xl,
-        backgroundColor: theme.colors.white,
-        borderRadius: theme.borderRadius.md,
-        borderWidth: 1,
-        borderColor: theme.colors.error,
-    },
-    logoutText: {
-        fontSize: theme.typography.fontSize.md,
-        fontWeight: theme.typography.fontWeight.medium,
-        color: theme.colors.error,
     },
 });

@@ -269,6 +269,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                     <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
                         <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
                         <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
+                        <Ionicons name="chevron-down-outline" size={16} color={theme.colors.gray500} style={{ marginLeft: 'auto' }} />
                     </TouchableOpacity>
                     {showDatePicker && (
                         <DateTimePicker
@@ -558,11 +559,10 @@ const styles = StyleSheet.create({
     dateButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: theme.spacing.sm,
-        backgroundColor: theme.colors.backgroundSecondary,
+        padding: theme.spacing.md,
+        backgroundColor: theme.colors.background,
         borderRadius: theme.borderRadius.md,
-        borderWidth: 1,
-        borderColor: theme.colors.gray300,
+        // Removed border for cleaner look
     },
     dateText: {
         fontSize: theme.typography.fontSize.sm,
@@ -590,8 +590,8 @@ const styles = StyleSheet.create({
     },
     radioGroup: {
         flexDirection: 'row',
-        backgroundColor: theme.colors.gray100,
-        borderRadius: theme.borderRadius.md,
+        backgroundColor: theme.colors.backgroundSecondary,
+        borderRadius: theme.borderRadius.full,
         padding: 4,
         marginBottom: theme.spacing.md,
     },
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 8,
         alignItems: 'center',
-        borderRadius: theme.borderRadius.sm,
+        borderRadius: theme.borderRadius.full,
     },
     radioButtonSelected: {
         backgroundColor: theme.colors.white,
@@ -781,11 +781,10 @@ const styles = StyleSheet.create({
 
     dropdown: {
         height: 50,
-        borderColor: theme.colors.gray300,
-        borderWidth: 1,
-        borderRadius: theme.borderRadius.sm,
-        paddingHorizontal: 10,
-        backgroundColor: theme.colors.white,
+        backgroundColor: theme.colors.background,
+        borderRadius: theme.borderRadius.md,
+        paddingHorizontal: 12,
+        // Removed harsh border
     },
     placeholderStyle: {
         fontSize: theme.typography.fontSize.sm,

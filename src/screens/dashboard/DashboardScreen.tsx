@@ -25,6 +25,7 @@ import {
     setSelectedProjectUserId,
 } from '../../store/slices/dashboardSlice';
 import { Card } from '../../components/common/Card';
+import { Button } from '../../components/common/Button';
 import { Loading } from '../../components/common/Loading';
 import { theme } from '../../theme';
 import { attendanceService } from '../../services/attendanceService';
@@ -311,230 +312,229 @@ export const DashboardScreen = ({ navigation }: any) => {
                                 <Text style={styles.paymentLabel}>Last Punch: {new Date(punchTime).toLocaleTimeString()}</Text>
                             )}
                         </View>
-                        <TouchableOpacity
-                            style={[
-                                styles.punchButton,
-                                { backgroundColor: attendanceStatus === 'In' ? theme.colors.error : theme.colors.success }
-                            ]}
-                            onPress={handlePunch}
-                            disabled={punchLoading}
-                        >
-                            {punchLoading ? (
-                                <ActivityIndicator color="#fff" />
-                            ) : (
-                                <Text style={styles.punchButtonText}>
-                                    {attendanceStatus === 'In' ? 'Punch Out' : 'Punch In'}
-                                </Text>
-                            )}
-                        </TouchableOpacity>
                     </View>
-                </Card>
+                    <Button
+                        title={attendanceStatus === 'In' ? 'Punch Out' : 'Punch In'}
+                        onPress={handlePunch}
+                        loading={punchLoading}
+                        style={{
+                            backgroundColor: attendanceStatus === 'In' ? theme.colors.error : theme.colors.success,
+                            flex: 0,
+                            paddingHorizontal: theme.spacing.xl,
+                        }}
+                    />
+                </View>
+            </Card>
 
-                {/* Admin Profile Card */}
-                {isAdmin && (
-                    <View style={styles.adminSection}>
-                        <Card style={styles.profileCard}>
-                            <View style={styles.avatarContainer}>
-                                <View style={styles.avatar}>
-                                    <Text style={styles.avatarText}>{getShortName()}</Text>
-                                </View>
+            {/* Admin Profile Card */}
+            {isAdmin && (
+                <View style={styles.adminSection}>
+                    <Card style={styles.profileCard}>
+                        <View style={styles.avatarContainer}>
+                            <View style={styles.avatar}>
+                                <Text style={styles.avatarText}>{getShortName()}</Text>
                             </View>
-                            <Text style={styles.profileName}>{user?.FullName}</Text>
-                            <Text style={styles.profileRole}>Admin</Text>
-                            <Text style={styles.membersText}>Members: {teamMembers.length - 1}</Text>
-                        </Card>
-
-                        {paymentInfo && (
-                            <>
-                                <Card style={styles.paymentCard}>
-                                    <Text style={styles.paymentTitle}>Next Payment</Text>
-                                    <View style={styles.paymentRow}>
-                                        <Text style={styles.paymentLabel}>Due Date:</Text>
-                                        <Text style={styles.paymentValue}>
-                                            {paymentInfo.due_date ? new Date(paymentInfo.due_date).toLocaleDateString() : 'N/A'}
-                                        </Text>
-                                    </View>
-                                    <View style={styles.paymentRow}>
-                                        <Text style={styles.paymentLabel}>Due Amount:</Text>
-                                        <Text style={styles.paymentValue}>${paymentInfo.total_due_amount || 0}</Text>
-                                    </View>
-                                </Card>
-
-                                <Card style={styles.paymentCard}>
-                                    <Text style={styles.paymentTitle}>Latest Payment</Text>
-                                    <View style={styles.paymentRow}>
-                                        <Text style={styles.paymentLabel}>Method:</Text>
-                                        <Text style={styles.paymentValue}>{paymentInfo.payment_method || 'N/A'}</Text>
-                                    </View>
-                                    <View style={styles.paymentRow}>
-                                        <Text style={styles.paymentLabel}>Amount:</Text>
-                                        <Text style={styles.paymentValue}>${paymentInfo.amount || 0}</Text>
-                                    </View>
-                                </Card>
-                            </>
-                        )}
-                    </View>
-                )}
-
-                {/* Time Summary Cards */}
-                {hoursWorked && renderTimeCard(
-                    'Today',
-                    hoursWorked.today,
-                    hoursWorked.previousDay,
-                    calculatePercentage(hoursWorked.today, hoursWorked.previousDay),
-                    hoursWorked.today < hoursWorked.previousDay
-                )}
-
-                {weeklySummary && renderTimeCard(
-                    'This Week',
-                    weeklySummary.currentWeek,
-                    weeklySummary.previousWeek,
-                    calculatePercentage(weeklySummary.currentWeek, weeklySummary.previousWeek),
-                    weeklySummary.currentWeek < weeklySummary.previousWeek
-                )}
-
-                {monthlySummary && renderTimeCard(
-                    'This Month',
-                    monthlySummary.currentMonth,
-                    monthlySummary.previousMonth,
-                    calculatePercentage(monthlySummary.currentMonth, monthlySummary.previousMonth),
-                    monthlySummary.currentMonth < monthlySummary.previousMonth
-                )}
-
-                {/* Productivity Chart */}
-                <Card style={styles.chartCard}>
-                    <View style={styles.chartHeader}>
-                        <Text style={styles.chartTitle}>Productivity</Text>
-                        {isAdmin && teamMembers.length > 0 && (
-                            <View style={styles.pickerContainer}>
-                                <Picker
-                                    selectedValue={selectedProductivityUserId || user?.id}
-                                    onValueChange={(value) => dispatch(setSelectedProductivityUserId(value))}
-                                    style={styles.picker}
-                                >
-                                    {teamMembers.map((member) => (
-                                        <Picker.Item
-                                            key={member.id}
-                                            label={member.firstName || member.FullName}
-                                            value={member.id}
-                                        />
-                                    ))}
-                                </Picker>
-                            </View>
-                        )}
-                    </View>
-                    {productivityChartData.length > 0 ? (
-                        <PieChart
-                            data={productivityChartData}
-                            width={screenWidth - 60}
-                            height={220}
-                            chartConfig={{
-                                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                            }}
-                            accessor="population"
-                            backgroundColor="transparent"
-                            paddingLeft="15"
-                            absolute
-                        />
-                    ) : (
-                        <View style={styles.emptyState}>
-                            <Ionicons name="pie-chart-outline" size={48} color={theme.colors.gray400} />
-                            <Text style={styles.emptyStateText}>No productivity data available</Text>
                         </View>
-                    )}
-                </Card>
+                        <Text style={styles.profileName}>{user?.FullName}</Text>
+                        <Text style={styles.profileRole}>Admin</Text>
+                        <Text style={styles.membersText}>Members: {teamMembers.length - 1}</Text>
+                    </Card>
 
-                {/* Task Summary Chart */}
-                <Card style={styles.chartCard}>
-                    <View style={styles.chartHeader}>
-                        <Text style={styles.chartTitle}>Tasks Summary</Text>
-                        {isAdmin && teamMembers.length > 0 && (
-                            <View style={styles.pickerContainer}>
-                                <Picker
-                                    selectedValue={selectedTaskUserId || user?.id}
-                                    onValueChange={(value) => dispatch(setSelectedTaskUserId(value))}
-                                    style={styles.picker}
-                                >
-                                    {teamMembers.map((member) => (
-                                        <Picker.Item
-                                            key={member.id}
-                                            label={member.firstName || member.FullName}
-                                            value={member.id}
-                                        />
-                                    ))}
-                                </Picker>
-                            </View>
-                        )}
-                    </View>
-                    {taskChartData.length > 0 ? (
-                        <PieChart
-                            data={taskChartData}
-                            width={screenWidth - 60}
-                            height={220}
-                            chartConfig={{
-                                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                            }}
-                            accessor="population"
-                            backgroundColor="transparent"
-                            paddingLeft="15"
-                            absolute
-                        />
-                    ) : (
-                        <View style={styles.emptyState}>
-                            <Ionicons name="checkbox-outline" size={48} color={theme.colors.gray400} />
-                            <Text style={styles.emptyStateText}>No task data available</Text>
-                        </View>
-                    )}
-                </Card>
-
-                {/* Project-wise Tasks */}
-                <Card style={styles.tableCard}>
-                    <View style={styles.chartHeader}>
-                        <Text style={styles.chartTitle}>Project-wise Time Spent</Text>
-                        {isAdmin && teamMembers.length > 0 && (
-                            <View style={styles.pickerContainer}>
-                                <Picker
-                                    selectedValue={selectedProjectUserId || user?.id}
-                                    onValueChange={(value) => dispatch(setSelectedProjectUserId(value))}
-                                    style={styles.picker}
-                                >
-                                    {teamMembers.map((member) => (
-                                        <Picker.Item
-                                            key={member.id}
-                                            label={member.firstName || member.FullName}
-                                            value={member.id}
-                                        />
-                                    ))}
-                                </Picker>
-                            </View>
-                        )}
-                    </View>
-                    {projectWiseTasks.length > 0 ? (
+                    {paymentInfo && (
                         <>
-                            <View style={styles.tableHeader}>
-                                <Text style={[styles.tableHeaderText, styles.projectColumn]}>Project</Text>
-                                <Text style={[styles.tableHeaderText, styles.taskColumn]}>Task</Text>
-                                <Text style={[styles.tableHeaderText, styles.timeColumn]}>Time</Text>
-                            </View>
-                            {projectWiseTasks.slice(0, 10).map((item, index) => (
-                                <View key={index} style={styles.tableRow}>
-                                    <Text style={[styles.tableCell, styles.projectColumn]} numberOfLines={1}>{item.name}</Text>
-                                    <Text style={[styles.tableCell, styles.taskColumn]} numberOfLines={1}>{item.taskName}</Text>
-                                    <View style={styles.timeBadge}>
-                                        <Text style={styles.timeText}>{item.timeTaken}</Text>
-                                    </View>
+                            <Card style={styles.paymentCard}>
+                                <Text style={styles.paymentTitle}>Next Payment</Text>
+                                <View style={styles.paymentRow}>
+                                    <Text style={styles.paymentLabel}>Due Date:</Text>
+                                    <Text style={styles.paymentValue}>
+                                        {paymentInfo.due_date ? new Date(paymentInfo.due_date).toLocaleDateString() : 'N/A'}
+                                    </Text>
                                 </View>
-                            ))}
+                                <View style={styles.paymentRow}>
+                                    <Text style={styles.paymentLabel}>Due Amount:</Text>
+                                    <Text style={styles.paymentValue}>${paymentInfo.total_due_amount || 0}</Text>
+                                </View>
+                            </Card>
+
+                            <Card style={styles.paymentCard}>
+                                <Text style={styles.paymentTitle}>Latest Payment</Text>
+                                <View style={styles.paymentRow}>
+                                    <Text style={styles.paymentLabel}>Method:</Text>
+                                    <Text style={styles.paymentValue}>{paymentInfo.payment_method || 'N/A'}</Text>
+                                </View>
+                                <View style={styles.paymentRow}>
+                                    <Text style={styles.paymentLabel}>Amount:</Text>
+                                    <Text style={styles.paymentValue}>${paymentInfo.amount || 0}</Text>
+                                </View>
+                            </Card>
                         </>
-                    ) : (
-                        <View style={styles.emptyState}>
-                            <Ionicons name="folder-open-outline" size={48} color={theme.colors.gray400} />
-                            <Text style={styles.emptyStateText}>No project data available</Text>
+                    )}
+                </View>
+            )}
+
+            {/* Time Summary Cards */}
+            {hoursWorked && renderTimeCard(
+                'Today',
+                hoursWorked.today,
+                hoursWorked.previousDay,
+                calculatePercentage(hoursWorked.today, hoursWorked.previousDay),
+                hoursWorked.today < hoursWorked.previousDay
+            )}
+
+            {weeklySummary && renderTimeCard(
+                'This Week',
+                weeklySummary.currentWeek,
+                weeklySummary.previousWeek,
+                calculatePercentage(weeklySummary.currentWeek, weeklySummary.previousWeek),
+                weeklySummary.currentWeek < weeklySummary.previousWeek
+            )}
+
+            {monthlySummary && renderTimeCard(
+                'This Month',
+                monthlySummary.currentMonth,
+                monthlySummary.previousMonth,
+                calculatePercentage(monthlySummary.currentMonth, monthlySummary.previousMonth),
+                monthlySummary.currentMonth < monthlySummary.previousMonth
+            )}
+
+            {/* Productivity Chart */}
+            <Card style={styles.chartCard}>
+                <View style={styles.chartHeader}>
+                    <Text style={styles.chartTitle}>Productivity</Text>
+                    {isAdmin && teamMembers.length > 0 && (
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={selectedProductivityUserId || user?.id}
+                                onValueChange={(value) => dispatch(setSelectedProductivityUserId(value))}
+                                style={styles.picker}
+                            >
+                                {teamMembers.map((member) => (
+                                    <Picker.Item
+                                        key={member.id}
+                                        label={member.firstName || member.FullName}
+                                        value={member.id}
+                                    />
+                                ))}
+                            </Picker>
                         </View>
                     )}
-                </Card>
-            </ScrollView>
-        </View>
+                </View>
+                {productivityChartData.length > 0 ? (
+                    <PieChart
+                        data={productivityChartData}
+                        width={screenWidth - 60}
+                        height={220}
+                        height={220}
+                        chartConfig={{
+                            color: (opacity = 1) => theme.colors.textPrimary,
+                            labelColor: (opacity = 1) => theme.colors.textSecondary,
+                        }}
+                        accessor="population"
+                        backgroundColor="transparent"
+                        paddingLeft="15"
+                        absolute
+                    />
+                ) : (
+                    <View style={styles.emptyState}>
+                        <Ionicons name="pie-chart-outline" size={48} color={theme.colors.gray400} />
+                        <Text style={styles.emptyStateText}>No productivity data available</Text>
+                    </View>
+                )}
+            </Card>
+
+            {/* Task Summary Chart */}
+            <Card style={styles.chartCard}>
+                <View style={styles.chartHeader}>
+                    <Text style={styles.chartTitle}>Tasks Summary</Text>
+                    {isAdmin && teamMembers.length > 0 && (
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={selectedTaskUserId || user?.id}
+                                onValueChange={(value) => dispatch(setSelectedTaskUserId(value))}
+                                style={styles.picker}
+                            >
+                                {teamMembers.map((member) => (
+                                    <Picker.Item
+                                        key={member.id}
+                                        label={member.firstName || member.FullName}
+                                        value={member.id}
+                                    />
+                                ))}
+                            </Picker>
+                        </View>
+                    )}
+                </View>
+                {taskChartData.length > 0 ? (
+                    <PieChart
+                        data={taskChartData}
+                        width={screenWidth - 60}
+                        height={220}
+                        height={220}
+                        chartConfig={{
+                            color: (opacity = 1) => theme.colors.textPrimary,
+                            labelColor: (opacity = 1) => theme.colors.textSecondary,
+                        }}
+                        accessor="population"
+                        backgroundColor="transparent"
+                        paddingLeft="15"
+                        absolute
+                    />
+                ) : (
+                    <View style={styles.emptyState}>
+                        <Ionicons name="checkbox-outline" size={48} color={theme.colors.gray400} />
+                        <Text style={styles.emptyStateText}>No task data available</Text>
+                    </View>
+                )}
+            </Card>
+
+            {/* Project-wise Tasks */}
+            <Card style={styles.tableCard}>
+                <View style={styles.chartHeader}>
+                    <Text style={styles.chartTitle}>Project-wise Time Spent</Text>
+                    {isAdmin && teamMembers.length > 0 && (
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={selectedProjectUserId || user?.id}
+                                onValueChange={(value) => dispatch(setSelectedProjectUserId(value))}
+                                style={styles.picker}
+                            >
+                                {teamMembers.map((member) => (
+                                    <Picker.Item
+                                        key={member.id}
+                                        label={member.firstName || member.FullName}
+                                        value={member.id}
+                                    />
+                                ))}
+                            </Picker>
+                        </View>
+                    )}
+                </View>
+                {projectWiseTasks.length > 0 ? (
+                    <>
+                        <View style={styles.tableHeader}>
+                            <Text style={[styles.tableHeaderText, styles.projectColumn]}>Project</Text>
+                            <Text style={[styles.tableHeaderText, styles.taskColumn]}>Task</Text>
+                            <Text style={[styles.tableHeaderText, styles.timeColumn]}>Time</Text>
+                        </View>
+                        {projectWiseTasks.slice(0, 10).map((item, index) => (
+                            <View key={index} style={styles.tableRow}>
+                                <Text style={[styles.tableCell, styles.projectColumn]} numberOfLines={1}>{item.name}</Text>
+                                <Text style={[styles.tableCell, styles.taskColumn]} numberOfLines={1}>{item.taskName}</Text>
+                                <View style={styles.timeBadge}>
+                                    <Text style={styles.timeText}>{item.timeTaken}</Text>
+                                </View>
+                            </View>
+                        ))}
+                    </>
+                ) : (
+                    <View style={styles.emptyState}>
+                        <Ionicons name="folder-open-outline" size={48} color={theme.colors.gray400} />
+                        <Text style={styles.emptyStateText}>No project data available</Text>
+                    </View>
+                )}
+            </Card>
+        </ScrollView>
+        </View >
     );
 };
 
@@ -756,17 +756,5 @@ const styles = StyleSheet.create({
         fontSize: theme.typography.fontSize.sm,
         color: theme.colors.primary,
         fontWeight: theme.typography.fontWeight.bold,
-    },
-    punchButton: {
-        paddingHorizontal: theme.spacing.lg,
-        paddingVertical: theme.spacing.sm,
-        borderRadius: theme.borderRadius.md,
-        minWidth: 100,
-        alignItems: 'center',
-    },
-    punchButtonText: {
-        color: theme.colors.white,
-        fontWeight: 'bold',
-        fontSize: theme.typography.fontSize.md,
     },
 });
