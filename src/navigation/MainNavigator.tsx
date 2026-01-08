@@ -115,7 +115,7 @@ const MainNavigator = () => {
                         name="Payslips"
                         component={PayslipScreen}
                         options={{
-                            title: t('navigation.payslips') || 'Payslips',
+                            title: t('navigation.payslips'),
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="document-text-outline" size={size} color={color} />
                             ),
@@ -292,7 +292,7 @@ const MainNavigator = () => {
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="lock-closed-outline" size={size} color={color} />
                     ),
-                    title: t('profile.change_password') || 'Change Password',
+                    title: t('profile.change_password'),
                 }}
             />
             <Drawer.Screen
@@ -319,8 +319,8 @@ const MainNavigator = () => {
                 name="AddExpense"
                 component={AddExpenseScreen}
                 options={{
-                    drawerLabel: t('navigation.expenses') || 'Expenses',
-                    title: t('navigation.expenses') || 'Expenses',
+                    drawerLabel: t('navigation.expenses'),
+                    title: t('navigation.expenses'),
                     drawerItemStyle: { display: 'none' },
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="add-circle-outline" size={size} color={color} />
