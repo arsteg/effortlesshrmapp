@@ -1,4 +1,4 @@
-package com.effortlesshrmapp
+package com.arsteg.effortlesshrmapp
 
 import android.os.Build
 import android.os.Bundle

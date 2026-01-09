@@ -1,4 +1,4 @@
-package com.effortlesshrmapp
+package com.arsteg.effortlesshrmapp
 
 import android.app.Application
 import android.content.res.Configuration

@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.effortlesshrmapp"
+    namespace "com.arsteg.effortlesshrmapp"
     defaultConfig {
-        applicationId "com.effortlesshrmapp"
+        applicationId "com.arsteg.effortlesshrmapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
