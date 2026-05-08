@@ -103,37 +103,17 @@ export const TaskScreen = () => {
         if (!user?.id) return;
 
         try {
-            // Add current user as "Me"
-            const projects: Project[] = [];
-
-            // Load subordinates
+            // Load projects for the user
             const response = await taskService.projectListByUser(user.id);
 
             // Handle different response structures
-            const subordinatesData = Array.isArray(response) ? response : (response.data || []);
+            const projectsData = Array.isArray(response) ? response : (response.data || []);
 
-            if (subordinatesData && subordinatesData.length > 0) {
-                const subordinates: TeamMember[] = subordinatesData
-                    .filter((u: any) => u.id !== user.id)
-                    .map((u: any) => ({
-                        id: u.id,
-                        name: u.firstName ? `${u.firstName} ${u.lastName || ''}`.trim() : (u.FullName || u.email || 'Unknown'),
-                        email: u.email || ''
-                    }))
-                    .sort((a: TeamMember, b: TeamMember) =>
-                        a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-                    );
-
-                projects.push(...subordinates);
-            }
-
-            setProjects(projects);
-            setSelectedUser(members[0]); // Default to "Me"
+            // Projects are loaded but not stored in state for now
+            // This function exists for potential future use
+            console.log('Projects loaded:', projectsData.length);
         } catch (error) {
-            console.error('Failed to load team members:', error);
-            const fallbackMember = { id: user.id, name: 'Me', email: user.email || '' };
-            setTeamMembers([fallbackMember]);
-            setSelectedUser(fallbackMember);
+            console.error('Failed to load projects:', error);
         }
     };
 

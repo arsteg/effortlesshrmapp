@@ -33,6 +33,12 @@ import AttendanceSettingsScreen from '../screens/attendance/AttendanceSettingsSc
 import ManualAttendanceScreen from '../screens/attendance/ManualAttendanceScreen';
 import AttendanceReportScreen from '../screens/attendance/AttendanceReportScreen';
 
+// Communication screens
+import ConversationsScreen from '../screens/communication/ConversationsScreen';
+import ChatScreen from '../screens/communication/ChatScreen';
+import NewConversationScreen from '../screens/communication/NewConversationScreen';
+import CallScreen from '../screens/communication/CallScreen';
+
 // Import all screens
 
 const Drawer = createDrawerNavigator();
@@ -73,6 +79,17 @@ const MainNavigator = () => {
                     title: t('navigation.screenshots'),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="camera-outline" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Drawer.Screen
+                name="Messages"
+                component={ConversationsScreen}
+                options={{
+                    title: t('navigation.messages') || 'Messages',
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="chatbubbles-outline" size={size} color={color} />
                     ),
                 }}
             />
@@ -350,6 +367,35 @@ const MainNavigator = () => {
                 options={{
                     drawerItemStyle: { display: 'none' },
                     title: t('attendance.attendance_report'),
+                    headerShown: false
+                }}
+            />
+
+            {/* Communication screens (hidden from drawer) */}
+            <Drawer.Screen
+                name="Chat"
+                component={ChatScreen}
+                options={{
+                    drawerItemStyle: { display: 'none' },
+                    title: 'Chat',
+                    headerShown: false
+                }}
+            />
+            <Drawer.Screen
+                name="NewConversation"
+                component={NewConversationScreen}
+                options={{
+                    drawerItemStyle: { display: 'none' },
+                    title: 'New Conversation',
+                    headerShown: false
+                }}
+            />
+            <Drawer.Screen
+                name="Call"
+                component={CallScreen}
+                options={{
+                    drawerItemStyle: { display: 'none' },
+                    title: 'Call',
                     headerShown: false
                 }}
             />

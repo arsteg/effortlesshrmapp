@@ -137,7 +137,7 @@ const ReportsScreen = () => {
         try {
             const res = await projectService.getProjects();
             // Handle various response parsing scenarios
-            const projects = res?.data?.projectList || res?.projectList || [];
+            const projects = res?.data?.projectList || (res as any)?.projectList || [];
 
             const map: Record<string, string> = {};
             let debugLog = `Projects found: ${projects.length}. `;

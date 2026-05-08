@@ -127,8 +127,8 @@ export const SettingsScreen = ({ navigation }: any) => {
                                         styles.settingItem,
                                         itemIndex < section.items.length - 1 && styles.settingItemBorder,
                                     ]}
-                                    onPress={item.onPress}
-                                    disabled={item.isSwitch}
+                                    onPress={'onPress' in item ? item.onPress : undefined}
+                                    disabled={'isSwitch' in item && item.isSwitch}
                                 >
                                     <View style={styles.settingItemLeft}>
                                         <Ionicons
@@ -139,18 +139,18 @@ export const SettingsScreen = ({ navigation }: any) => {
                                         <Text style={styles.settingItemLabel}>{item.label}</Text>
                                     </View>
                                     <View style={styles.settingItemRight}>
-                                        {item.isSwitch ? (
+                                        {'isSwitch' in item && item.isSwitch ? (
                                             <Switch
-                                                value={item.value}
-                                                onValueChange={item.onToggle}
+                                                value={'value' in item ? item.value as boolean : false}
+                                                onValueChange={'onToggle' in item ? item.onToggle : undefined}
                                                 trackColor={{
                                                     false: theme.colors.gray300,
                                                     true: theme.colors.primary,
                                                 }}
                                             />
-                                        ) : item.value ? (
-                                            <Text style={styles.settingItemValue}>{item.value}</Text>
-                                        ) : item.showArrow ? (
+                                        ) : 'value' in item && item.value ? (
+                                            <Text style={styles.settingItemValue}>{String(item.value)}</Text>
+                                        ) : 'showArrow' in item && item.showArrow ? (
                                             <Ionicons
                                                 name="chevron-forward"
                                                 size={20}

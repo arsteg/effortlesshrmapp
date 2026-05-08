@@ -1,0 +1,4 @@
+Build Credentials WCEnly3Nd4 (Default)
+SHA1: FB:20:37:D9:11:9D:02:6C:88:1C:9D:1E:7A:9D:1D:1D:FB:8D:49:B9
+
+Build command: eas build

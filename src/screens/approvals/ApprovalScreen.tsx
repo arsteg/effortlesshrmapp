@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     screenTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: theme.colors.text,
+        color: theme.colors.textPrimary,
     },
     filterRow: {
         flexDirection: 'row',
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     userName: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: theme.colors.text,
+        color: theme.colors.textPrimary,
     },
     statusBadge: {
         paddingHorizontal: 8,

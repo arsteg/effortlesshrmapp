@@ -37,7 +37,7 @@ export const attendanceService = {
     getAttendance: async (req: AttendanceRequest) => {
         return apiService.post<AttendanceData[]>('/attendance/get', req);
     },
-    clockIn: async (data: { officeId: string; latitude: number; longitude: number; selfieUrl?: string; deviceId?: string; company?: string }) => {
+    clockIn: async (data: { officeId?: string; latitude: number; longitude: number; selfieUrl?: string; deviceId?: string; company?: string }) => {
         return apiService.post('/attendance/check-in', data);
     },
     clockOut: async (data: { officeId?: string; latitude: number; longitude: number; company?: string }) => {

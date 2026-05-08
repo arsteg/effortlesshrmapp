@@ -323,8 +323,7 @@ export const DashboardScreen = ({ navigation }: any) => {
                             paddingHorizontal: theme.spacing.xl,
                         }}
                     />
-                </View>
-            </Card>
+                </Card>
 
             {/* Admin Profile Card */}
             {isAdmin && (
@@ -424,7 +423,6 @@ export const DashboardScreen = ({ navigation }: any) => {
                         data={productivityChartData}
                         width={screenWidth - 60}
                         height={220}
-                        height={220}
                         chartConfig={{
                             color: (opacity = 1) => theme.colors.textPrimary,
                             labelColor: (opacity = 1) => theme.colors.textSecondary,
@@ -468,7 +466,6 @@ export const DashboardScreen = ({ navigation }: any) => {
                     <PieChart
                         data={taskChartData}
                         width={screenWidth - 60}
-                        height={220}
                         height={220}
                         chartConfig={{
                             color: (opacity = 1) => theme.colors.textPrimary,

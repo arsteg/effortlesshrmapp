@@ -1,5 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import NetInfo from '@react-native-community/netinfo';
+
+// NetInfo check - will be replaced with actual connectivity check when package is installed
+const checkConnectivity = async (): Promise<boolean> => {
+    // For now, assume connected. In production, use @react-native-community/netinfo
+    return true;
+};
 
 const QUEUE_KEY = '@attendance_sync_queue';
 
@@ -22,7 +27,7 @@ export const syncService = {
             currentQueue.push(record);
             await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(currentQueue));
 
-            const isConnected = (await NetInfo.fetch()).isConnected;
+            const isConnected = await checkConnectivity();
             if (isConnected) {
                 await this.processQueue();
             }

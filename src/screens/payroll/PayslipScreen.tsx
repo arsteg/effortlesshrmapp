@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: theme.colors.text,
+        color: theme.colors.textPrimary,
     },
     loader: {
         marginTop: 20,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     employeeName: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: theme.colors.text,
+        color: theme.colors.textPrimary,
     },
     periodText: {
         fontSize: 14,
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     detailValue: {
         fontSize: 16,
         fontWeight: '500',
-        color: theme.colors.text,
+        color: theme.colors.textPrimary,
         marginTop: 4,
     },
     divider: {

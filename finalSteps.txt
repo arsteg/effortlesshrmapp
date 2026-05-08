@@ -1,0 +1,10 @@
+3. Final Step: When the "Pending" message disappears
+Once the 48 hours have passed and the "Pending" message is gone:
+
+Do NOT generate a new key. Your EAS is already set up with the correct one.
+
+Run your build: eas build --platform android --profile production.
+
+Upload: Take the .aab file from Expo and upload it to Google.
+
+Success: Google will see the signature 57:ED (from your terminal earlier) and match it against the new record they just created for you.

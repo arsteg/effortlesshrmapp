@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
 import dashboardReducer from './slices/dashboardSlice';
 import taskReducer from './slices/taskSlice';
+import communicationReducer from './slices/communicationSlice';
 
 export const store = configureStore({
     reducer: {
         auth: authReducer,
         dashboard: dashboardReducer,
         task: taskReducer,
+        communication: communicationReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
