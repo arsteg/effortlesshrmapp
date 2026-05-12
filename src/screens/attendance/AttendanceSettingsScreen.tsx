@@ -141,7 +141,12 @@ const AttendanceSettingsScreen = () => {
             setLoading(true);
             const response: any = await attendanceService.getRulesByOffice(officeId);
             if (response.status?.toLowerCase() === 'success') {
-                setCurrentRules(response.data.rules);
+                const fetchedRules = response.data?.rules;
+                setCurrentRules({
+                    ...(fetchedRules || {}),
+                    officeId,
+                    office: officeId,
+                });
                 setRulesModalVisible(true);
             }
         } catch (error) {
@@ -160,6 +165,7 @@ const AttendanceSettingsScreen = () => {
             if (response.status?.toLowerCase() === 'success') {
                 Alert.alert(t('common.success'), t('attendance.rules_updated') || 'Rules updated successfully');
                 setRulesModalVisible(false);
+                setCurrentRules(null);
             }
         } catch (error) {
             Alert.alert(t('common.error'), t('attendance.failed_update_rules') || 'Failed to update rules');
@@ -359,7 +365,13 @@ const AttendanceSettingsScreen = () => {
                             </ScrollView>
                         )}
                         <View style={styles.modalFooter}>
-                            <TouchableOpacity style={styles.cancelButton} onPress={() => setRulesModalVisible(false)}>
+                            <TouchableOpacity
+                                style={styles.cancelButton}
+                                onPress={() => {
+                                    setRulesModalVisible(false);
+                                    setCurrentRules(null);
+                                }}
+                            >
                                 <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.saveButton} onPress={handleSaveRules}>
