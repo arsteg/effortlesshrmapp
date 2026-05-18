@@ -258,6 +258,11 @@ const AttendanceScreen = () => {
     };
 
     const handleCheckOut = async () => {
+        if (!selectedOffice) {
+            Alert.alert(t('attendance.office_required') || 'Office Required', t('attendance.select_office_desc') || 'Please select an office location.');
+            return;
+        }
+
         setActionLoading(true);
         try {
             const loc = await getCurrentLocation();
@@ -266,11 +271,29 @@ const AttendanceScreen = () => {
                 return;
             }
 
+            const dist = calculateDistance(
+                loc.coords.latitude,
+                loc.coords.longitude,
+                selectedOffice.latitude || selectedOffice.location.coordinates[1],
+                selectedOffice.longitude || selectedOffice.location.coordinates[0]
+            );
+
+            const allowedRadius = selectedOffice.geofence_radius || selectedOffice.radius;
+
+            if (dist > allowedRadius) {
+                Alert.alert(
+                    t('attendance.outside_geofence'),
+                    `${t('attendance.distance')}: ${Math.round(dist)}m. ${t('attendance.target')}: ${allowedRadius}m.`
+                );
+                setActionLoading(false);
+                return;
+            }
+
             const companyId = user?.company?.id || user?.company || (user as any)?.companyId;
             const userId = user?.id;
 
             const response: any = await attendanceService.clockOut({
-                officeId: selectedOffice?._id,
+                officeId: selectedOffice._id,
                 latitude: loc.coords.latitude,
                 longitude: loc.coords.longitude,
                 company: companyId
