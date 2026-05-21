@@ -14,6 +14,8 @@ const hi = {
         today: "आज",
         none: "कोई नहीं",
         no_data: "कोई डेटा नहीं मिला",
+        delete: "हटाएं",
+        unexpected_error: "एक अनपेक्षित त्रुटि हुई।",
     },
     navigation: {
         dashboard: "डैशबोर्ड",
@@ -40,6 +42,7 @@ const hi = {
         team_members: "टीम के सदस्य",
         manage_employees: "कर्मचारियों को प्रबंधित करें",
         leave_application: "लीव एप्लिकेशन",
+        messages: "संदेश",
     },
     attendance: {
         title: "उपस्थिति प्रबंधन",
@@ -127,6 +130,25 @@ const hi = {
         request_updated: "अनुरोध सफलतापूर्वक अपडेट किया गया",
         failed_load_requests: "मैनुअल उपस्थिति अनुरोध लोड करने में विफल",
         status: "स्थिति",
+        load_error: "उपस्थिति डेटा लोड करने में विफल।",
+        report_error: "रिपोर्ट प्राप्त करने में विफल।",
+        office_required: "कार्यालय आवश्यक",
+        select_office_desc: "कृपया कार्यालय स्थान चुनें।",
+        clock_in_failed: "चेक-इन विफल।",
+        clock_out_failed: "चेक-आउट विफल।",
+        reason_required: "कृपया एक कारण प्रदान करें।",
+        photo_required: "फोटो आवश्यक",
+        photo_desc: "कृपया एक फोटो संलग्न करें।",
+        manager_required: "मैनेजर आवश्यक",
+        request_failed: "अनुरोध विफल।",
+        failed_update_request: "अनुरोध अपडेट करने में विफल",
+        failed_get_location: "वर्तमान स्थान प्राप्त करने में विफल",
+        please_fill_all_fields: "कृपया सभी फ़ील्ड वैध निर्देशांक के साथ भरें",
+        failed_save_office: "कार्यालय सहेजने में विफल",
+        failed_delete_office: "कार्यालय हटाने में विफल",
+        failed_fetch_rules: "नियम प्राप्त करने में विफल",
+        rules_updated: "नियम सफलतापूर्वक अपडेट किए गए",
+        failed_update_rules: "नियम अपडेट करने में विफल",
     },
     dashboard: {
         welcome: "स्वागत है",
@@ -156,6 +178,9 @@ const hi = {
         select_member: "सदस्य चुनें",
         search_placeholder: "खोजें...",
         status_anomaly: "विसंगति",
+    },
+    profile: {
+        change_password: "पासवर्ड बदलें",
     }
 };
 

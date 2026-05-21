@@ -14,6 +14,8 @@ const en = {
         today: "Today",
         none: "None",
         no_data: "No data found",
+        delete: "Delete",
+        unexpected_error: "An unexpected error occurred.",
     },
     navigation: {
         dashboard: "Dashboard",
@@ -40,6 +42,7 @@ const en = {
         team_members: "Team Members",
         manage_employees: "Manage Employees",
         leave_application: "Leave Application",
+        messages: "Messages",
     },
     attendance: {
         title: "Attendance Management",
@@ -127,6 +130,25 @@ const en = {
         request_updated: "Request updated successfully",
         failed_load_requests: "Failed to load manual attendance requests",
         status: "Status",
+        load_error: "Failed to load attendance data.",
+        report_error: "Failed to fetch report.",
+        office_required: "Office Required",
+        select_office_desc: "Please select an office location.",
+        clock_in_failed: "Check-in failed.",
+        clock_out_failed: "Check-out failed.",
+        reason_required: "Please provide a reason.",
+        photo_required: "Photo Required",
+        photo_desc: "Please attach a photo.",
+        manager_required: "Manager Required",
+        request_failed: "Request failed.",
+        failed_update_request: "Failed to update request",
+        failed_get_location: "Failed to get current location",
+        please_fill_all_fields: "Please fill all fields with valid coordinates",
+        failed_save_office: "Failed to save office",
+        failed_delete_office: "Failed to delete office",
+        failed_fetch_rules: "Failed to fetch rules",
+        rules_updated: "Rules updated successfully",
+        failed_update_rules: "Failed to update rules",
     },
     dashboard: {
         welcome: "Welcome",
@@ -156,6 +178,9 @@ const en = {
         select_member: "Select member",
         search_placeholder: "Search...",
         status_anomaly: "Anomaly",
+    },
+    profile: {
+        change_password: "Change Password",
     }
 };
 
