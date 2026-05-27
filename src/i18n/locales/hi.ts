@@ -80,6 +80,8 @@ const hi = {
         attach_photo: "फोटो संलग्न करें",
         photo_attached: "फोटो संलग्न है",
         outside_geofence: "जियोफेंस के बाहर",
+        please_wait: "कृपया प्रतीक्षा करें",
+        wait_before_action: "कृपया अगली क्रिया से पहले कुछ सेकंड प्रतीक्षा करें।",
         selfie_required: "सेल्फी आवश्यक है",
         verification_selfie: "सत्यापन सेल्फी कैप्चर पर निर्भर करता है।",
         clock_in_success: "सफलतापूर्वक क्लॉक इन किया गया।",

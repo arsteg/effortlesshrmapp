@@ -80,6 +80,8 @@ const en = {
         attach_photo: "Attach Photo",
         photo_attached: "Photo Attached",
         outside_geofence: "Outside Geofence",
+        please_wait: "Please Wait",
+        wait_before_action: "Please wait a few seconds before your next action.",
         selfie_required: "Selfie Required",
         verification_selfie: "Verification depends on a selfie capture.",
         clock_in_success: "Clocked in successfully.",

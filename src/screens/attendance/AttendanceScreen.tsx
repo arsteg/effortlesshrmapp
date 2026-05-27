@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     View,
     Text,
@@ -26,11 +26,16 @@ import { useCamera } from '../../hooks/useCamera';
 import { attendanceService } from '../../services/attendanceService';
 import { theme } from '../../theme';
 import { calculateDistance } from '../../utils/distance';
+import { storage } from '../../utils/storage';
 import { authService } from '../../services/authService';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Loading } from '../../components/common/Loading';
+
+// Minimum gap between two clock actions. Guards against an accidental
+// clock-out fired right after a clock-in (the button relabels in place).
+const ACTION_COOLDOWN_MS = 5000;
 
 interface Office {
     _id: string;
@@ -73,6 +78,9 @@ const AttendanceScreen = () => {
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    // Timestamp (ms) of the last successful clock action, used to debounce
+    // rapid re-taps. A ref so the check is synchronous (no render lag).
+    const lastActionAtRef = useRef(0);
 
     // Manual Request Modal State
     const [manualModalVisible, setManualModalVisible] = useState(false);
@@ -94,9 +102,10 @@ const AttendanceScreen = () => {
     const [showReportFromPicker, setShowReportFromPicker] = useState(false);
     const [showReportToPicker, setShowReportToPicker] = useState(false);
 
-    const loadData = useCallback(async () => {
+    const loadData = useCallback(async (isRefresh = false) => {
         try {
-            setLoading(true);
+            if (isRefresh) setRefreshing(true);
+            else setLoading(true);
             const companyId = user?.company?.id || user?.company || (user as any)?.companyId;
 
             const [officesRes, historyRes]: [any, any] = await Promise.all([
@@ -104,16 +113,27 @@ const AttendanceScreen = () => {
                 attendanceService.getHistory({ company: companyId })
             ]);
 
+            // Determine whether the user currently has an open shift (from history)
+            // so we only restore/lock the clock-in office while clocked in.
+            const historyData = historyRes.status?.toLowerCase() === 'success'
+                ? (historyRes.data?.history || [])
+                : [];
+            const isCurrentlyClockedIn = historyData[0]?.type === 'check-in';
+
             if (officesRes.status?.toLowerCase() === 'success') {
                 const officesData = officesRes.data?.offices || [];
                 setOffices(officesData);
                 if (officesData.length > 0) {
-                    setSelectedOffice(officesData[0]);
+                    // Keep the office chosen at clock-in selected until clock-out.
+                    const savedOfficeId = isCurrentlyClockedIn ? await storage.getItem('clockInOfficeId') : null;
+                    const savedOffice = savedOfficeId
+                        ? officesData.find((o: Office) => o._id === savedOfficeId)
+                        : null;
+                    setSelectedOffice(savedOffice || officesData[0]);
                 }
             }
 
             if (historyRes.status?.toLowerCase() === 'success') {
-                const historyData = historyRes.data?.history || [];
                 setHistory(historyData);
                 // Last check-in/out determines current state
                 const last = historyData[0];
@@ -164,8 +184,7 @@ const AttendanceScreen = () => {
     }, [location, selectedOffice]);
 
     const handleRefresh = () => {
-        setRefreshing(true);
-        loadData();
+        loadData(true);
     };
 
     const handleFetchUserReport = async () => {
@@ -192,6 +211,13 @@ const AttendanceScreen = () => {
     };
 
     const handleCheckIn = async () => {
+        if (Date.now() - lastActionAtRef.current < ACTION_COOLDOWN_MS) {
+            Alert.alert(
+                t('attendance.please_wait') || 'Please wait',
+                t('attendance.wait_before_action') || 'Please wait a few seconds before your next action.'
+            );
+            return;
+        }
         if (!selectedOffice) {
             Alert.alert(t('attendance.office_required') || 'Office Required', t('attendance.select_office_desc') || 'Please select an office location.');
             return;
@@ -245,8 +271,11 @@ const AttendanceScreen = () => {
             });
 
             if (response.status?.toLowerCase() === 'success') {
+                // Remember where the user clocked in so clock-out defaults here.
+                await storage.setItem('clockInOfficeId', selectedOffice._id);
                 Alert.alert(t('common.success'), t('attendance.clock_in_success'));
-                loadData();
+                await loadData(true);
+                lastActionAtRef.current = Date.now();
             } else {
                 Alert.alert(t('common.error'), response.message || t('attendance.clock_in_failed') || 'Check-in failed.');
             }
@@ -258,6 +287,13 @@ const AttendanceScreen = () => {
     };
 
     const handleCheckOut = async () => {
+        if (Date.now() - lastActionAtRef.current < ACTION_COOLDOWN_MS) {
+            Alert.alert(
+                t('attendance.please_wait') || 'Please wait',
+                t('attendance.wait_before_action') || 'Please wait a few seconds before your next action.'
+            );
+            return;
+        }
         if (!selectedOffice) {
             Alert.alert(t('attendance.office_required') || 'Office Required', t('attendance.select_office_desc') || 'Please select an office location.');
             return;
@@ -300,8 +336,11 @@ const AttendanceScreen = () => {
             });
 
             if (response.status?.toLowerCase() === 'success') {
+                // Clock-out done — clear the saved office so the dropdown unlocks.
+                await storage.removeItem('clockInOfficeId');
                 Alert.alert(t('common.success'), t('attendance.clock_out_success'));
-                loadData();
+                await loadData(true);
+                lastActionAtRef.current = Date.now();
             } else {
                 Alert.alert(t('common.error'), response.message || t('attendance.clock_out_failed') || 'Check-out failed.');
             }
@@ -350,7 +389,7 @@ const AttendanceScreen = () => {
                     photoUrl: '',
                     managerId: ''
                 });
-                loadData();
+                await loadData(true);
             } else {
                 Alert.alert(t('common.error'), response.message || t('attendance.request_failed') || 'Request failed.');
             }
