@@ -1,6 +1,6 @@
-export const API_BASE_URL = 'https://effortlesshrm-e029cd6a5095.herokuapp.com/api/v1/';
-export const WEBSOCKET_URL = 'wss://effortlesshrm-e029cd6a5095.herokuapp.com/';
-export const PORTAL_BASE_URL = 'https://www.effortlesshrm.com/';
+export const API_BASE_URL = 'https://api.effortlesshrm.com/api/v1/';
+export const WEBSOCKET_URL = 'wss://api.effortlesshrm.com/';
+export const PORTAL_BASE_URL = 'https://api.effortlesshrm.com/';
 
 // API Success/Failure codes
 export const API_SUCCESS_CODE = 'Success';
