@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.arsteg.effortlesshrmapp"
+      "package": "com.arsteg.effortlesshrm.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
