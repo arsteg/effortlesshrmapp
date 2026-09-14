@@ -15,6 +15,7 @@ const hi = {
         none: "कोई नहीं",
         no_data: "कोई डेटा नहीं मिला",
         delete: "हटाएं",
+        retry: "पुनः प्रयास करें",
         unexpected_error: "एक अनपेक्षित त्रुटि हुई।",
     },
     navigation: {

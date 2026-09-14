@@ -15,6 +15,7 @@ const en = {
         none: "None",
         no_data: "No data found",
         delete: "Delete",
+        retry: "Retry",
         unexpected_error: "An unexpected error occurred.",
     },
     navigation: {

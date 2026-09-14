@@ -244,7 +244,11 @@ const AttendanceScreen = () => {
             if (dist > allowedRadius) {
                 Alert.alert(
                     t('attendance.outside_geofence'),
-                    `${t('attendance.distance')}: ${Math.round(dist)}m. ${t('attendance.target')}: ${allowedRadius}m.`
+                    `${t('attendance.distance')}: ${Math.round(dist)}m. ${t('attendance.target')}: ${allowedRadius}m.`,
+                    [
+                        { text: t('common.cancel') || 'Cancel', style: 'cancel' },
+                        { text: t('common.retry') || 'Retry', onPress: () => handleCheckIn() },
+                    ]
                 );
                 setActionLoading(false);
                 return;
@@ -319,7 +323,11 @@ const AttendanceScreen = () => {
             if (dist > allowedRadius) {
                 Alert.alert(
                     t('attendance.outside_geofence'),
-                    `${t('attendance.distance')}: ${Math.round(dist)}m. ${t('attendance.target')}: ${allowedRadius}m.`
+                    `${t('attendance.distance')}: ${Math.round(dist)}m. ${t('attendance.target')}: ${allowedRadius}m.`,
+                    [
+                        { text: t('common.cancel') || 'Cancel', style: 'cancel' },
+                        { text: t('common.retry') || 'Retry', onPress: () => handleCheckOut() },
+                    ]
                 );
                 setActionLoading(false);
                 return;
