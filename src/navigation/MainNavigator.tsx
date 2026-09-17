@@ -43,7 +43,13 @@ import CallScreen from '../screens/communication/CallScreen';
 
 const Drawer = createDrawerNavigator();
 
-const MainNavigator = () => {
+interface MainNavigatorProps {
+    // Screen to open first instead of the Dashboard (e.g. "Attendance" when
+    // an interrupted clock-in needs completing after the OS killed the app).
+    initialRouteName?: string;
+}
+
+const MainNavigator = ({ initialRouteName }: MainNavigatorProps) => {
     const { t } = useTranslation();
     const isAdminPortal = useAppSelector((state) => state.auth.isAdminPortal);
 
@@ -52,6 +58,7 @@ const MainNavigator = () => {
 
     return (
         <Drawer.Navigator
+            initialRouteName={initialRouteName}
             drawerContent={(props) => <CustomDrawerContent {...props} />}
             screenOptions={{
                 headerStyle: { backgroundColor: theme.colors.primary },

@@ -87,6 +87,8 @@ const en = {
         verification_selfie: "Verification depends on a selfie capture.",
         camera_timeout_title: "Selfie Capture Failed",
         camera_timeout_desc: "We didn't receive your selfie in time. Please capture your selfie within {{seconds}} seconds, then tap Clock In to try again.",
+        clock_in_interrupted_title: "Clock In Not Completed",
+        clock_in_interrupted_desc: "Your phone closed the app before the selfie was saved. Please tap Clock In and try again.",
         clock_in_success: "Clocked in successfully.",
         clock_out_success: "Clocked out successfully.",
         request_submitted: "Manual attendance request submitted.",

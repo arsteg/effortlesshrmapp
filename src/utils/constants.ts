@@ -196,6 +196,9 @@ export const STORAGE_USER_INFO = 'UserInfo';
 export const STORAGE_EMAIL = 'Email';
 export const STORAGE_PASSWORD = 'Password';
 export const STORAGE_IS_REMEMBER = 'IsRemember';
+// Clock-in context saved before the selfie camera opens, so an interrupted
+// clock-in (OS killed the app while the camera was open) can be completed.
+export const STORAGE_PENDING_CLOCK_IN = 'pendingClockIn';
 
 // Email validation
 export const isValidEmail = (email: string): boolean => {

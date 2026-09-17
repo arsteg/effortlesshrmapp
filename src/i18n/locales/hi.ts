@@ -87,6 +87,8 @@ const hi = {
         verification_selfie: "सत्यापन सेल्फी कैप्चर पर निर्भर करता है।",
         camera_timeout_title: "सेल्फी कैप्चर विफल",
         camera_timeout_desc: "हमें आपकी सेल्फी समय पर नहीं मिली। कृपया {{seconds}} सेकंड के भीतर अपनी सेल्फी कैप्चर करें, फिर पुनः प्रयास करने के लिए Clock In पर टैप करें।",
+        clock_in_interrupted_title: "क्लॉक इन पूरा नहीं हुआ",
+        clock_in_interrupted_desc: "सेल्फी सहेजे जाने से पहले आपके फ़ोन ने ऐप बंद कर दिया। कृपया Clock In पर टैप करके फिर से प्रयास करें।",
         clock_in_success: "सफलतापूर्वक क्लॉक इन किया गया।",
         clock_out_success: "सफलतापूर्वक क्लॉक आउट किया गया।",
         request_submitted: "मैनुअल उपस्थिति अनुरोध जमा किया गया।",
