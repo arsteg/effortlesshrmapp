@@ -18,6 +18,18 @@ const hi = {
         retry: "पुनः प्रयास करें",
         unexpected_error: "एक अनपेक्षित त्रुटि हुई।",
     },
+    location: {
+        permission_denied_title: "लोकेशन अनुमति आवश्यक",
+        permission_denied_desc: "उपस्थिति के लिए लोकेशन एक्सेस आवश्यक है। कृपया EffortlessHRM के लिए लोकेशन की अनुमति दें।",
+        precise_required_title: "सटीक लोकेशन आवश्यक",
+        precise_required_desc: "उपस्थिति के लिए आपकी सटीक लोकेशन चाहिए, लेकिन ऐप के पास केवल अनुमानित लोकेशन है, जो 2 किमी तक गलत हो सकती है। कृपया सटीक लोकेशन की अनुमति दें और फिर से प्रयास करें।",
+        precise_settings_desc: "उपस्थिति के लिए आपकी सटीक लोकेशन चाहिए। Settings खोलें, Permissions, Location में जाएं और EffortlessHRM के लिए \"Use precise location\" चालू करें।",
+        open_settings: "Settings खोलें",
+        imprecise_title: "लोकेशन पर्याप्त सटीक नहीं है",
+        imprecise_desc: "आपकी लोकेशन केवल लगभग {{meters}} मीटर तक सटीक है, जो यह सत्यापित करने के लिए पर्याप्त नहीं है कि आप ऑफिस में हैं। खिड़की के पास या बाहर जाएं, Wi-Fi चालू रखें, फिर पुनः प्रयास करें।",
+        fetch_failed_title: "लोकेशन उपलब्ध नहीं",
+        fetch_failed_desc: "आपकी वर्तमान लोकेशन प्राप्त नहीं हो सकी। सुनिश्चित करें कि लोकेशन चालू है और पुनः प्रयास करें।",
+    },
     navigation: {
         dashboard: "डैशबोर्ड",
         attendance: "उपस्थिति",

@@ -18,6 +18,18 @@ const en = {
         retry: "Retry",
         unexpected_error: "An unexpected error occurred.",
     },
+    location: {
+        permission_denied_title: "Location Permission Required",
+        permission_denied_desc: "Location access is required for attendance. Please allow location for EffortlessHRM.",
+        precise_required_title: "Precise Location Required",
+        precise_required_desc: "Attendance needs your precise location, but the app only has approximate location, which can be off by 2 km. Please allow precise location and try again.",
+        precise_settings_desc: "Attendance needs your precise location. Open Settings, go to Permissions, Location, and turn on \"Use precise location\" for EffortlessHRM.",
+        open_settings: "Open Settings",
+        imprecise_title: "Location Not Accurate Enough",
+        imprecise_desc: "Your location is only accurate to about {{meters}} m, which is not enough to verify you are at the office. Move near a window or outdoors, make sure Wi-Fi is on, then try again.",
+        fetch_failed_title: "Location Unavailable",
+        fetch_failed_desc: "Could not get your current location. Make sure location is turned on and try again.",
+    },
     navigation: {
         dashboard: "Dashboard",
         attendance: "Attendance",

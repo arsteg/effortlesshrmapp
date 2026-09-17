@@ -45,6 +45,11 @@ const ACTION_COOLDOWN_MS = 5000;
 // the clock-in is completed. Anything older than this is dropped as stale.
 const PENDING_CLOCK_IN_MAX_AGE_MS = 10 * 60 * 1000;
 
+// "(±30m)" for the geofence alert, so support can tell a genuine
+// "outside the office" from a rough fix at a glance.
+const formatAccuracy = (accuracy: number | null | undefined) =>
+    accuracy != null ? ` (±${Math.round(accuracy)}m)` : '';
+
 interface PendingClockIn {
     officeId: string;
     latitude: number;
@@ -354,7 +359,7 @@ const AttendanceScreen = () => {
             if (dist > allowedRadius) {
                 Alert.alert(
                     t('attendance.outside_geofence'),
-                    `${t('attendance.distance')}: ${Math.round(dist)}m. ${t('attendance.target')}: ${allowedRadius}m.`,
+                    `${t('attendance.distance')}: ${Math.round(dist)}m${formatAccuracy(loc.coords.accuracy)}. ${t('attendance.target')}: ${allowedRadius}m.`,
                     [
                         { text: t('common.cancel') || 'Cancel', style: 'cancel' },
                         { text: t('common.retry') || 'Retry', onPress: () => handleCheckIn() },
@@ -446,7 +451,7 @@ const AttendanceScreen = () => {
             if (dist > allowedRadius) {
                 Alert.alert(
                     t('attendance.outside_geofence'),
-                    `${t('attendance.distance')}: ${Math.round(dist)}m. ${t('attendance.target')}: ${allowedRadius}m.`,
+                    `${t('attendance.distance')}: ${Math.round(dist)}m${formatAccuracy(loc.coords.accuracy)}. ${t('attendance.target')}: ${allowedRadius}m.`,
                     [
                         { text: t('common.cancel') || 'Cancel', style: 'cancel' },
                         { text: t('common.retry') || 'Retry', onPress: () => handleCheckOut() },

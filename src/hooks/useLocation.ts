@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import * as Location from 'expo-location';
-import { Alert } from 'react-native';
+import { Alert, Linking, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 // Android/Play Services can satisfy a location request with a cached
 // "last known location" instead of a live GPS fix, especially right after
@@ -14,6 +15,12 @@ const ACCEPTABLE_ACCURACY_METERS = 50;
 const MAX_FIX_AGE_MS = 10000;
 const RETRY_DELAY_MS = 1500;
 
+// A fix rougher than this cannot be compared against an office geofence at
+// all: an "approximate" permission grant or a cell-tower-only fix reports
+// ~2000 m, and using it produces a false "you are 2 km away". Rather than
+// return it we tell the user why and let them retry.
+const USABLE_ACCURACY_METERS = 100;
+
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 const isFixGoodEnough = (location: Location.LocationObject) => {
@@ -22,18 +29,57 @@ const isFixGoodEnough = (location: Location.LocationObject) => {
     return accuracy != null && accuracy <= ACCEPTABLE_ACCURACY_METERS && age <= MAX_FIX_AGE_MS;
 };
 
+// Android 12+ lets the user grant only "approximate" location, which Android
+// blurs to roughly a 2 km grid. The grant can also be downgraded later from
+// the app's permission page, which is what "it worked, then showed 2 km,
+// then reinstalling fixed it" looks like.
+const hasOnlyApproximateLocation = (permission: Location.LocationPermissionResponse) =>
+    Platform.OS === 'android' && permission.android?.accuracy === 'coarse';
+
 export const useLocation = () => {
+    const { t } = useTranslation();
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
+    const openSettingsButton = { text: t('location.open_settings') || 'Open Settings', onPress: () => Linking.openSettings() };
+
     const requestPermissions = async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
+        let permission = await Location.requestForegroundPermissionsAsync();
+
+        if (!permission.granted) {
             setErrorMsg('Permission to access location was denied');
-            Alert.alert('Permission Denied', 'Location access is required for attendance.');
+            Alert.alert(
+                t('location.permission_denied_title') || 'Location Permission Required',
+                t('location.permission_denied_desc') || 'Location access is required for attendance.',
+                permission.canAskAgain
+                    ? undefined
+                    : [{ text: t('common.cancel') || 'Cancel', style: 'cancel' }, openSettingsButton]
+            );
             return false;
         }
+
+        if (hasOnlyApproximateLocation(permission)) {
+            // Asking for the fine permission again while only the coarse one
+            // is held makes Android show its own "upgrade to precise" popup,
+            // so the user can fix this in one tap without leaving the app.
+            // Android refuses to show it once the user has declined precise
+            // twice; then only the Settings page can change it.
+            permission = await Location.requestForegroundPermissionsAsync();
+
+            if (!permission.granted || hasOnlyApproximateLocation(permission)) {
+                setErrorMsg('Precise location permission was not granted');
+                Alert.alert(
+                    t('location.precise_required_title') || 'Precise Location Required',
+                    permission.canAskAgain
+                        ? (t('location.precise_required_desc') || 'Attendance needs your precise location. Please allow precise location and try again.')
+                        : (t('location.precise_settings_desc') || 'Attendance needs your precise location. Open Settings and turn on "Use precise location" for this app.'),
+                    [{ text: t('common.cancel') || 'Cancel', style: 'cancel' }, openSettingsButton]
+                );
+                return false;
+            }
+        }
+
         return true;
     };
 
@@ -66,11 +112,28 @@ export const useLocation = () => {
                 }
             }
 
+            const bestAccuracy = bestFix?.coords.accuracy;
+            if (!bestFix || bestAccuracy == null || bestAccuracy > USABLE_ACCURACY_METERS) {
+                setErrorMsg('Location accuracy is too low');
+                Alert.alert(
+                    t('location.imprecise_title') || 'Location Not Accurate Enough',
+                    t('location.imprecise_desc', { meters: Math.round(bestAccuracy ?? 0) }) ||
+                        `Your location is only accurate to about ${Math.round(bestAccuracy ?? 0)} m. Move near a window or outdoors, make sure Wi-Fi is on, then try again.`
+                );
+                setLoading(false);
+                return null;
+            }
+
+            setErrorMsg(null);
             setLocation(bestFix);
             setLoading(false);
             return bestFix;
         } catch (error) {
             setErrorMsg('Could not fetch location');
+            Alert.alert(
+                t('location.fetch_failed_title') || 'Location Unavailable',
+                t('location.fetch_failed_desc') || 'Could not get your current location. Make sure location is turned on and try again.'
+            );
             setLoading(false);
             return null;
         }
