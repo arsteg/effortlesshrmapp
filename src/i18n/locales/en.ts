@@ -85,6 +85,8 @@ const en = {
         wait_before_action: "Please wait a few seconds before your next action.",
         selfie_required: "Selfie Required",
         verification_selfie: "Verification depends on a selfie capture.",
+        camera_timeout_title: "Selfie Capture Failed",
+        camera_timeout_desc: "We didn't receive your selfie in time. Please capture your selfie within {{seconds}} seconds, then tap Clock In to try again.",
         clock_in_success: "Clocked in successfully.",
         clock_out_success: "Clocked out successfully.",
         request_submitted: "Manual attendance request submitted.",

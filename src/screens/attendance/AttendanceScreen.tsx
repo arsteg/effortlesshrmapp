@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../../store/hooks';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useLocation } from '../../hooks/useLocation';
-import { useCamera } from '../../hooks/useCamera';
+import { useCamera, CameraTimeoutError, POST_RESUME_TIMEOUT_SECONDS } from '../../hooks/useCamera';
 import { attendanceService } from '../../services/attendanceService';
 import { theme } from '../../theme';
 import { calculateDistance } from '../../utils/distance';
@@ -284,7 +284,19 @@ const AttendanceScreen = () => {
                 Alert.alert(t('common.error'), response.message || t('attendance.clock_in_failed') || 'Check-in failed.');
             }
         } catch (error) {
-            Alert.alert(t('common.error'), t('common.unexpected_error') || 'An unexpected error occurred.');
+            if (error instanceof CameraTimeoutError) {
+                // We only start this timer once the app is confirmed back in
+                // the foreground, so it's always safe to show the alert
+                // immediately here — no risk of it being silently dropped
+                // while a different app still has focus.
+                Alert.alert(
+                    t('attendance.camera_timeout_title') || 'Selfie Capture Failed',
+                    t('attendance.camera_timeout_desc', { seconds: POST_RESUME_TIMEOUT_SECONDS }) ||
+                        `We didn't receive your selfie in time. Please capture your selfie within ${POST_RESUME_TIMEOUT_SECONDS} seconds, then tap Clock In to try again.`
+                );
+            } else {
+                Alert.alert(t('common.error'), t('common.unexpected_error') || 'An unexpected error occurred.');
+            }
         } finally {
             setActionLoading(false);
         }
