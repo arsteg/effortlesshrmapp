@@ -6,14 +6,11 @@ import { AuthNavigator } from './AuthNavigator';
 import { Loading } from '../components/common/Loading';
 import MainNavigator from './MainNavigator';
 import { apiService } from '../services/api';
-import { storage } from '../utils/storage';
-import { STORAGE_PENDING_CLOCK_IN } from '../utils/constants';
 
 export const AppNavigator = () => {
     const dispatch = useAppDispatch();
     const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
     const [checking, setChecking] = React.useState(true);
-    const [initialRoute, setInitialRoute] = React.useState<string | undefined>(undefined);
 
     useEffect(() => {
         checkAuth();
@@ -26,10 +23,6 @@ export const AppNavigator = () => {
 
     const checkAuth = async () => {
         await dispatch(checkAuthStatus());
-        // If the OS killed the app while the clock-in camera was open, open
-        // Attendance first so the interrupted clock-in is completed right away.
-        const pendingClockIn = await storage.getItem(STORAGE_PENDING_CLOCK_IN);
-        setInitialRoute(pendingClockIn ? 'Attendance' : undefined);
         setChecking(false);
     };
 
@@ -39,7 +32,7 @@ export const AppNavigator = () => {
 
     return (
         <NavigationContainer>
-            {isAuthenticated ? <MainNavigator initialRouteName={initialRoute} /> : <AuthNavigator />}
+            {isAuthenticated ? <MainNavigator /> : <AuthNavigator />}
         </NavigationContainer>
     );
 };

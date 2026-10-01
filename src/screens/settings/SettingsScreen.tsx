@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import DeviceInfo from 'react-native-device-info';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { logout } from '../../store/slices/authSlice';
 import { Card } from '../../components/common/Card';
@@ -105,7 +106,7 @@ export const SettingsScreen = ({ navigation }: any) => {
                 {
                     icon: 'information-circle-outline',
                     label: 'App Version',
-                    value: '1.0.0',
+                    value: DeviceInfo.getVersion(),
                     showArrow: false,
                 },
             ],

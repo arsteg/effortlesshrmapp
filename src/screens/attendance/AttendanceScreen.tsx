@@ -22,12 +22,12 @@ import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../../store/hooks';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useLocation } from '../../hooks/useLocation';
-import { useCamera, getPendingSelfie, CameraTimeoutError, POST_RESUME_TIMEOUT_SECONDS } from '../../hooks/useCamera';
+import { useCamera } from '../../hooks/useCamera';
+import { SelfieCamera } from '../../components/attendance/SelfieCamera';
 import { attendanceService } from '../../services/attendanceService';
 import { theme } from '../../theme';
 import { calculateDistance } from '../../utils/distance';
 import { storage } from '../../utils/storage';
-import { STORAGE_PENDING_CLOCK_IN } from '../../utils/constants';
 import { authService } from '../../services/authService';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
@@ -38,24 +38,16 @@ import { Loading } from '../../components/common/Loading';
 // clock-out fired right after a clock-in (the button relabels in place).
 const ACTION_COOLDOWN_MS = 5000;
 
-// A clock-in interrupted between opening the camera and posting to the
-// server is saved under STORAGE_PENDING_CLOCK_IN. Some phones (Realme /
-// ColorOS in particular) kill the app while the camera is in the foreground;
-// on restart the saved context is paired with the selfie the picker kept and
-// the clock-in is completed. Anything older than this is dropped as stale.
-const PENDING_CLOCK_IN_MAX_AGE_MS = 10 * 60 * 1000;
-
 // "(±30m)" for the geofence alert, so support can tell a genuine
 // "outside the office" from a rough fix at a glance.
 const formatAccuracy = (accuracy: number | null | undefined) =>
     accuracy != null ? ` (±${Math.round(accuracy)}m)` : '';
 
-interface PendingClockIn {
+interface PendingCheckInContext {
     officeId: string;
     latitude: number;
     longitude: number;
     companyId?: string;
-    startedAt: number;
 }
 
 interface ClockInPayload {
@@ -113,7 +105,11 @@ const AttendanceScreen = () => {
     // Sequence number for loadData so a slow, older fetch can't overwrite
     // the state set by a newer one (e.g. a refresh right after a clock-in).
     const loadSeqRef = useRef(0);
-    const recoveryStartedRef = useRef(false);
+
+    // In-app selfie camera state for clock-in. The office/location captured
+    // before opening the camera lives here until the photo comes back.
+    const [cameraVisible, setCameraVisible] = useState(false);
+    const pendingCheckInRef = useRef<PendingCheckInContext | null>(null);
 
     // Manual Request Modal State
     const [manualModalVisible, setManualModalVisible] = useState(false);
@@ -192,14 +188,6 @@ const AttendanceScreen = () => {
         loadData();
         loadManagers();
     }, [loadData]);
-
-    // Once per mount: complete a clock-in that the OS interrupted while the
-    // camera was open (see PENDING_CLOCK_IN_MAX_AGE_MS).
-    useEffect(() => {
-        if (recoveryStartedRef.current) return;
-        recoveryStartedRef.current = true;
-        recoverPendingClockIn();
-    }, []);
 
     const loadManagers = async () => {
         if (!user?.id) return;
@@ -286,43 +274,29 @@ const AttendanceScreen = () => {
         await loadData(true);
     };
 
-    // Finishes a clock-in that was cut short by the OS killing the app while
-    // the camera was open. The context was saved by handleCheckIn before the
-    // camera launched; the photo is whatever expo-image-picker kept for us.
-    const recoverPendingClockIn = async () => {
-        const raw = await storage.getItem(STORAGE_PENDING_CLOCK_IN);
-        if (!raw) return;
-        await storage.removeItem(STORAGE_PENDING_CLOCK_IN);
-
-        // Always consume the picker's stored result, even if it ends up
-        // unused, so a stale photo can't be picked up by a later attempt.
-        const selfie = await getPendingSelfie();
-
-        let pending: PendingClockIn | null = null;
-        try {
-            pending = JSON.parse(raw);
-        } catch (error) {
-            return;
-        }
-        if (!pending || Date.now() - pending.startedAt > PENDING_CLOCK_IN_MAX_AGE_MS) return;
-
-        if (!selfie) {
-            Alert.alert(
-                t('attendance.clock_in_interrupted_title') || 'Clock In Not Completed',
-                t('attendance.clock_in_interrupted_desc') ||
-                    'Your phone closed the app before the selfie was saved. Please tap Clock In and try again.'
-            );
-            return;
-        }
+    // Called when the in-app camera captures a photo. The app was never
+    // backgrounded during capture, so there's nothing to recover: the
+    // context saved by handleCheckIn is simply still here.
+    const handleSelfieCaptured = async (uri: string) => {
+        setCameraVisible(false);
+        const pending = pendingCheckInRef.current;
+        pendingCheckInRef.current = null;
+        if (!pending) return;
 
         setActionLoading(true);
         try {
-            await submitClockIn({ ...pending, selfieUrl: selfie });
+            await submitClockIn({ ...pending, selfieUrl: uri });
         } catch (error: any) {
             Alert.alert(t('common.error'), error?.message || t('attendance.clock_in_failed') || 'Check-in failed.');
         } finally {
             setActionLoading(false);
         }
+    };
+
+    const handleCameraCancel = () => {
+        setCameraVisible(false);
+        pendingCheckInRef.current = null;
+        setActionLoading(false);
     };
 
     const handleCheckIn = async () => {
@@ -369,48 +343,19 @@ const AttendanceScreen = () => {
                 return;
             }
 
-            // Selfie mandatory for check-in. Save the context first: some
-            // phones kill the app while the camera is open, and on restart
-            // recoverPendingClockIn() pairs this with the photo the picker kept.
+            // Selfie mandatory for check-in. Save the office/location, then
+            // open the in-app camera: since it renders inside this same
+            // screen (not a separate camera app), we never lose foreground
+            // focus during capture, so there's no window for the OS to kill
+            // the app mid-flow the way a separate camera Activity allowed.
             const companyId = user?.company?.id || user?.company || (user as any)?.companyId;
-            const pending: PendingClockIn = {
+            pendingCheckInRef.current = {
                 officeId: selectedOffice._id,
                 latitude: loc.coords.latitude,
                 longitude: loc.coords.longitude,
-                companyId,
-                startedAt: Date.now()
+                companyId
             };
-            await storage.setItem(STORAGE_PENDING_CLOCK_IN, JSON.stringify(pending));
-
-            let img: string | null = null;
-            try {
-                img = await takeSelfie();
-            } catch (error) {
-                if (!(error instanceof CameraTimeoutError)) throw error;
-                // The camera promise was orphaned (Activity recreated) but the
-                // app itself survived: the picker may still hold the photo.
-                img = await getPendingSelfie();
-                if (!img) {
-                    await storage.removeItem(STORAGE_PENDING_CLOCK_IN);
-                    // The timer only starts once the app is back in the
-                    // foreground, so this alert is safe to show right away.
-                    Alert.alert(
-                        t('attendance.camera_timeout_title') || 'Selfie Capture Failed',
-                        t('attendance.camera_timeout_desc', { seconds: POST_RESUME_TIMEOUT_SECONDS }) ||
-                            `We didn't receive your selfie in time. Please capture your selfie within ${POST_RESUME_TIMEOUT_SECONDS} seconds, then tap Clock In to try again.`
-                    );
-                    return;
-                }
-            }
-            // Reached only when the app survived the camera round-trip.
-            await storage.removeItem(STORAGE_PENDING_CLOCK_IN);
-
-            if (!img) {
-                Alert.alert(t('attendance.selfie_required'), t('attendance.verification_selfie'));
-                return;
-            }
-
-            await submitClockIn({ ...pending, selfieUrl: img });
+            setCameraVisible(true);
         } catch (error: any) {
             Alert.alert(t('common.error'), error?.message || t('common.unexpected_error') || 'An unexpected error occurred.');
         } finally {
@@ -925,6 +870,13 @@ const AttendanceScreen = () => {
                     </View>
                 </View>
             </Modal>
+
+            {/* In-app camera for the clock-in selfie */}
+            <SelfieCamera
+                visible={cameraVisible}
+                onCapture={handleSelfieCaptured}
+                onCancel={handleCameraCancel}
+            />
         </SafeAreaView>
     );
 };

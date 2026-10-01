@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import DeviceInfo from 'react-native-device-info';
 import { Card } from '../../components/common/Card';
 import { theme } from '../../theme';
 
@@ -144,7 +145,7 @@ export const HelpScreen = () => {
                 <Card style={styles.infoCard}>
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>App Version:</Text>
-                        <Text style={styles.infoValue}>1.0.0</Text>
+                        <Text style={styles.infoValue}>{DeviceInfo.getVersion()}</Text>
                     </View>
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>Last Updated:</Text>

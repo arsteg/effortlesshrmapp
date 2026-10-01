@@ -16,6 +16,7 @@ const en = {
         no_data: "No data found",
         delete: "Delete",
         retry: "Retry",
+        allow: "Allow Camera",
         unexpected_error: "An unexpected error occurred.",
     },
     location: {
@@ -90,6 +91,8 @@ const en = {
         reason: "Reason",
         reason_placeholder: "e.g., Forgot to clock in...",
         select_manager: "Select Manager *",
+        camera_permission_required: "Camera access is required to take your attendance selfie.",
+        selfie_hint: "Center your face and tap to capture",
         attach_photo: "Attach Photo",
         photo_attached: "Photo Attached",
         outside_geofence: "Outside Geofence",

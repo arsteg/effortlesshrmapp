@@ -1,102 +1,14 @@
 import { useState } from 'react';
-import { Alert, AppState, AppStateStatus, Platform } from 'react-native';
+import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
-// Some OEM ROMs (e.g. Realme/ColorOS) can kill or recreate the host Activity
-// while the native camera app is open, which orphans the pending camera
-// promise so it never resolves. A blind fixed timeout would either fire too
-// late or interrupt someone who is just slow to take the photo — so instead
-// we only start the clock once the app is confirmed back in the foreground
-// (the failure signature is specifically "we're back, but no result came
-// through"). While the user is still in the camera, however long that
-// takes, nothing here ever times out.
-//
-// Once we are back in the foreground a real result normally arrives within
-// a couple of seconds (the picker only has to read/compress the file), so
-// the window is kept short. When it fires, callers should ask
-// `getPendingSelfie()` for the result the picker stored on our behalf.
-export const POST_RESUME_TIMEOUT_MS = 15000;
-export const POST_RESUME_TIMEOUT_SECONDS = POST_RESUME_TIMEOUT_MS / 1000;
-
-// Thrown instead of returning null so the caller can tell "timed out after
-// resume" apart from "user cancelled" and show a message explaining why.
-export class CameraTimeoutError extends Error {
-    constructor() {
-        super('CAMERA_TIMEOUT');
-        this.name = 'CameraTimeoutError';
-    }
-}
-
-// No crop step: every extra Activity hop is another chance for the OS to
-// kill us mid-flow, and the server only stores the file path anyway.
-const SELFIE_OPTIONS: ImagePicker.ImagePickerOptions = {
-    mediaTypes: ['images'],
-    allowsEditing: false,
-    quality: 0.5,
-    cameraType: ImagePicker.CameraType.front,
-};
-
-const raceWithResumeTimeout = <T,>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
-    return new Promise((resolve, reject) => {
-        let settled = false;
-        let resumeTimer: ReturnType<typeof setTimeout> | null = null;
-
-        const cleanup = () => {
-            if (resumeTimer) clearTimeout(resumeTimer);
-            subscription.remove();
-        };
-
-        const subscription = AppState.addEventListener('change', (state: AppStateStatus) => {
-            if (state === 'active' && !resumeTimer && !settled) {
-                resumeTimer = setTimeout(() => {
-                    if (!settled) {
-                        settled = true;
-                        cleanup();
-                        reject(new CameraTimeoutError());
-                    }
-                }, timeoutMs);
-            }
-        });
-
-        promise.then(
-            (value) => {
-                if (!settled) {
-                    settled = true;
-                    cleanup();
-                    resolve(value);
-                }
-            },
-            (error) => {
-                if (!settled) {
-                    settled = true;
-                    cleanup();
-                    reject(error);
-                }
-            }
-        );
-    });
-};
-
-/**
- * Android only. When the system destroys our Activity while the camera is
- * open (low memory, aggressive OEM battery management, "Don't keep
- * activities"), the promise from `launchCameraAsync` is lost, but
- * expo-image-picker keeps the captured photo and hands it out here exactly
- * once. Returns the photo URI, or null when nothing is waiting.
- */
-export const getPendingSelfie = async (): Promise<string | null> => {
-    if (Platform.OS !== 'android') return null;
-    try {
-        const pending = await ImagePicker.getPendingResultAsync();
-        if (pending && 'canceled' in pending && !pending.canceled && pending.assets?.length) {
-            return pending.assets[0].uri;
-        }
-    } catch (error) {
-        console.warn('Could not read pending camera result:', error);
-    }
-    return null;
-};
-
+// Used only for the manual-attendance-request photo attachment, a low-stakes
+// flow where an interruption just means the user retries attaching a photo.
+// The actual clock-in selfie no longer uses this: see
+// src/components/attendance/SelfieCamera.tsx, which captures the photo
+// in-app instead of handing off to a separate camera Activity, so the app
+// can't be backgrounded (and killed by aggressive OEM battery managers)
+// mid-capture in the first place.
 export const useCamera = () => {
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
@@ -114,10 +26,12 @@ export const useCamera = () => {
         const permission = await requestPermissions();
         if (!permission) return null;
 
-        const result = await raceWithResumeTimeout(
-            ImagePicker.launchCameraAsync(SELFIE_OPTIONS),
-            POST_RESUME_TIMEOUT_MS
-        );
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ['images'],
+            allowsEditing: false,
+            quality: 0.5,
+            cameraType: ImagePicker.CameraType.front,
+        });
 
         if (!result.canceled) {
             return result.assets[0].uri;
@@ -127,7 +41,6 @@ export const useCamera = () => {
 
     return {
         takeSelfie,
-        getPendingSelfie,
         requestPermissions,
     };
 };

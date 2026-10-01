@@ -16,6 +16,7 @@ const hi = {
         no_data: "कोई डेटा नहीं मिला",
         delete: "हटाएं",
         retry: "पुनः प्रयास करें",
+        allow: "कैमरा की अनुमति दें",
         unexpected_error: "एक अनपेक्षित त्रुटि हुई।",
     },
     location: {
@@ -90,6 +91,8 @@ const hi = {
         reason: "कारण",
         reason_placeholder: "जैसे, क्लॉक इन करना भूल गए...",
         select_manager: "मैनेजर चुनें *",
+        camera_permission_required: "उपस्थिति सेल्फी लेने के लिए कैमरा एक्सेस आवश्यक है।",
+        selfie_hint: "अपने चेहरे को केंद्र में रखें और कैप्चर करने के लिए टैप करें",
         attach_photo: "फोटो संलग्न करें",
         photo_attached: "फोटो संलग्न है",
         outside_geofence: "जियोफेंस के बाहर",
