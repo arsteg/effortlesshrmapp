@@ -284,8 +284,8 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                 </Card>
 
 
-                {/* Subscription Info - Placeholder */}
-                {paymentInfo && (
+                {/* Subscription Info - Placeholder (hidden on iOS: unfinished content fails App Store review) */}
+                {paymentInfo && Platform.OS !== 'ios' && (
                     <Card style={styles.subscriptionCard}>
                         <Text style={styles.cardTitle}>{t('dashboard.subscription_info')}</Text>
                         <Text style={styles.placeholderText}>

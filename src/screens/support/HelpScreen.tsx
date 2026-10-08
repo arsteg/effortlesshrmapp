@@ -65,7 +65,7 @@ export const HelpScreen = () => {
     };
 
     const handleCallSupport = () => {
-        Linking.openURL('tel:+1234567890');
+        Linking.openURL('tel:+918447470101');
     };
 
     return (

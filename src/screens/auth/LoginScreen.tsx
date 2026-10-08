@@ -218,15 +218,18 @@ export const LoginScreen = ({ navigation }: any) => {
                             style={styles.loginButton}
                         />
 
-                        <View style={styles.footer}>
-                            <Text style={styles.footerText}>Don't have an account? </Text>
-                            <TouchableOpacity
-                                onPress={() => navigation.navigate('Register')}
-                                activeOpacity={0.7}
-                            >
-                                <Text style={styles.signupLink}>Create account</Text>
-                            </TouchableOpacity>
-                        </View>
+                        {/* iOS accounts are created by company admins only (App Store guideline 5.1.1(v)) */}
+                        {Platform.OS !== 'ios' && (
+                            <View style={styles.footer}>
+                                <Text style={styles.footerText}>Don't have an account? </Text>
+                                <TouchableOpacity
+                                    onPress={() => navigation.navigate('Register')}
+                                    activeOpacity={0.7}
+                                >
+                                    <Text style={styles.signupLink}>Create account</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
                 </Animated.View>
             </ScrollView>

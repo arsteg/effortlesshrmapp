@@ -261,12 +261,17 @@ const ChatScreen: React.FC = () => {
         </TouchableOpacity>
 
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.headerButton} onPress={() => handleCall('audio')}>
-            <Ionicons name="call-outline" size={22} color="#1976d2" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={() => handleCall('video')}>
-            <Ionicons name="videocam-outline" size={22} color="#1976d2" />
-          </TouchableOpacity>
+          {/* Calling has no audio/video implementation yet; hidden on iOS for App Store review */}
+          {Platform.OS !== 'ios' && (
+            <>
+              <TouchableOpacity style={styles.headerButton} onPress={() => handleCall('audio')}>
+                <Ionicons name="call-outline" size={22} color="#1976d2" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.headerButton} onPress={() => handleCall('video')}>
+                <Ionicons name="videocam-outline" size={22} color="#1976d2" />
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </View>
 
