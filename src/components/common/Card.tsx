@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { theme } from '../../theme';
 
 interface CardProps {
     children: React.ReactNode;
-    style?: ViewStyle;
+    // StyleProp (not a bare ViewStyle) so callers can pass an array of
+    // styles to combine, matching Button's existing style prop convention.
+    style?: StyleProp<ViewStyle>;
     elevated?: boolean;
     variant?: 'default' | 'outlined' | 'flat';
 }

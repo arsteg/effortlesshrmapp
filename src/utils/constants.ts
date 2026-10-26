@@ -52,6 +52,20 @@ export const NEW_TASK_USER = 'task/newtaskuser';
 export const TASKLIST_BY_TEAM = 'task/tasklistbyteam';
 export const CREATE_NEW_TASK = 'task/newtask';
 
+// Canonical Task Management status/priority vocabulary (TM-008/TM-009).
+// Must match ARSTEG.EffortlessHRM.API/constants.js (Task_Statuses /
+// Task_Priorities) and the Angular web app's tasks.component.ts /
+// edit-task.component.ts literal values exactly — these are stored verbatim
+// in MongoDB and used for status/priority board grouping on web. Mobile
+// previously used a different, incompatible set ("To Do" instead of
+// "ToDo", no "Closed" status, and a Low/Medium/High/Critical priority scale
+// instead of web's Urgent/High/Normal, which web has icon assets for).
+export const TASK_STATUSES = ['ToDo', 'In Progress', 'Done', 'Closed'] as const;
+export type TaskStatus = typeof TASK_STATUSES[number];
+
+export const TASK_PRIORITIES = ['Urgent', 'High', 'Normal'] as const;
+export type TaskPriority = typeof TASK_PRIORITIES[number];
+
 
 // RealTime API's
 export const GET_LOGIN_USERS = 'timelogs/getLogInUsers';

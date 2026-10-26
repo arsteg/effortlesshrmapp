@@ -1,5 +1,6 @@
+import { io, Socket } from 'socket.io-client';
 import { getToken } from '../utils/storage';
-import { WEBSOCKET_URL } from '../utils/constants';
+import { API_BASE_URL } from '../utils/constants';
 import {
   Message,
   WsTypingEvent,
@@ -12,11 +13,10 @@ import {
 type EventCallback<T = any> = (data: T) => void;
 
 class CommunicationWebSocketService {
-  private socket: WebSocket | null = null;
+  private socket: Socket | null = null;
   private reconnectAttempts = 0;
   private readonly MAX_RECONNECT_ATTEMPTS = 50;
   private isConnecting = false;
-  private heartbeatInterval: any = null;
   private userId: string | null = null;
 
   // Event listeners
@@ -56,7 +56,7 @@ class CommunicationWebSocketService {
   };
 
   async connect(userId: string): Promise<void> {
-    if (this.socket?.readyState === WebSocket.OPEN) {
+    if (this.socket?.connected) {
       if (this.userId === userId) return;
       this.disconnect();
     }
@@ -68,83 +68,128 @@ class CommunicationWebSocketService {
 
     try {
       const token = await getToken();
-      // Connect to communication-specific WebSocket endpoint
-      const wsUrl = `${WEBSOCKET_URL}/communication?token=${token}`;
 
-      this.socket = new WebSocket(wsUrl);
+      // Extract base URL without /api/v1/ suffix
+      const baseUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
 
-      this.socket.onopen = () => {
+      // Connect to Socket.IO server with /communication namespace
+      this.socket = io(`${baseUrl}/communication`, {
+        auth: {
+          token: token
+        },
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: this.MAX_RECONNECT_ATTEMPTS,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 30000,
+      });
+
+      this.socket.on('connect', () => {
         console.log('Communication WebSocket connected');
         this.isConnecting = false;
         this.reconnectAttempts = 0;
-        this.startHeartbeat();
         this.emit(CommunicationWebSocketService.EVENTS.CONNECTED, { userId });
-      };
+      });
 
-      this.socket.onmessage = (event) => {
-        this.handleMessage(event.data);
-      };
-
-      this.socket.onerror = (error) => {
-        console.error('Communication WebSocket error:', error);
+      this.socket.on('disconnect', (reason) => {
+        console.log('Communication WebSocket disconnected:', reason);
         this.isConnecting = false;
-      };
-
-      this.socket.onclose = (event) => {
-        console.log('Communication WebSocket closed:', event.code, event.reason);
-        this.isConnecting = false;
-        this.stopHeartbeat();
         this.emit(CommunicationWebSocketService.EVENTS.DISCONNECTED, {});
+      });
 
-        // Attempt reconnection
-        if (this.userId && this.reconnectAttempts < this.MAX_RECONNECT_ATTEMPTS) {
-          const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-          this.reconnectAttempts++;
-          console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
-          setTimeout(() => {
-            if (this.userId) this.connect(this.userId);
-          }, delay);
-        }
-      };
+      this.socket.on('connect_error', (error) => {
+        console.error('Communication WebSocket connection error:', error.message);
+        this.isConnecting = false;
+      });
+
+      // Set up event listeners for all communication events
+      this.setupEventListeners();
+
     } catch (error) {
       console.error('Failed to connect WebSocket:', error);
       this.isConnecting = false;
     }
   }
 
+  private setupEventListeners(): void {
+    if (!this.socket) return;
+
+    // Message events
+    this.socket.on('new_message', (data: { conversationId: string; message: Message }) => {
+      this.emit(CommunicationWebSocketService.EVENTS.NEW_MESSAGE, data);
+    });
+
+    this.socket.on('message_updated', (message: Message) => {
+      this.emit(CommunicationWebSocketService.EVENTS.MESSAGE_UPDATED, message);
+    });
+
+    this.socket.on('message_deleted', (data: { conversationId: string; messageId: string }) => {
+      this.emit(CommunicationWebSocketService.EVENTS.MESSAGE_DELETED, data);
+    });
+
+    this.socket.on('message_reaction', (data: any) => {
+      this.emit(CommunicationWebSocketService.EVENTS.MESSAGE_REACTION, data);
+    });
+
+    // Typing events
+    this.socket.on('user_typing', (data: { conversationId: string; userId: string }) => {
+      this.emit(CommunicationWebSocketService.EVENTS.USER_TYPING, data);
+    });
+
+    this.socket.on('user_stopped_typing', (data: { conversationId: string; userId: string }) => {
+      this.emit(CommunicationWebSocketService.EVENTS.USER_STOPPED_TYPING, data);
+    });
+
+    // Presence events
+    this.socket.on('presence_update', (data: { userId: string; status: string }) => {
+      this.emit(CommunicationWebSocketService.EVENTS.PRESENCE_UPDATE, data);
+    });
+
+    // Conversation events
+    this.socket.on('conversation_created', (data: any) => {
+      this.emit(CommunicationWebSocketService.EVENTS.CONVERSATION_CREATED, data);
+    });
+
+    this.socket.on('conversation_updated', (data: any) => {
+      this.emit(CommunicationWebSocketService.EVENTS.CONVERSATION_UPDATED, data);
+    });
+
+    // Call events
+    this.socket.on('incoming_call', (call: CallSession) => {
+      this.emit(CommunicationWebSocketService.EVENTS.INCOMING_CALL, call);
+    });
+
+    this.socket.on('call_answered', (data: { callId: string }) => {
+      this.emit(CommunicationWebSocketService.EVENTS.CALL_ANSWERED, data);
+    });
+
+    this.socket.on('call_declined', (data: { callId: string }) => {
+      this.emit(CommunicationWebSocketService.EVENTS.CALL_DECLINED, data);
+    });
+
+    this.socket.on('call_ended', (data: { callId: string }) => {
+      this.emit(CommunicationWebSocketService.EVENTS.CALL_ENDED, data);
+    });
+
+    // WebRTC signaling events
+    this.socket.on('rtc_offer', (data: WsRTCSignalEvent) => {
+      this.emit(CommunicationWebSocketService.EVENTS.RTC_OFFER, data);
+    });
+
+    this.socket.on('rtc_answer', (data: WsRTCSignalEvent) => {
+      this.emit(CommunicationWebSocketService.EVENTS.RTC_ANSWER, data);
+    });
+
+    this.socket.on('rtc_ice_candidate', (data: WsRTCSignalEvent) => {
+      this.emit(CommunicationWebSocketService.EVENTS.RTC_ICE_CANDIDATE, data);
+    });
+  }
+
   disconnect(): void {
     this.userId = null;
-    this.stopHeartbeat();
     if (this.socket) {
-      this.socket.close();
+      this.socket.disconnect();
       this.socket = null;
-    }
-  }
-
-  private handleMessage(data: string): void {
-    try {
-      const message = JSON.parse(data);
-      const { event, payload } = message;
-
-      if (event) {
-        this.emit(event, payload);
-      }
-    } catch (error) {
-      console.error('Error parsing WebSocket message:', error);
-    }
-  }
-
-  private startHeartbeat(): void {
-    this.stopHeartbeat();
-    this.heartbeatInterval = setInterval(() => {
-      this.send('ping', {});
-    }, 30000);
-  }
-
-  private stopHeartbeat(): void {
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
-      this.heartbeatInterval = null;
     }
   }
 
@@ -174,59 +219,53 @@ class CommunicationWebSocketService {
 
   // ==================== Send Messages ====================
 
-  private send(event: string, payload: any): void {
-    if (this.socket?.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({ event, payload }));
-    }
-  }
-
   // Room management
   joinConversation(conversationId: string): void {
-    this.send('join_conversation', { conversationId });
+    this.socket?.emit('join_conversation', { conversationId });
   }
 
   leaveConversation(conversationId: string): void {
-    this.send('leave_conversation', { conversationId });
+    this.socket?.emit('leave_conversation', { conversationId });
   }
 
   joinCallRoom(callId: string): void {
-    this.send('join_call', { callId });
+    this.socket?.emit('join_call', { callId });
   }
 
   leaveCallRoom(callId: string): void {
-    this.send('leave_call', { callId });
+    this.socket?.emit('leave_call', { callId });
   }
 
   // Typing indicators
   startTyping(conversationId: string): void {
-    this.send('typing_start', { conversationId });
+    this.socket?.emit('typing_start', { conversationId });
   }
 
   stopTyping(conversationId: string): void {
-    this.send('typing_stop', { conversationId });
+    this.socket?.emit('typing_stop', { conversationId });
   }
 
   // Presence
   updatePresence(status: string, customMessage?: string): void {
-    this.send('presence_update', { status, customMessage });
+    this.socket?.emit('presence_update', { status, customMessage });
   }
 
   // WebRTC Signaling
   sendOffer(callId: string, targetUserId: string, sdp: RTCSessionDescriptionInit): void {
-    this.send('rtc_offer', { callId, targetUserId, sdp });
+    this.socket?.emit('rtc_offer', { callId, targetUserId, sdp });
   }
 
   sendAnswer(callId: string, targetUserId: string, sdp: RTCSessionDescriptionInit): void {
-    this.send('rtc_answer', { callId, targetUserId, sdp });
+    this.socket?.emit('rtc_answer', { callId, targetUserId, sdp });
   }
 
   sendIceCandidate(callId: string, targetUserId: string, candidate: RTCIceCandidateInit): void {
-    this.send('rtc_ice_candidate', { callId, targetUserId, candidate });
+    this.socket?.emit('rtc_ice_candidate', { callId, targetUserId, candidate });
   }
 
   // Utility
   isConnected(): boolean {
-    return this.socket?.readyState === WebSocket.OPEN;
+    return this.socket?.connected ?? false;
   }
 }
 

@@ -18,6 +18,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { theme } from '../../theme';
 import { taskService, AddTaskRequest } from '../../services/taskService';
 import { useAppSelector } from '../../store/hooks';
+import { TASK_STATUSES, TASK_PRIORITIES } from '../../utils/constants';
 
 interface AddNewTaskModalProps {
     isVisible: boolean;
@@ -37,8 +38,8 @@ const AddNewTaskModal = ({ isVisible, onClose, onSuccess, isAdmin }: AddNewTaskM
         taskName: '',
         description: '',
         project: '',
-        priority: 'Medium',
-        status: 'To Do',
+        priority: TASK_PRIORITIES[1], // 'High' — a safer default than the old 'Medium', which doesn't exist in the canonical scale
+        status: TASK_STATUSES[0], // 'ToDo'
         startDate: new Date().toISOString(),
         endDate: new Date().toISOString(),
         user: '', // Assignee
@@ -46,6 +47,7 @@ const AddNewTaskModal = ({ isVisible, onClose, onSuccess, isAdmin }: AddNewTaskM
 
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
+    const [showDuePicker, setShowDuePicker] = useState(false); // TM-014
 
     useEffect(() => {
         if (isVisible) {
@@ -98,8 +100,8 @@ const AddNewTaskModal = ({ isVisible, onClose, onSuccess, isAdmin }: AddNewTaskM
                     taskName: '',
                     description: '',
                     project: '',
-                    priority: 'Medium',
-                    status: 'To Do',
+                    priority: TASK_PRIORITIES[1],
+                    status: TASK_STATUSES[0],
                     startDate: new Date().toISOString(),
                     endDate: new Date().toISOString(),
                     user: '',
@@ -114,13 +116,16 @@ const AddNewTaskModal = ({ isVisible, onClose, onSuccess, isAdmin }: AddNewTaskM
         }
     };
 
-    const onDateChange = (event: any, selectedDate?: Date, type: 'start' | 'end' = 'start') => {
+    const onDateChange = (event: any, selectedDate?: Date, type: 'start' | 'end' | 'due' = 'start') => {
         if (type === 'start') {
             setShowStartPicker(Platform.OS === 'ios');
             if (selectedDate) setForm({ ...form, startDate: selectedDate.toISOString() });
-        } else {
+        } else if (type === 'end') {
             setShowEndPicker(Platform.OS === 'ios');
             if (selectedDate) setForm({ ...form, endDate: selectedDate.toISOString() });
+        } else {
+            setShowDuePicker(Platform.OS === 'ios');
+            if (selectedDate) setForm({ ...form, dueDate: selectedDate.toISOString() });
         }
     };
 
@@ -189,10 +194,9 @@ const AddNewTaskModal = ({ isVisible, onClose, onSuccess, isAdmin }: AddNewTaskM
                                         selectedValue={form.priority}
                                         onValueChange={(val) => setForm({ ...form, priority: val })}
                                     >
-                                        <Picker.Item label="Low" value="Low" />
-                                        <Picker.Item label="Medium" value="Medium" />
-                                        <Picker.Item label="High" value="High" />
-                                        <Picker.Item label="Critical" value="Critical" />
+                                        {TASK_PRIORITIES.map((priority) => (
+                                            <Picker.Item key={priority} label={priority} value={priority} />
+                                        ))}
                                     </Picker>
                                 </View>
                             </View>
@@ -203,9 +207,9 @@ const AddNewTaskModal = ({ isVisible, onClose, onSuccess, isAdmin }: AddNewTaskM
                                         selectedValue={form.status}
                                         onValueChange={(val) => setForm({ ...form, status: val })}
                                     >
-                                        <Picker.Item label="To Do" value="To Do" />
-                                        <Picker.Item label="In Progress" value="In Progress" />
-                                        <Picker.Item label="Done" value="Done" />
+                                        {TASK_STATUSES.map((status) => (
+                                            <Picker.Item key={status} label={status} value={status} />
+                                        ))}
                                     </Picker>
                                 </View>
                             </View>
@@ -242,6 +246,22 @@ const AddNewTaskModal = ({ isVisible, onClose, onSuccess, isAdmin }: AddNewTaskM
                                     />
                                 )}
                             </View>
+                        </View>
+
+                        <View style={styles.formGroup}>
+                            <Text style={styles.label}>Due Date (optional)</Text>
+                            <TouchableOpacity onPress={() => setShowDuePicker(true)} style={styles.dateInput}>
+                                <Text>{form.dueDate ? new Date(form.dueDate).toLocaleDateString() : 'No due date set'}</Text>
+                                <Ionicons name="calendar-outline" size={20} color={theme.colors.gray500} />
+                            </TouchableOpacity>
+                            {showDuePicker && (
+                                <DateTimePicker
+                                    value={form.dueDate ? new Date(form.dueDate) : new Date()}
+                                    mode="date"
+                                    display="default"
+                                    onChange={(e, d) => onDateChange(e, d, 'due')}
+                                />
+                            )}
                         </View>
 
                         <View style={styles.formGroup}>

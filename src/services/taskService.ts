@@ -17,6 +17,7 @@ export interface AddTaskRequest {
     taskName: string;
     startDate: string;
     endDate: string;
+    dueDate?: string; // TM-014: hard deadline, distinct from endDate
     startTime?: string;
     description: string;
     comment?: string;
@@ -64,5 +65,30 @@ export const taskService = {
 
     getUserTaskListByProject: async (userId: string, projectId: string, skip: string = '', next: string = '') => {
         return apiService.post<ApiResponse<any>>('task/getUserTaskListByProject', { userId, projectId, skip, next });
-    }
+    },
+
+    // --- Task detail screen support (TM-013) --------------------------------
+    getTaskById: async (taskId: string) => {
+        return apiService.get<ApiResponse<any>>(`task/${taskId}`);
+    },
+
+    getSubtasks: async (taskId: string) => {
+        return apiService.get<ApiResponse<any>>(`task/tasklistbyparenttask/${taskId}`);
+    },
+
+    getComments: async (taskId: string) => {
+        return apiService.get<ApiResponse<any>>(`task/Comments/${taskId}`);
+    },
+
+    addComment: async (comment: { content: string; author: string; task: string; commentedAt: string }) => {
+        return apiService.post<ApiResponse<any>>('task/comment', comment);
+    },
+
+    getAttachments: async (taskId: string) => {
+        return apiService.get<ApiResponse<any>>(`task/gettaskattachmentslist/${taskId}`);
+    },
+
+    assignTask: async (taskId: string, userId: string) => {
+        return apiService.post<ApiResponse<any>>('task/newtaskuser', { task: taskId, user: userId });
+    },
 };

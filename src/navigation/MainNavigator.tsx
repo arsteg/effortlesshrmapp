@@ -8,6 +8,7 @@ import { theme } from '../theme';
 import { UserDashboardScreen } from '../screens/dashboard/UserDashboardScreen';
 import { AdminDashboardScreen } from '../screens/dashboard/AdminDashboardScreen';
 import { TaskScreen } from '../screens/tasks/TaskScreen';
+import { TaskDetailScreen } from '../screens/tasks/TaskDetailScreen';
 import AttendanceScreen from '../screens/attendance/AttendanceScreen';
 import TimesheetScreen from '../screens/projects/TimesheetScreen';
 import { LeaveReportScreen } from '../screens/leaves/LeaveReportScreen';
@@ -69,6 +70,19 @@ const MainNavigator = () => {
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="grid-outline" size={size} color={color} />
                     ),
+                }}
+            />
+
+            {/* TM-013: reachable only via navigation.navigate('TaskDetail', ...)
+                from the task list — hidden from the drawer menu itself since
+                it's not a top-level section. */}
+            <Drawer.Screen
+                name="TaskDetail"
+                component={TaskDetailScreen}
+                options={{
+                    title: t('navigation.task_detail') || 'Task Detail',
+                    drawerItemStyle: { height: 0 },
+                    drawerLabel: () => null,
                 }}
             />
 

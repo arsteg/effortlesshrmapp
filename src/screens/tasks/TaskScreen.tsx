@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Card } from '../../components/common/Card';
 import AddNewTaskModal from '../../components/modals/AddNewTaskModal';
+import FilterTaskModal, { TaskFilters } from '../../components/modals/FilterTaskModal';
 import { Project } from '../../types';
 
 interface TeamMember {
@@ -24,6 +25,8 @@ interface TeamMember {
     name: string;
     email: string;
 }
+
+const EMPTY_FILTERS: TaskFilters = { statuses: [], priorities: [] };
 
 export const TaskScreen = () => {
     const navigation = useNavigation();
@@ -35,16 +38,32 @@ export const TaskScreen = () => {
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
     const [selectedUser, setSelectedUser] = useState<TeamMember | null>(null);
     const [isFocus, setIsFocus] = useState(false);
+    // TM-025: FilterTaskModal was previously a non-functional stub — there
+    // was no way to filter the mobile task list at all.
+    const [isFilterVisible, setIsFilterVisible] = useState(false);
+    const [filters, setFilters] = useState<TaskFilters>(EMPTY_FILTERS);
+    const filtersActive = filters.statuses.length > 0 || filters.priorities.length > 0;
 
     useEffect(() => {
         navigation.setOptions({
             headerRight: () => (
-                <TouchableOpacity onPress={() => loadTasks(true)} style={{ marginRight: 15 }}>
-                    <Ionicons name="refresh" size={24} color={theme.colors.white} />
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row' }}>
+                    <TouchableOpacity onPress={() => setIsFilterVisible(true)} style={{ marginRight: 15 }}>
+                        <Ionicons name={filtersActive ? 'filter' : 'filter-outline'} size={24} color={theme.colors.white} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => loadTasks(true)} style={{ marginRight: 15 }}>
+                        <Ionicons name="refresh" size={24} color={theme.colors.white} />
+                    </TouchableOpacity>
+                </View>
             ),
         });
-    }, [navigation]);
+    }, [navigation, filtersActive]);
+
+    const visibleTasks = tasks.filter((t) => {
+        if (filters.statuses.length > 0 && !filters.statuses.includes(t.status)) return false;
+        if (filters.priorities.length > 0 && !filters.priorities.includes(t.priority)) return false;
+        return true;
+    });
 
     useEffect(() => {
         if (isAdminPortal) {
@@ -117,20 +136,29 @@ export const TaskScreen = () => {
         }
     };
 
+    // TM-018: the list previously fetched a single fixed page of 100 tasks
+    // with no way to see anything beyond it. PAGE_SIZE paired with
+    // onEndReached below gives real infinite scroll using the API's
+    // existing skip/next pagination parameters.
+    const PAGE_SIZE = 25;
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+
     const loadTasks = async (isRefresh = false) => {
         if (isRefresh) setRefreshing(true);
         else setLoading(true);
 
         try {
-            let response;
-            response = await taskService.getTasksByUser({
+            const response = await taskService.getTasksByUser({
                 userId: isAdminPortal ? selectedUser?.id : user?.id,
                 skip: 0,
-                next: 100
+                next: PAGE_SIZE
             });
 
             if (response.status === 'success') {
-                setTasks(response.data?.taskList || []);
+                const taskList = response.data?.taskList || [];
+                setTasks(taskList);
+                setHasMore(taskList.length >= PAGE_SIZE);
             } else {
                 Alert.alert('Error', response.message || 'Failed to load tasks');
             }
@@ -140,6 +168,27 @@ export const TaskScreen = () => {
         } finally {
             setLoading(false);
             setRefreshing(false);
+        }
+    };
+
+    const loadMoreTasks = async () => {
+        if (loadingMore || !hasMore || loading || refreshing) return;
+        setLoadingMore(true);
+        try {
+            const response = await taskService.getTasksByUser({
+                userId: isAdminPortal ? selectedUser?.id : user?.id,
+                skip: tasks.length,
+                next: PAGE_SIZE
+            });
+            if (response.status === 'success') {
+                const nextPage = response.data?.taskList || [];
+                setTasks((prev) => [...prev, ...nextPage]);
+                setHasMore(nextPage.length >= PAGE_SIZE);
+            }
+        } catch (error) {
+            console.error('Failed to load more tasks', error);
+        } finally {
+            setLoadingMore(false);
         }
     };
 
@@ -170,76 +219,70 @@ export const TaskScreen = () => {
         );
     };
 
-    const handleStatusUpdate = async (taskId: string, currentStatus: string) => {
-        const nextStatus = currentStatus === 'To Do' ? 'In Progress' : currentStatus === 'In Progress' ? 'Done' : 'To Do';
-
-        try {
-            const res = await taskService.updateTask(taskId, { status: nextStatus });
-            if (res.status === 'success') {
-                loadTasks();
-            } else {
-                Alert.alert('Error', res.message || 'Failed to update status');
-            }
-        } catch (error: any) {
-            Alert.alert('Error', error.message || 'Failed to update status');
-        }
-    };
-
+    // TM-009: status changes used to happen via a blind 3-state tap-cycle
+    // right here on the card, which didn't know about the 'Closed' status
+    // and would silently reopen a closed task. That unsafe control has been
+    // removed — status changes now go through TaskDetailScreen's explicit
+    // status picker, which warns before leaving/entering a terminal state.
     const renderItem = ({ item }: { item: any }) => (
-        <Card style={styles.card}>
-            <View style={styles.header}>
-                <View style={styles.titleContainer}>
-                    <Text style={styles.title} numberOfLines={1}>{item.taskName}</Text>
-                    <Text style={styles.projectText}>{item.project?.projectName || 'No Project'}</Text>
-                </View>
-                <View style={[styles.priorityBadge, { backgroundColor: getPriorityColor(item.priority) }]}>
-                    <Text style={styles.priorityText}>{item.priority}</Text>
-                </View>
-            </View>
-
-            <Text style={styles.description} numberOfLines={2}>{item.description || 'No description provided'}</Text>
-
-            <View style={styles.metaRow}>
-                <View style={styles.metaItem}>
-                    <Ionicons name="calendar-outline" size={14} color={theme.colors.textSecondary} />
-                    <Text style={styles.metaText}>{new Date(item.startDate).toLocaleDateString()}</Text>
-                </View>
-                {isAdminPortal && item.TaskUsers && item.TaskUsers.length > 0 && (
-                    <View style={styles.metaItem}>
-                        <Ionicons name="person-outline" size={14} color={theme.colors.textSecondary} />
-                        <Text style={styles.metaText}>{item.TaskUsers[0].user?.firstName}</Text>
+        <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => (navigation as any).navigate('TaskDetail', { taskId: item._id || item.id })}
+        >
+            <Card style={styles.card}>
+                <View style={styles.header}>
+                    <View style={styles.titleContainer}>
+                        <Text style={styles.title} numberOfLines={1}>{item.taskName}</Text>
+                        <Text style={styles.projectText}>{item.project?.projectName || 'No Project'}</Text>
                     </View>
-                )}
-            </View>
-
-            <View style={styles.footer}>
-                <TouchableOpacity
-                    style={[styles.statusBadge, { borderColor: getStatusColor(item.status) }]}
-                    onPress={() => handleStatusUpdate(item._id || item.id, item.status)}
-                >
-                    <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>{item.status}</Text>
-                </TouchableOpacity>
-
-                <View style={styles.actions}>
-                    {isAdminPortal && (
-                        <TouchableOpacity onPress={() => handleDeleteTask(item._id || item.id)} style={styles.actionButton}>
-                            <Ionicons name="trash-outline" size={20} color={theme.colors.error} />
-                        </TouchableOpacity>
-                    )}
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Ionicons name="chevron-forward" size={20} color={theme.colors.gray500} />
-                    </TouchableOpacity>
+                    <View style={[styles.priorityBadge, { backgroundColor: getPriorityColor(item.priority) }]}>
+                        <Text style={styles.priorityText}>{item.priority}</Text>
+                    </View>
                 </View>
-            </View>
-        </Card>
+
+                <Text style={styles.description} numberOfLines={2}>{item.description || 'No description provided'}</Text>
+
+                <View style={styles.metaRow}>
+                    <View style={styles.metaItem}>
+                        <Ionicons name="calendar-outline" size={14} color={theme.colors.textSecondary} />
+                        <Text style={styles.metaText}>{new Date(item.startDate).toLocaleDateString()}</Text>
+                    </View>
+                    {isAdminPortal && item.TaskUsers && item.TaskUsers.length > 0 && (
+                        <View style={styles.metaItem}>
+                            <Ionicons name="person-outline" size={14} color={theme.colors.textSecondary} />
+                            <Text style={styles.metaText}>{item.TaskUsers[0].user?.firstName}</Text>
+                        </View>
+                    )}
+                </View>
+
+                <View style={styles.footer}>
+                    <View style={[styles.statusBadge, { borderColor: getStatusColor(item.status) }]}>
+                        <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>{item.status}</Text>
+                    </View>
+
+                    <View style={styles.actions}>
+                        {isAdminPortal && (
+                            <TouchableOpacity
+                                onPress={(e) => { e.stopPropagation(); handleDeleteTask(item._id || item.id); }}
+                                style={styles.actionButton}
+                            >
+                                <Ionicons name="trash-outline" size={20} color={theme.colors.error} />
+                            </TouchableOpacity>
+                        )}
+                        <View style={styles.actionButton}>
+                            <Ionicons name="chevron-forward" size={20} color={theme.colors.gray500} />
+                        </View>
+                    </View>
+                </View>
+            </Card>
+        </TouchableOpacity>
     );
 
     const getPriorityColor = (priority: string) => {
         switch (priority) {
-            case 'Critical': return theme.colors.error;
+            case 'Urgent': return theme.colors.error;
             case 'High': return '#f59e0b';
-            case 'Medium': return theme.colors.info;
-            case 'Low': return theme.colors.success;
+            case 'Normal': return theme.colors.info;
             default: return theme.colors.gray500;
         }
     };
@@ -248,8 +291,8 @@ export const TaskScreen = () => {
         switch (status) {
             case 'Done': return theme.colors.success;
             case 'In Progress': return theme.colors.primary;
-            case 'To Do': return theme.colors.gray500;
-            case 'Blocked': return theme.colors.error;
+            case 'ToDo': return theme.colors.gray500;
+            case 'Closed': return theme.colors.error;
             default: return theme.colors.gray500;
         }
     };
@@ -296,17 +339,24 @@ export const TaskScreen = () => {
                 <ActivityIndicator size="large" color={theme.colors.primary} style={styles.loader} />
             ) : (
                 <FlatList
-                    data={tasks}
+                    data={visibleTasks}
                     renderItem={renderItem}
                     keyExtractor={(item) => item._id || item.id || Math.random().toString()}
                     contentContainerStyle={styles.list}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={() => loadTasks(true)} />
                     }
+                    onEndReached={loadMoreTasks}
+                    onEndReachedThreshold={0.4}
+                    ListFooterComponent={
+                        loadingMore ? <ActivityIndicator style={{ marginVertical: theme.spacing.md }} color={theme.colors.primary} /> : null
+                    }
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
                             <Ionicons name="list" size={64} color={theme.colors.gray300} />
-                            <Text style={styles.emptyText}>No tasks found.</Text>
+                            <Text style={styles.emptyText}>
+                                {filtersActive ? 'No tasks match these filters.' : 'No tasks found.'}
+                            </Text>
                         </View>
                     }
                 />
@@ -324,6 +374,13 @@ export const TaskScreen = () => {
                 onClose={() => setIsModalVisible(false)}
                 onSuccess={() => loadTasks()}
                 isAdmin={isAdminPortal}
+            />
+
+            <FilterTaskModal
+                visible={isFilterVisible}
+                value={filters}
+                onClose={() => setIsFilterVisible(false)}
+                onApply={(next) => { setFilters(next); setIsFilterVisible(false); }}
             />
         </View>
     );
