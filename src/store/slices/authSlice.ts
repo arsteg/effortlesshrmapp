@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
+import { attendanceService } from '../../services/attendanceService';
 import { saveToken, saveUserData, clearAuthData, getToken, getUserData, getPortalMode, savePortalMode } from '../../utils/storage';
 import { LoginRequest, User, LoginResponse } from '../../types';
 
@@ -35,6 +36,15 @@ export const login = createAsyncThunk(
                 console.log('Token saved. Saving user data...');
                 await saveUserData(response.data);
                 console.log('User data saved. Returning response.');
+
+                // Best-effort, not awaited: warm the local office cache right
+                // after login so it's already available if the Attendance
+                // screen's own fetch ever fails later (e.g. a brand-new
+                // install's very first load). Never blocks or fails login.
+                const loginUser: any = response.data.user;
+                const companyId = loginUser?.company?.id || loginUser?.company || loginUser?.companyId;
+                attendanceService.getOfficesWithRetry({ company: companyId }).catch(() => {});
+
                 return response;
             }
             throw new Error('Invalid response from server: Missing user data');

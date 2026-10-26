@@ -105,6 +105,12 @@ const AttendanceScreen = () => {
     // Sequence number for loadData so a slow, older fetch can't overwrite
     // the state set by a newer one (e.g. a refresh right after a clock-in).
     const loadSeqRef = useRef(0);
+    // Last successfully fetched history, read as a fallback when a later
+    // history fetch fails (so we don't lose the clock-in-office lock) and
+    // when deciding whether to alert on a totally empty office result. A
+    // ref, not state, so it doesn't change loadData's identity.
+    const lastHistoryDataRef = useRef<AttendanceLog[]>([]);
+    const hasOfficesRef = useRef(false);
 
     // In-app selfie camera state for clock-in. The office/location captured
     // before opening the camera lives here until the photo comes back.
@@ -138,39 +144,64 @@ const AttendanceScreen = () => {
             else setLoading(true);
             const companyId = user?.company?.id || user?.company || (user as any)?.companyId;
 
-            const [officesRes, historyRes]: [any, any] = await Promise.all([
-                attendanceService.getOffices({ company: companyId }),
+            // Offices and history are fetched independently now: a failure
+            // in one must never block the other. (Previously both were
+            // fetched with Promise.all, so a single history hiccup wiped
+            // out an office list that had loaded just fine.)
+            const [officesResult, historyResult] = await Promise.allSettled([
+                attendanceService.getOfficesWithRetry({ company: companyId }),
                 attendanceService.getHistory({ company: companyId })
             ]);
 
             // A newer load has started since; let it own the state.
             if (seq !== loadSeqRef.current) return;
 
-            // Determine whether the user currently has an open shift (from history)
-            // so we only restore/lock the clock-in office while clocked in.
-            const historyData = historyRes.status?.toLowerCase() === 'success'
-                ? (historyRes.data?.history || [])
-                : [];
-            const isCurrentlyClockedIn = historyData[0]?.type === 'check-in';
+            // History: only overwrite on success. On failure, keep showing
+            // whatever was last loaded rather than clearing the screen.
+            let historyData = lastHistoryDataRef.current;
+            if (historyResult.status === 'fulfilled' && (historyResult.value as any)?.status?.toLowerCase() === 'success') {
+                historyData = (historyResult.value as any).data?.history || [];
+                lastHistoryDataRef.current = historyData;
+                setHistory(historyData);
+                setStatus(historyData[0] || null);
+            } else {
+                console.error(
+                    'Error loading attendance history:',
+                    historyResult.status === 'rejected' ? historyResult.reason : historyResult.value
+                );
+            }
 
-            if (officesRes.status?.toLowerCase() === 'success') {
-                const officesData = officesRes.data?.offices || [];
+            // Offices: use the fresh result if the fetch (with its own
+            // retries) succeeded; otherwise fall back to the last list that
+            // was ever successfully fetched, on this device, in any session.
+            let officesData: any[] | null = officesResult.status === 'fulfilled' ? officesResult.value : null;
+            let usedCache = false;
+            if (!officesData) {
+                officesData = await attendanceService.getCachedOffices();
+                usedCache = !!officesData;
+            }
+
+            if (officesData) {
+                hasOfficesRef.current = true;
                 setOffices(officesData);
                 if (officesData.length > 0) {
                     // Keep the office chosen at clock-in selected until clock-out.
+                    const isCurrentlyClockedIn = historyData[0]?.type === 'check-in';
                     const savedOfficeId = isCurrentlyClockedIn ? await storage.getItem('clockInOfficeId') : null;
                     const savedOffice = savedOfficeId
                         ? officesData.find((o: Office) => o._id === savedOfficeId)
                         : null;
                     setSelectedOffice(savedOffice || officesData[0]);
                 }
-            }
-
-            if (historyRes.status?.toLowerCase() === 'success') {
-                setHistory(historyData);
-                // Last check-in/out determines current state
-                const last = historyData[0];
-                setStatus(last || null);
+                if (usedCache) {
+                    console.warn('Offices loaded from local cache after a live fetch failed.');
+                }
+            } else if (!hasOfficesRef.current) {
+                // No fresh data, no cache either: only reachable on a
+                // brand-new install (or cleared app data) whose very first
+                // fetch, including the background one at login, never
+                // succeeded. There is genuinely nothing to show yet.
+                Alert.alert(t('common.error'), t('attendance.load_error') || 'Failed to load attendance data.');
             }
         } catch (error) {
             if (seq !== loadSeqRef.current) return;

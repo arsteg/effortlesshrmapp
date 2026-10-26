@@ -1,4 +1,12 @@
 import { apiService } from './api';
+import { storage } from '../utils/storage';
+import { STORAGE_CACHED_OFFICES } from '../utils/constants';
+
+// A single bad moment on the network or server shouldn't blank out the
+// office picker. Retry a couple of times before giving up.
+const OFFICE_FETCH_ATTEMPTS = 3;
+const OFFICE_FETCH_RETRY_DELAY_MS = 1500;
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export interface AttendanceData {
     time: number;
@@ -36,6 +44,50 @@ export const attendanceService = {
     // User Attendance Actions
     getAttendance: async (req: AttendanceRequest) => {
         return apiService.post<AttendanceData[]>('/attendance/get', req);
+    },
+    /**
+     * Fetches offices, retrying a few times on a failed/non-success
+     * response before giving up. On success, the result is also cached to
+     * local storage so getCachedOffices() has something to fall back to
+     * the next time a fetch fails outright. Returns null if every attempt
+     * failed; callers should fall back to getCachedOffices() in that case.
+     */
+    getOfficesWithRetry: async (params?: { company?: string }): Promise<any[] | null> => {
+        let lastError: any;
+        for (let attempt = 1; attempt <= OFFICE_FETCH_ATTEMPTS; attempt++) {
+            try {
+                const res: any = await attendanceService.getOffices(params || {});
+                if (res.status?.toLowerCase() === 'success') {
+                    const offices = res.data?.offices || [];
+                    try {
+                        await storage.setItem(STORAGE_CACHED_OFFICES, JSON.stringify(offices));
+                    } catch (cacheError) {
+                        console.error('Failed to cache offices:', cacheError);
+                    }
+                    return offices;
+                }
+                lastError = new Error(res.message || 'Failed to fetch offices');
+            } catch (error) {
+                lastError = error;
+            }
+            if (attempt < OFFICE_FETCH_ATTEMPTS) await sleep(OFFICE_FETCH_RETRY_DELAY_MS);
+        }
+        console.error('getOfficesWithRetry: all attempts failed:', lastError);
+        return null;
+    },
+    /**
+     * The office list from the last successful fetch (this session or a
+     * previous one). Returns null if nothing has ever been cached, e.g. a
+     * brand-new install whose very first fetch also failed.
+     */
+    getCachedOffices: async (): Promise<any[] | null> => {
+        try {
+            const raw = await storage.getItem(STORAGE_CACHED_OFFICES);
+            return raw ? JSON.parse(raw) : null;
+        } catch (error) {
+            console.error('Failed to read cached offices:', error);
+            return null;
+        }
     },
     clockIn: async (data: { officeId?: string; latitude: number; longitude: number; selfieUrl?: string; deviceId?: string; company?: string }) => {
         return apiService.post('/attendance/check-in', data);

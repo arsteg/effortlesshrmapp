@@ -210,6 +210,11 @@ export const STORAGE_USER_INFO = 'UserInfo';
 export const STORAGE_EMAIL = 'Email';
 export const STORAGE_PASSWORD = 'Password';
 export const STORAGE_IS_REMEMBER = 'IsRemember';
+// Last successfully fetched office list, used as a fallback so the
+// Attendance screen's office picker still has data to show when a live
+// fetch fails (common cause: an intermittent hiccup on the offices or
+// history request). Written only on success, read only on failure.
+export const STORAGE_CACHED_OFFICES = 'cachedOffices';
 
 // Email validation
 export const isValidEmail = (email: string): boolean => {
